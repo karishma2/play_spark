@@ -51,6 +51,8 @@
 
 - **Status:** Complete
 - **Branch:** `feature/development-workflow`
+- **Commit:** `72fa13b`
+- **Completed:** 22 September 2026
 - **Delivered:** Workflow documentation, Definition of Done, phased implementation plan, decision-log templates, pull-request checklist, unified local verification, GitHub Actions verification, and an automated progress-file guard.
 - **Key files:** `AGENTS.md`, `docs/`, `.github/`, `scripts/check-progress-update.mjs`, `package.json`
 - **Validation:** `npm run verify` passes: TypeScript checks, 5 automated tests, production build, and progress-file guard.
