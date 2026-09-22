@@ -11,7 +11,9 @@
     "dev:api": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
     "check": "tsc -b --pretty false",
+    "check:progress": "node scripts/check-progress-update.mjs",
     "test": "node scripts/run-tests.mjs",
+    "verify": "npm run check && npm test && npm run build && npm run check:progress",
     "start": "node server-dist/index.js"
   },
   "dependencies": {
