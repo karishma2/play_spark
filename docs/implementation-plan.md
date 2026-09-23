@@ -28,13 +28,14 @@ This document describes delivery order and acceptance criteria. Approved archite
 
 **Proposed branch:** `feature/guest-experience`
 
-**Stitch reference:** Project `Play Spark Activity Planner`; primary screen `Landing & Exploration` (`b5d36294b3a440e8a46839b3840fdb67`).
+**Stitch reference:** Project `Play Spark Activity Planner`; `Landing & Exploration` (`b5d36294b3a440e8a46839b3840fdb67`), `Guest Preview - Try Before Sign-Up` (`873c83f9a0d64e059b6de77c387a2f0d`), `Play Path Detail` (`56c6db2af09c41c1ae87b9e3412ae4fc`), and the guest `Active Play Session` (`89dfc5566c46459c84f4310af1d0f8a0`).
 
 ### Scope
 
 - Establish shared design tokens and foundational UI components from the approved Stitch design system.
 - Build the responsive landing and exploration experience.
 - Provide two curated sample Play Paths with ordered missions.
+- Give each sample a detail overview and a browser-only active session that presents one mission at a time.
 - Implement `GET /api/v1/guest/samples` and `GET /api/v1/guest/samples/:sampleId`.
 - Keep guest progress and sample-completion count in browser storage.
 - Present an account invitation after two completed samples.
@@ -43,6 +44,7 @@ This document describes delivery order and acceptance criteria. Approved archite
 
 - A visitor understands the product purpose and can choose either sample without signing in.
 - A visitor can read and complete every mission in a sample Play Path.
+- Starting a sample moves from its detail overview into a focused active session and advances one mission at a time.
 - Guest progress is never written to MongoDB.
 - Refreshing the browser preserves the local two-sample count.
 - Completing the second sample shows the account invitation.

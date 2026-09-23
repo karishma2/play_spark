@@ -19,6 +19,39 @@ test("returns a safe status when MongoDB is not configured", async () => {
   assert.deepEqual(response.body, { data: { status: "not_configured" } });
 });
 
+test("lists exactly two guest sample Play Paths without mission detail", async () => {
+  const response = await request(app).get("/api/v1/guest/samples").expect(200);
+
+  assert.equal(response.body.data.length, 2);
+  assert.equal(response.body.data[0].missionCount, 3);
+  assert.equal(response.body.data[0].missions, undefined);
+});
+
+test("returns one guest sample with ordered missions", async () => {
+  const response = await request(app)
+    .get("/api/v1/guest/samples/build-and-deliver")
+    .expect(200);
+
+  assert.equal(response.body.data.title, "Build & Deliver");
+  assert.deepEqual(
+    response.body.data.missions.map((mission: { id: string }) => mission.id),
+    ["build-gather", "build-road", "build-deliver"],
+  );
+});
+
+test("returns a safe error for an unavailable guest sample", async () => {
+  const response = await request(app)
+    .get("/api/v1/guest/samples/not-a-sample")
+    .expect(404);
+
+  assert.deepEqual(response.body, {
+    error: {
+      code: "NOT_FOUND",
+      message: "This sample Play Path is unavailable.",
+    },
+  });
+});
+
 test("returns the standard error shape for an unknown API route", async () => {
   const response = await request(app).get("/api/v1/not-a-route").expect(404);
 
