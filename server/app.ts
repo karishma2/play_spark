@@ -2,7 +2,9 @@ import express from "express";
 import helmet from "helmet";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { z } from "zod";
 import { createMongoClientProvider } from "./db.js";
+import { findGuestSample, guestSampleIds, listGuestSamples } from "./guestSamples.js";
 import { apiErrorHandler, apiNotFound, createAuthRateLimiter } from "./middleware.js";
 
 export interface CreateAppOptions {
@@ -45,6 +47,37 @@ export function createApp(options: CreateAppOptions) {
         },
       });
     }
+  });
+
+  app.get("/api/v1/guest/samples", (_request, response) => {
+    response.json(json(listGuestSamples()));
+  });
+
+  app.get("/api/v1/guest/samples/:sampleId", (request, response) => {
+    const params = z.object({ sampleId: z.enum(guestSampleIds) }).safeParse(request.params);
+
+    if (!params.success) {
+      response.status(404).json({
+        error: {
+          code: "NOT_FOUND",
+          message: "This sample Play Path is unavailable.",
+        },
+      });
+      return;
+    }
+
+    const sample = findGuestSample(params.data.sampleId);
+    if (!sample) {
+      response.status(404).json({
+        error: {
+          code: "NOT_FOUND",
+          message: "This sample Play Path is unavailable.",
+        },
+      });
+      return;
+    }
+
+    response.json(json(sample));
   });
 
   app.use("/api", apiNotFound);
