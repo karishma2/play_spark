@@ -17,6 +17,7 @@ This document describes delivery order and acceptance criteria. Approved archite
 |---|---|---|
 | 0 — Foundation | React/Express application, safe configuration, MongoDB connectivity, tests, and production build | None |
 | 1 — Guest experience | Landing page and two complete browser-only sample Play Paths | Phase 0 |
+| 1.1 — Activity catalogue persistence | MongoDB-backed guest Play Paths, missions, Mission Wall scenes, and repeatable content seeding | Phase 1 |
 | 2 — Parent accounts | Sign-up, sign-in, sign-out, password management, and secure server-side sessions | Phase 0 |
 | 3 — Child onboarding | One active beta child profile with curated interests and play styles | Phase 2 |
 | 4 — Discovery | Dashboard, filters, rule-based recommendations, and Play Path details | Phases 1 and 3 |
@@ -52,5 +53,27 @@ This document describes delivery order and acceptance criteria. Approved archite
 - The experience works at relevant mobile and desktop sizes and meets the applicable Definition of Done.
 
 ## Later-phase preparation
+
+## Phase 1.1 — Activity catalogue persistence
+
+**Branch:** `feature/activity-catalog`
+
+### Scope
+
+- Store published guest Play Paths, missions, their ordering, and Mission Wall scenes in the approved MongoDB collections.
+- Seed the two reviewed guest samples through a repeatable, schema-validated command.
+- Read both guest sample endpoints from MongoDB without a runtime hardcoded-content fallback.
+- Keep guest completion progress in browser storage; this phase persists developer-managed content only.
+- Return safe API errors when the catalogue database is unavailable or a sample is not published.
+
+### Acceptance criteria
+
+- Re-running the seed command updates the same catalogue records without creating duplicates.
+- The guest list returns only published, enabled samples in their configured order and omits mission details.
+- The guest detail endpoint returns published missions in Play Path order with matching Mission Wall elements.
+- Invalid, unpublished, or unknown identifiers return the documented safe not-found response.
+- Database failures do not expose connection details or low-level errors.
+- MongoDB validators and indexes enforce the essential catalogue invariants.
+- Guest progress remains browser-only, and the existing guest journey behaves the same after seeding.
 
 Before each later phase begins, expand its scope into feature-level acceptance criteria and record any required dependency decision. Likely decisions include client routing, password hashing, browser testing, email delivery, analytics integration, and production session cleanup.

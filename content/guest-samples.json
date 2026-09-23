@@ -1,0 +1,154 @@
+{
+  "samples": [
+    {
+      "id": "64b100000000000000000001",
+      "title": "Build & Deliver",
+      "description": "Turn cushions, blocks, and a spoon into a tiny delivery route.",
+      "durationMinutes": 20,
+      "themeKey": "vehicles",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["vehicles", "building"],
+        "playStyleKeys": ["build", "pretend"],
+        "energyLevels": ["ready_to_play", "full_energy"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "position": 1,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Building Blocks",
+        "secondaryCategory": "Pretend Play",
+        "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuDXxiham9LOk82Hp5c1XN5R-JLFHi_DiowVkSNyaDyu8AA7MRXg07-6Lg_ZNKBzmLi1ShA_mEwTZp0RrNczgSSsEeCsWoXaFCUdvDvwm5sPSs6PvG8Np-Ikjq7xDLzCiQ_QL9pZkuoUsCO9BDpAgrUEU0lRkRliEuyk8_zMpG6qS3wsw76-DQpK-kDy0-3ik6JViRxHCtEcHBh8UZU9LQz5ljCfZPxsUOW8BVTtoZuVvJtgfTLL1FPQ-w",
+        "imageAlt": "Wooden blocks arranged as roads for small toy cars.",
+        "materials": ["2 sofa cushions", "wooden blocks", "1 spoon or toy car"],
+        "safetyNote": "Keep the route on the floor and away from doorways or stairs."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000001",
+        "key": "delivery-route",
+        "title": "Delivery Route",
+        "background": { "assetRef": "inline-svg:delivery-route", "alt": "A delivery route Mission Wall" },
+        "elements": [
+          { "key": "road", "label": "Road and route marker", "revealMessage": "Road revealed!", "assetRef": "inline-svg:road", "layer": 1 },
+          { "key": "bridge", "label": "Bridge", "revealMessage": "Bridge revealed!", "assetRef": "inline-svg:bridge", "layer": 2 },
+          { "key": "delivery", "label": "Delivery car and parcel", "revealMessage": "Delivery vehicle revealed!", "assetRef": "inline-svg:delivery", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000001",
+          "position": 1,
+          "wallElementKey": "road",
+          "title": "Gather the route pieces",
+          "durationMinutes": 3,
+          "setupSteps": ["Place two cushions on the floor.", "Add a few blocks and one spoon or toy car."],
+          "sayThis": "A delivery is waiting. What kind of road should we build?",
+          "childChallenge": "Choose where the delivery route begins and ends.",
+          "tidyUp": "Keep unused blocks in their basket."
+        },
+        {
+          "id": "64b300000000000000000002",
+          "position": 2,
+          "wallElementKey": "bridge",
+          "title": "Build bridges and bends",
+          "durationMinutes": 9,
+          "setupSteps": ["Use blocks to mark two bends.", "Make one cushion into a gentle bridge."],
+          "sayThis": "Can the driver find a way over the bridge?",
+          "childChallenge": "Test the route, then change one part to make it easier or trickier.",
+          "tidyUp": "Move any loose pieces away from walking paths."
+        },
+        {
+          "id": "64b300000000000000000003",
+          "position": 3,
+          "wallElementKey": "delivery",
+          "title": "Make the final delivery",
+          "durationMinutes": 8,
+          "setupSteps": ["Choose a small soft item as the parcel.", "Put it at the starting point."],
+          "sayThis": "Who needs this special delivery today?",
+          "childChallenge": "Carry the parcel along the whole route and invent who receives it.",
+          "tidyUp": "Return cushions and blocks together when the delivery is complete."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000002",
+      "title": "Kitchen Shadow Safari",
+      "description": "Make gentle animal shadows with a torch and everyday kitchen tools.",
+      "durationMinutes": 15,
+      "themeKey": "animals",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["animals", "stories"],
+        "playStyleKeys": ["sensory", "pretend"],
+        "energyLevels": ["calm", "ready_to_play"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "parent_guided"
+      },
+      "guestPreview": {
+        "position": 2,
+        "setupMinutes": 1,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Sensory",
+        "secondaryCategory": "Animals",
+        "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCyuWhLhB3zizw-Sqk3g1-BZL3ii7dxvPI-2nouzqH1GsoSbIfWqXejHZlTXIqTLHEhFaLzVhv-VWnJWXKc30B4ugbFQPPnFXlm6SQDgE7ShEVb1vqGEhZpDbbkrgztFPajNi0aJhNgYfPeqqPWK6lVvGdCHcPYdTGb3xUYGgdks69eo7vmP7vP1_Iaw33Z4FyENZN6clqXLBKjbfWpt-jiyQeDTMY6hLDf-LrjHUtQpxDCMWrv2M4n0w",
+        "imageAlt": "Warm torchlight casting playful shadows from kitchen tools.",
+        "materials": ["torch", "colander or slotted spoon", "clear wall"],
+        "safetyNote": "An adult holds the torch. Do not shine it toward anyone's eyes."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000002",
+        "key": "shadow-safari",
+        "title": "Shadow Safari",
+        "background": { "assetRef": "inline-svg:shadow-safari", "alt": "A moonlit safari Mission Wall" },
+        "elements": [
+          { "key": "moonlight", "label": "Moonlight beam", "revealMessage": "Moonlight revealed!", "assetRef": "inline-svg:moonlight", "layer": 1 },
+          { "key": "animal", "label": "Animal shadow", "revealMessage": "Shadow friend revealed!", "assetRef": "inline-svg:animal-shadow", "layer": 2 },
+          { "key": "tree", "label": "Safari tree", "revealMessage": "Safari tree revealed!", "assetRef": "inline-svg:safari-tree", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000004",
+          "position": 1,
+          "wallElementKey": "moonlight",
+          "title": "Find a shadow den",
+          "durationMinutes": 3,
+          "setupSteps": ["Dim one room slightly.", "Point the torch at a clear wall from arm's length."],
+          "sayThis": "Our wall is a quiet jungle. Who might be hiding here?",
+          "childChallenge": "Move closer and farther from the wall to change the shadow size.",
+          "tidyUp": "Keep the floor clear while the room is dim."
+        },
+        {
+          "id": "64b300000000000000000005",
+          "position": 2,
+          "wallElementKey": "animal",
+          "title": "Discover three creatures",
+          "durationMinutes": 7,
+          "setupSteps": ["Hold a slotted spoon or colander between the torch and wall."],
+          "sayThis": "What animal does this shadow remind you of?",
+          "childChallenge": "Name three shadow creatures and show how each one moves.",
+          "tidyUp": "Place each kitchen tool on a nearby table after using it."
+        },
+        {
+          "id": "64b300000000000000000006",
+          "position": 3,
+          "wallElementKey": "tree",
+          "title": "Tell the safari story",
+          "durationMinutes": 5,
+          "setupSteps": ["Choose the child's favourite shadow creature."],
+          "sayThis": "Where is our creature going before bedtime?",
+          "childChallenge": "Tell a beginning, middle, and ending for the creature's adventure.",
+          "tidyUp": "Turn on the room light before returning the torch and tools."
+        }
+      ]
+    }
+  ]
+}

@@ -3,13 +3,14 @@ import helmet from "helmet";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import { createMongoCatalogRepository, type CatalogRepository } from "./catalog.js";
 import { createMongoClientProvider } from "./db.js";
-import { findGuestSample, guestSampleIds, listGuestSamples } from "./guestSamples.js";
 import { apiErrorHandler, apiNotFound, createAuthRateLimiter } from "./middleware.js";
 
 export interface CreateAppOptions {
   databaseName: string;
   mongoUri?: string;
+  catalog?: CatalogRepository;
 }
 
 function json(data: unknown) {
@@ -19,6 +20,7 @@ function json(data: unknown) {
 export function createApp(options: CreateAppOptions) {
   const app = express();
   const mongo = createMongoClientProvider(options.mongoUri);
+  const catalog = options.catalog ?? createMongoCatalogRepository(mongo, options.databaseName);
 
   app.disable("x-powered-by");
   app.use(helmet());
@@ -49,12 +51,21 @@ export function createApp(options: CreateAppOptions) {
     }
   });
 
-  app.get("/api/v1/guest/samples", (_request, response) => {
-    response.json(json(listGuestSamples()));
+  app.get("/api/v1/guest/samples", async (_request, response) => {
+    try {
+      response.json(json(await catalog.listGuestSamples()));
+    } catch {
+      response.status(503).json({
+        error: {
+          code: "CATALOG_UNAVAILABLE",
+          message: "Play Paths are temporarily unavailable. Please try again.",
+        },
+      });
+    }
   });
 
-  app.get("/api/v1/guest/samples/:sampleId", (request, response) => {
-    const params = z.object({ sampleId: z.enum(guestSampleIds) }).safeParse(request.params);
+  app.get("/api/v1/guest/samples/:sampleId", async (request, response) => {
+    const params = z.object({ sampleId: z.string().regex(/^[a-f\d]{24}$/iu) }).safeParse(request.params);
 
     if (!params.success) {
       response.status(404).json({
@@ -66,7 +77,18 @@ export function createApp(options: CreateAppOptions) {
       return;
     }
 
-    const sample = findGuestSample(params.data.sampleId);
+    let sample;
+    try {
+      sample = await catalog.findGuestSample(params.data.sampleId);
+    } catch {
+      response.status(503).json({
+        error: {
+          code: "CATALOG_UNAVAILABLE",
+          message: "This Play Path is temporarily unavailable. Please try again.",
+        },
+      });
+      return;
+    }
     if (!sample) {
       response.status(404).json({
         error: {

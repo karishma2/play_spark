@@ -11,6 +11,16 @@ Private-beta foundation for a screen-free preschool activity planner.
 
 The endpoint returns only `connected`, `not_configured`, or a generic unavailable error. It never returns a connection string or low-level database error.
 
+## Seed the activity catalogue
+
+After configuring the development MongoDB connection in `.env`, seed the reviewed guest Play Paths with:
+
+```powershell
+npm run seed:catalog
+```
+
+The command validates `content/guest-samples.json`, creates or updates the approved catalogue collections and indexes, and upserts stable records. It is safe to run again after reviewed content changes.
+
 ## Commands
 
 ```text

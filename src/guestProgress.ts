@@ -5,6 +5,35 @@ export interface GuestProgress {
 
 const storageKey = "play-spark:guest-progress:v1";
 const emptyProgress: GuestProgress = { completedSampleIds: [], completedMissions: {} };
+const legacyIdReplacements: Record<string, string> = {
+  "build-and-deliver": "64b100000000000000000001",
+  "kitchen-shadow-safari": "64b100000000000000000002",
+  "build-gather": "64b300000000000000000001",
+  "build-road": "64b300000000000000000002",
+  "build-deliver": "64b300000000000000000003",
+  "shadow-den": "64b300000000000000000004",
+  "shadow-animals": "64b300000000000000000005",
+  "shadow-story": "64b300000000000000000006",
+};
+
+function replaceLegacyId(id: string) {
+  return legacyIdReplacements[id] ?? id;
+}
+
+export function migrateLegacyGuestProgress(progress: GuestProgress): GuestProgress {
+  const completedSampleIds = [...new Set(progress.completedSampleIds.map(replaceLegacyId))];
+  const completedMissions: Record<string, string[]> = {};
+
+  for (const [sampleId, missionIds] of Object.entries(progress.completedMissions)) {
+    const migratedSampleId = replaceLegacyId(sampleId);
+    const existing = completedMissions[migratedSampleId] ?? [];
+    completedMissions[migratedSampleId] = [
+      ...new Set([...existing, ...missionIds.filter((id): id is string => typeof id === "string").map(replaceLegacyId)]),
+    ];
+  }
+
+  return { completedSampleIds, completedMissions };
+}
 
 export function readGuestProgress(): GuestProgress {
   try {
@@ -12,7 +41,7 @@ export function readGuestProgress(): GuestProgress {
     if (!stored) return emptyProgress;
 
     const parsed = JSON.parse(stored) as Partial<GuestProgress>;
-    return {
+    const normalized = {
       completedSampleIds: Array.isArray(parsed.completedSampleIds)
         ? parsed.completedSampleIds.filter((value): value is string => typeof value === "string")
         : [],
@@ -21,6 +50,11 @@ export function readGuestProgress(): GuestProgress {
           ? parsed.completedMissions
           : {},
     };
+    const migrated = migrateLegacyGuestProgress(normalized);
+    if (JSON.stringify(migrated) !== JSON.stringify(normalized)) {
+      window.localStorage.setItem(storageKey, JSON.stringify(migrated));
+    }
+    return migrated;
   } catch {
     return emptyProgress;
   }
