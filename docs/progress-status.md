@@ -19,6 +19,7 @@
 |---|---|---|
 | 0 | Application and server foundation | Complete |
 | 1 | Landing page and guest sample experience | Complete |
+| 1.1 | MongoDB-backed activity catalogue and seeding | Complete |
 | 2 | Parent accounts and secure authentication | Planned |
 | 3 | Child-profile onboarding and editing | Planned |
 | 4 | Dashboard, filters, and rule-based recommendations | Planned |
@@ -27,6 +28,23 @@
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
 ## Completed features
+
+### MongoDB-backed activity catalogue
+
+- **Status:** Complete
+- **Branch:** `feature/activity-catalog`
+- **Completed:** 23 September 2026
+- **Delivered:**
+  - MongoDB-backed guest sample list and detail queries using normalized Play Paths, missions, ordering links, and Mission Wall scenes.
+  - Schema-validated, repeatable seed content for the two reviewed guest samples.
+  - Essential MongoDB collection validators and catalogue indexes.
+  - Database-owned Mission Wall labels and reveal messages while completion progress remains browser-only.
+  - One-time migration of browser progress from the former readable sample and mission identifiers to catalogue ObjectIds.
+  - Conflict-free reseeding when existing guest samples exchange display positions.
+  - Safe not-found and catalogue-unavailable API responses.
+- **Key files or routes:** `content/guest-samples.json`, `server/seedCatalog.ts`, `server/catalog.ts`, `GET /api/v1/guest/samples`, `GET /api/v1/guest/samples/:sampleId`
+- **Validation:** `npm run verify` passes catalogue validation, TypeScript checks, 14 automated tests, the production build, and the progress guard. The seed completed repeatedly against `play_spark_dev`; the live API returned two samples and three ordered missions for the first sample.
+- **Follow-up:** Replace the remote prototype activity images with owned production assets before public release.
 
 ### Application and server foundation
 
@@ -76,9 +94,9 @@
   - Browser-only mission and sample progress that survives reloads.
   - Account invitation after both guest samples are complete.
   - Safe guest sample list and detail API endpoints.
-- **Key files or routes:** `src/App.tsx`, `src/styles.css`, `src/guestProgress.ts`, `server/guestSamples.ts`, `GET /api/v1/guest/samples`, `GET /api/v1/guest/samples/:sampleId`
+- **Key files or routes:** `src/App.tsx`, `src/styles.css`, `src/guestProgress.ts`, `server/catalog.ts`, `GET /api/v1/guest/samples`, `GET /api/v1/guest/samples/:sampleId`
 - **Validation:** `npm run verify` passes TypeScript checks, 11 automated tests, the production build, and the progress guard. The complete guest-preview → detail → active-session journey, all three mission-specific Mission Wall reveals, replay reset, final completion, reload persistence, desktop layout, and 390 px mobile layout were checked manually.
-- **Follow-up:** Add a dedicated `/guest-preview` route when application routing is introduced, and replace the remote prototype activity images with owned production assets before public release.
+- **Follow-up:** Phase 1.1 replaced the temporary runtime sample array with the MongoDB-backed catalogue. Add a dedicated `/guest-preview` route when application routing is introduced, and replace the remote prototype activity images with owned production assets before public release.
 
 ## Feature log template
 

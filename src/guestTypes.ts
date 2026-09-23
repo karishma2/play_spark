@@ -22,9 +22,15 @@ export interface GuestMission {
   sayThis: string;
   childChallenge: string;
   tidyUp: string;
+  wallElement: {
+    key: string;
+    label: string;
+    revealMessage: string;
+  };
 }
 
 export interface GuestSample extends Omit<GuestSampleSummary, "missionCount"> {
   safetyNote: string;
+  wallSceneKey: string;
   missions: GuestMission[];
 }

@@ -350,9 +350,7 @@ function MissionWallPreview({
 }) {
   const revealed = sample.missions.map((mission) => completedMissions.includes(mission.id));
   const revealedCount = revealed.filter(Boolean).length;
-  const sceneLabels = sample.id === "build-and-deliver"
-    ? ["Road and route marker", "Bridge", "Delivery car and parcel"]
-    : ["Moonlight beam", "Animal shadow", "Safari tree"];
+  const sceneLabels = sample.missions.map((mission) => mission.wallElement.label);
 
   return (
     <div className="mission-wall-scene" aria-live="polite">
@@ -362,7 +360,7 @@ function MissionWallPreview({
         aria-label={`${revealedCount} of ${sample.missions.length} Mission Wall elements revealed`}
       >
         <rect className="mission-wall-sky" width="360" height="150" rx="18" />
-        {sample.id === "build-and-deliver" ? (
+        {sample.wallSceneKey === "delivery-route" ? (
           <>
             <g className={`mission-wall-piece${revealed[0] ? " revealed" : ""}${highlightedMissionIndex === 0 ? " newly-revealed" : ""}`}>
               <path className="mission-wall-road" d="M-20 130 C70 118 78 74 162 86 S260 142 382 104" />
@@ -421,9 +419,7 @@ function MissionReveal({
   completedMissions: string[];
   onContinue: () => void;
 }) {
-  const revealNames = sample.id === "build-and-deliver"
-    ? ["Road revealed!", "Bridge revealed!", "Delivery vehicle revealed!"]
-    : ["Moonlight revealed!", "Shadow friend revealed!", "Safari tree revealed!"];
+  const revealNames = sample.missions.map((mission) => mission.wallElement.revealMessage);
   const isFinalMission = missionIndex === sample.missions.length - 1;
 
   return (

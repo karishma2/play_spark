@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { completeSample, restartSample, toggleMission, type GuestProgress } from "../src/guestProgress.js";
+import {
+  completeSample,
+  migrateLegacyGuestProgress,
+  restartSample,
+  toggleMission,
+  type GuestProgress,
+} from "../src/guestProgress.js";
 
 const emptyProgress: GuestProgress = {
   completedSampleIds: [],
@@ -37,6 +43,28 @@ test("restarts only the selected guest sample", () => {
     completedMissions: {
       "sample-one": [],
       "sample-two": ["mission-one"],
+    },
+  });
+});
+
+test("migrates legacy sample and mission identifiers without losing or duplicating progress", () => {
+  const migrated = migrateLegacyGuestProgress({
+    completedSampleIds: ["build-and-deliver", "64b100000000000000000001"],
+    completedMissions: {
+      "build-and-deliver": ["build-gather", "build-road"],
+      "64b100000000000000000001": ["64b300000000000000000002"],
+      "kitchen-shadow-safari": ["shadow-den"],
+    },
+  });
+
+  assert.deepEqual(migrated, {
+    completedSampleIds: ["64b100000000000000000001"],
+    completedMissions: {
+      "64b100000000000000000001": [
+        "64b300000000000000000001",
+        "64b300000000000000000002",
+      ],
+      "64b100000000000000000002": ["64b300000000000000000004"],
     },
   });
 });

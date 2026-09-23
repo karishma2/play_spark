@@ -11,9 +11,11 @@
     "dev:api": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
     "check": "tsc -b --pretty false",
+    "check:catalog": "tsx server/seedCatalog.ts --validate-only",
     "check:progress": "node scripts/check-progress-update.mjs",
+    "seed:catalog": "tsx server/seedCatalog.ts",
     "test": "node scripts/run-tests.mjs",
-    "verify": "npm run check && npm test && npm run build && npm run check:progress",
+    "verify": "npm run check && npm run check:catalog && npm test && npm run build && npm run check:progress",
     "start": "node server-dist/index.js"
   },
   "dependencies": {
