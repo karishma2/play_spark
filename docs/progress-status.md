@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 23 September 2026
+**Last updated:** 24 September 2026
 
 ## Status meanings
 
@@ -20,7 +20,7 @@
 | 0 | Application and server foundation | Complete |
 | 1 | Landing page and guest sample experience | Complete |
 | 1.1 | MongoDB-backed activity catalogue and seeding | Complete |
-| 2 | Parent accounts and secure authentication | Planned |
+| 2 | Parent accounts and secure authentication | In progress |
 | 3 | Child-profile onboarding and editing | Planned |
 | 4 | Dashboard, filters, and rule-based recommendations | Planned |
 | 5 | Active Play Sessions and mission actions | Planned |
@@ -28,6 +28,28 @@
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
 ## Completed features
+
+### Parent account access
+
+- **Status:** Complete
+- **Branch:** `feature/parent-account-access`
+- **Completed:** 24 September 2026
+- **Delivered:**
+  - Parent sign-up and sign-in with normalized unique emails and scrypt password hashes.
+  - Opaque 14-day server-side sessions with hashed tokens, secure cookie settings, immediate sign-out, and browser session restoration.
+  - MongoDB validators and indexes for `users` and `authSessions`, including unique and TTL indexes plus a repeatable setup command.
+  - Stable `/sign-up`, `/sign-in`, `/guest-preview`, and `/onboarding` routes using React Router.
+  - Responsive account screens, enabled guest account actions, and an authenticated Phase 3 onboarding boundary.
+  - Signed-in sample browsing that preserves the parent session and suppresses the guest account invitation.
+  - Account-aware sample-page messaging that removes sign-up and sign-in prompts for authenticated parents.
+  - Protection against a pending session-restoration request overwriting a newly completed sign-in.
+  - Failed sign-out attempts preserve the visible authenticated session and provide a safe retry message.
+  - Browser history navigation back to landing or sample browsing clears stale and in-flight sample details.
+  - Safe validation, duplicate-account, invalid-credential, unauthenticated, and database-unavailable responses.
+- **Key files or routes:** `server/auth.ts`, `server/setupAuth.ts`, `src/AuthPage.tsx`, `POST /api/v1/auth/sign-up`, `POST /api/v1/auth/sign-in`, `POST /api/v1/auth/sign-out`, `GET /api/v1/auth/session`
+- **Validation:** `npm run verify` passes TypeScript checks, catalogue validation, 19 automated tests, the production build, and the progress guard. `npm audit --omit=dev` reports no production vulnerabilities. Authentication collections were prepared in `play_spark_dev`; the sign-up and sign-in screens were checked at desktop and 390 px mobile widths. Independent review passed after its three findings were fixed. Independent feature testing verified signed-in sample browsing, hidden guest account prompts, home-navigation cleanup, and session preservation with a safe retry message when sign-out fails.
+- **Follow-up:** Password change, session invalidation after credential changes, and forgotten-password reset remain Phase 2.2.
+- **Feature-log note:** Finalization fixed account-prompt flashes during session restoration, removed runtime schema-management work from authentication requests, and cleared stale form state when switching between sign-up and sign-in.
 
 ### MongoDB-backed activity catalogue
 

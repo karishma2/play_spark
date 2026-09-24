@@ -14,6 +14,7 @@
     "check:catalog": "tsx server/seedCatalog.ts --validate-only",
     "check:progress": "node scripts/check-progress-update.mjs",
     "seed:catalog": "tsx server/seedCatalog.ts",
+    "setup:auth": "tsx server/setupAuth.ts",
     "test": "node scripts/run-tests.mjs",
     "verify": "npm run check && npm run check:catalog && npm test && npm run build && npm run check:progress",
     "start": "node server-dist/index.js"
@@ -26,6 +27,7 @@
     "mongodb": "^6.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.4",
     "zod": "^4.0.17"
   },
   "devDependencies": {

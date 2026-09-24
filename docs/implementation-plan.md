@@ -25,6 +25,44 @@ This document describes delivery order and acceptance criteria. Approved archite
 | 6 — Progress and retention | Mission Wall, favourites, history, and fixed-choice feedback | Phase 5 |
 | 7 — Private-beta readiness | Account deletion, analytics, accessibility review, deployment, backup, and operational checks | Phases 2–6 |
 
+## Phase 2 — Parent accounts and secure authentication
+
+Phase 2 is delivered as two independently reviewable vertical slices.
+
+### Phase 2.1 — Parent account access
+
+**Branch:** `feature/parent-account-access`
+
+#### Scope
+
+- Add stable client routes for account access and the existing guest experience.
+- Enable parent sign-up, sign-in, sign-out, and session restoration.
+- Store normalized parent accounts and hashed opaque browser sessions in MongoDB.
+- Use a 14-day `HttpOnly`, `SameSite=Lax` cookie, with `Secure` enabled outside local development and tests.
+- Send a newly authenticated parent without a child profile to the Phase 3 onboarding boundary.
+- Keep existing guest progress browser-only.
+
+#### Acceptance criteria
+
+- A parent can create an account with a unique normalized email and a password of 10–128 characters.
+- A parent can sign in without the response revealing whether the submitted email exists.
+- Refreshing the browser restores a valid account session without exposing the session token to JavaScript.
+- Signing out deletes the matching server-side session immediately and clears the cookie.
+- Expired, missing, and invalid sessions receive the documented `UNAUTHENTICATED` response.
+- Authentication input is validated with Zod and sign-up/sign-in remain rate limited.
+- MongoDB validators and indexes enforce unique emails, unique token hashes, and automatic session expiry.
+- Existing guest journeys continue to work and `npm run verify` passes.
+
+### Phase 2.2 — Password management
+
+**Proposed branch:** `feature/password-management`
+
+- Change a password after verifying the current password.
+- Request a non-enumerating password-reset email.
+- Confirm a single-use reset token that expires after 30 minutes.
+- Invalidate other sessions on password change and all sessions on forgotten-password reset.
+- Add the reviewed email provider through a small server-side adapter.
+
 ## Phase 1 — Landing page and guest sample experience
 
 **Proposed branch:** `feature/guest-experience`
