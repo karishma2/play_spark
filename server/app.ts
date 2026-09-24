@@ -3,6 +3,7 @@ import helmet from "helmet";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import { createAuthRouter, createMongoAuthRepository, type AuthRepository, type PasswordHasher } from "./auth.js";
 import { createMongoCatalogRepository, type CatalogRepository } from "./catalog.js";
 import { createMongoClientProvider } from "./db.js";
 import { apiErrorHandler, apiNotFound, createAuthRateLimiter } from "./middleware.js";
@@ -11,6 +12,9 @@ export interface CreateAppOptions {
   databaseName: string;
   mongoUri?: string;
   catalog?: CatalogRepository;
+  auth?: AuthRepository;
+  passwordHasher?: PasswordHasher;
+  authCookieSecure?: boolean;
 }
 
 function json(data: unknown) {
@@ -21,11 +25,19 @@ export function createApp(options: CreateAppOptions) {
   const app = express();
   const mongo = createMongoClientProvider(options.mongoUri);
   const catalog = options.catalog ?? createMongoCatalogRepository(mongo, options.databaseName);
+  const auth = options.auth ?? createMongoAuthRepository(mongo, options.databaseName);
 
   app.disable("x-powered-by");
   app.use(helmet());
   app.use(express.json({ limit: "100kb" }));
-  app.use("/api/v1/auth", createAuthRateLimiter());
+  const authRateLimiter = createAuthRateLimiter();
+  app.use("/api/v1/auth/sign-up", authRateLimiter);
+  app.use("/api/v1/auth/sign-in", authRateLimiter);
+  app.use("/api/v1/auth", createAuthRouter({
+    repository: auth,
+    passwordHasher: options.passwordHasher,
+    cookieSecure: options.authCookieSecure ?? process.env.NODE_ENV === "production",
+  }));
 
   app.get("/api/v1/health", (_request, response) => {
     response.json(json({ service: "play-spark-api", status: "ok" }));

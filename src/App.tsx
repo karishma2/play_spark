@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { getGuestSample, getGuestSamples } from "./api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getAuthSession, getGuestSample, getGuestSamples, signOut, type AuthSession } from "./api";
+import { AuthPage, OnboardingBoundary } from "./AuthPage";
 import {
   completeSample,
   readGuestProgress,
@@ -33,19 +35,42 @@ function Header({
   screen,
   onHome,
   onGuest,
+  session,
+  sessionReady,
+  onSignIn,
+  onSignUp,
+  onSignOut,
+  signOutError,
 }: {
   screen: ExploreScreen;
   onHome: () => void;
   onGuest: () => void;
+  session: AuthSession | null;
+  sessionReady: boolean;
+  onSignIn: () => void;
+  onSignUp: () => void;
+  onSignOut: () => void;
+  signOutError?: string;
 }) {
   return (
     <header className="site-header">
       <div className="header-inner">
         <Brand onNavigate={onHome} />
-        {screen === "guest" ? (
+        {!sessionReady ? (
+          <div className="guest-auth-actions" aria-label="Checking parent account" role="status">
+            <span className="account-email">Checking account…</span>
+          </div>
+        ) : session ? (
+          <div className="guest-auth-actions" aria-label="Parent account">
+            <span className="account-email">{session.user.email}</span>
+            <button onClick={onSignOut}>Sign out</button>
+            <span className="guest-avatar" aria-hidden="true">●</span>
+            {signOutError && <span className="account-action-error" role="alert">{signOutError}</span>}
+          </div>
+        ) : screen === "guest" ? (
           <div className="guest-auth-actions" aria-label="Parent account options">
-            <button disabled title="Parent accounts are coming soon">Sign in</button>
-            <button className="guest-account-button" disabled title="Parent accounts are coming soon">Create account</button>
+            <button onClick={onSignIn}>Sign in</button>
+            <button className="guest-account-button" onClick={onSignUp}>Create account</button>
             <span className="guest-avatar" aria-hidden="true">●</span>
           </div>
         ) : (
@@ -54,7 +79,10 @@ function Header({
               <button className="nav-active" onClick={onHome}>Explore</button>
               <a href="#how-it-works">How it works</a>
             </nav>
-            <button className="guest-pill" onClick={onGuest}>Guest preview</button>
+            <div className="header-account-actions">
+              <button className="guest-pill" onClick={onGuest}>Guest preview</button>
+              <button className="header-sign-in" onClick={onSignIn}>Sign in</button>
+            </div>
           </>
         )}
       </div>
@@ -124,7 +152,7 @@ function SampleCard({
   );
 }
 
-function AccountInvitation({ onClose }: { onClose: () => void }) {
+function AccountInvitation({ onClose, onCreate, onSignIn }: { onClose: () => void; onCreate: () => void; onSignIn: () => void }) {
   return (
     <div className="modal-backdrop" role="presentation">
       <section className="invite-modal" role="dialog" aria-modal="true" aria-labelledby="invite-title">
@@ -133,8 +161,8 @@ function AccountInvitation({ onClose }: { onClose: () => void }) {
         <p className="eyebrow">Two sparks completed</p>
         <h2 id="invite-title">Keep the playful momentum going</h2>
         <p>Create a parent account to get ideas matched to your child's interests, save favourites, and build a living Mission Wall.</p>
-        <button className="button button-primary" disabled aria-describedby="account-note">Create parent account</button>
-        <p className="account-note" id="account-note">Parent accounts are coming soon.</p>
+        <button className="button button-primary" onClick={onCreate}>Create parent account</button>
+        <button className="text-button" onClick={onSignIn}>I already have an account</button>
         <button className="text-button" onClick={onClose}>Keep exploring samples</button>
       </section>
     </div>
@@ -260,10 +288,18 @@ function GuestPreview({
   samples,
   progress,
   onSelect,
+  session,
+  sessionReady,
+  onSignUp,
+  onSignIn,
 }: {
   samples: GuestSampleSummary[];
   progress: GuestProgress;
   onSelect: (sampleId: string) => void;
+  session: AuthSession | null;
+  sessionReady: boolean;
+  onSignUp: () => void;
+  onSignIn: () => void;
 }) {
   return (
     <section className="guest-preview-page" id="top">
@@ -271,12 +307,20 @@ function GuestPreview({
         <p className="eyebrow">Screen-free play, made simple</p>
         <h1>A small spark for their<br />next free moment.</h1>
         <p>Try two ready-made activity plans. Each one helps your child play independently while you stay close by.</p>
-        <span className="guest-preview-badge"><span aria-hidden="true">✦</span> Try both sample paths — no account needed.</span>
+        <span className="guest-preview-badge"><span aria-hidden="true">✦</span> {!sessionReady
+          ? "Checking your account…"
+          : session
+          ? `Signed in as ${session.user.email}`
+          : "Try both sample paths — no account needed."}</span>
       </header>
 
       <div className="guest-preview-heading">
         <div>
-          <span className="guest-preview-label"><span aria-hidden="true" /> Guest preview · Two free samples</span>
+          <span className="guest-preview-label"><span aria-hidden="true" /> {!sessionReady
+            ? "Sample activities · Two ready-to-play paths"
+            : session
+            ? "Sample activities · Two ready-to-play paths"
+            : "Guest preview · Two free samples"}</span>
           <h2>Choose a play path</h2>
         </div>
         <p>Everything you need is on one calm, parent-friendly plan.</p>
@@ -319,22 +363,27 @@ function GuestPreview({
         <span className="guest-reassurance-icon" aria-hidden="true">✓</span>
         <div>
           <h3>Designed for parent-guided, screen-free moments.</h3>
-          <p>No account or credit card needed to try these two sample paths right now.</p>
+          <p>{!sessionReady
+            ? "Your sample activities are ready while we check your account."
+            : session
+            ? "Your parent account stays signed in while you explore and play these samples."
+            : "No account or credit card needed to try these two sample paths right now."}</p>
         </div>
       </aside>
 
-      <section className="guest-signup-panel" aria-labelledby="guest-signup-title">
-        <div>
-          <p className="eyebrow">✦ Tailored experiences</p>
-          <h2 id="guest-signup-title">Want ideas tailored to your child?</h2>
-          <p>Create a free account to add interests, save favourites, and easily keep track of completed play as they grow.</p>
-        </div>
-        <div className="guest-signup-actions">
-          <button className="button button-soft" disabled aria-describedby="guest-account-note">Create a free account →</button>
-          <button className="text-button" disabled>Already have an account? Sign in ↗</button>
-          <small id="guest-account-note">Parent accounts are coming soon.</small>
-        </div>
-      </section>
+      {sessionReady && !session && (
+        <section className="guest-signup-panel" aria-labelledby="guest-signup-title">
+          <div>
+            <p className="eyebrow">✦ Tailored experiences</p>
+            <h2 id="guest-signup-title">Want ideas tailored to your child?</h2>
+            <p>Create a free account to add interests, save favourites, and easily keep track of completed play as they grow.</p>
+          </div>
+          <div className="guest-signup-actions">
+            <button className="button button-soft" onClick={onSignUp}>Create a free account →</button>
+            <button className="text-button" onClick={onSignIn}>Already have an account? Sign in ↗</button>
+          </div>
+        </section>
+      )}
     </section>
   );
 }
@@ -634,8 +683,10 @@ function ActiveSession({
 }
 
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [samples, setSamples] = useState<GuestSampleSummary[]>([]);
-  const [screen, setScreen] = useState<ExploreScreen>("landing");
+  const [screen, setScreen] = useState<ExploreScreen>(location.pathname === "/guest-preview" ? "guest" : "landing");
   const [detailOrigin, setDetailOrigin] = useState<DetailOrigin>("landing");
   const [selectedId, setSelectedId] = useState<string>();
   const [selectedSample, setSelectedSample] = useState<GuestSample>();
@@ -645,6 +696,11 @@ function App() {
   const [detailRetry, setDetailRetry] = useState(0);
   const [progress, setProgress] = useState<GuestProgress>(() => readGuestProgress());
   const [inviteDismissed, setInviteDismissed] = useState(false);
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [signOutError, setSignOutError] = useState<string>();
+  const sessionRequestVersion = useRef(0);
+  const previousPath = useRef(location.pathname);
 
   function loadSamples() {
     setLoading(true);
@@ -658,20 +714,58 @@ function App() {
   useEffect(loadSamples, []);
 
   useEffect(() => {
+    const requestVersion = sessionRequestVersion.current;
+    getAuthSession()
+      .then((restoredSession) => {
+        if (sessionRequestVersion.current === requestVersion) setSession(restoredSession);
+      })
+      .catch(() => {
+        if (sessionRequestVersion.current === requestVersion) setSession(null);
+      })
+      .finally(() => {
+        if (sessionRequestVersion.current === requestVersion) setSessionReady(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    const pathChanged = previousPath.current !== location.pathname;
+    previousPath.current = location.pathname;
+    if (!pathChanged) return;
+
+    if (location.pathname === "/guest-preview" || location.pathname === "/") {
+      setScreen(location.pathname === "/guest-preview" ? "guest" : "landing");
+      setActiveMissionIndex(null);
+      setSelectedId(undefined);
+      setSelectedSample(undefined);
+      setError(false);
+      setLoading(false);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
     if (!selectedId) {
       setSelectedSample(undefined);
       return;
     }
 
+    let current = true;
     setLoading(true);
     setError(false);
     getGuestSample(selectedId)
-      .then(setSelectedSample)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .then((sample) => {
+        if (current) setSelectedSample(sample);
+      })
+      .catch(() => {
+        if (current) setError(true);
+      })
+      .finally(() => {
+        if (current) setLoading(false);
+      });
+    return () => { current = false; };
   }, [selectedId, detailRetry]);
 
   function goHome() {
+    navigate("/");
     setScreen("landing");
     setActiveMissionIndex(null);
     setSelectedId(undefined);
@@ -681,6 +775,7 @@ function App() {
   }
 
   function goGuest() {
+    navigate("/guest-preview");
     setScreen("guest");
     setActiveMissionIndex(null);
     setSelectedId(undefined);
@@ -724,6 +819,39 @@ function App() {
 
   const activeSession = selectedSample && activeMissionIndex !== null;
 
+  function authenticated(nextSession: AuthSession) {
+    sessionRequestVersion.current += 1;
+    setSignOutError(undefined);
+    setSession(nextSession);
+    setSessionReady(true);
+    navigate(nextSession.hasChildProfile ? "/" : "/onboarding");
+  }
+
+  async function endSession() {
+    try {
+      await signOut();
+      sessionRequestVersion.current += 1;
+      setSignOutError(undefined);
+      setSession(null);
+      setSessionReady(true);
+      navigate("/");
+    } catch {
+      setSignOutError("We couldn't sign you out. Please try again.");
+    }
+  }
+
+  if (location.pathname === "/sign-in") {
+    return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+  }
+  if (location.pathname === "/sign-up") {
+    return <AuthPage mode="sign-up" onAuthenticated={authenticated} />;
+  }
+  if (location.pathname === "/onboarding") {
+    if (!sessionReady) return <LoadingState label="Opening your account…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    return <OnboardingBoundary session={session} onSignOut={endSession} signOutError={signOutError} />;
+  }
+
   return (
     <>
       {activeSession ? (
@@ -737,7 +865,17 @@ function App() {
         />
       ) : (
         <>
-          <Header screen={selectedSample ? detailOrigin : screen} onHome={goHome} onGuest={goGuest} />
+          <Header
+            screen={selectedSample ? detailOrigin : screen}
+            onHome={goHome}
+            onGuest={goGuest}
+            session={session}
+            sessionReady={sessionReady}
+            onSignIn={() => navigate("/sign-in")}
+            onSignUp={() => navigate("/sign-up")}
+            onSignOut={endSession}
+            signOutError={signOutError}
+          />
           <main className="app-shell">
             {loading ? (
               <LoadingState label={selectedId ? "Opening this Play Path…" : "Gathering tonight's sparks…"} />
@@ -752,7 +890,15 @@ function App() {
                 onStart={startSession}
               />
             ) : screen === "guest" ? (
-              <GuestPreview samples={samples} progress={progress} onSelect={(sampleId) => openSample(sampleId, "guest")} />
+              <GuestPreview
+                samples={samples}
+                progress={progress}
+                onSelect={(sampleId) => openSample(sampleId, "guest")}
+                session={session}
+                sessionReady={sessionReady}
+                onSignUp={() => navigate("/sign-up")}
+                onSignIn={() => navigate("/sign-in")}
+              />
             ) : (
               <Landing
                 samples={samples}
@@ -765,8 +911,12 @@ function App() {
           <footer><Brand /><p>Screen-free moments designed for real homes · Built for preschool minds ages 3–5.</p></footer>
         </>
       )}
-      {!activeSession && progress.completedSampleIds.length >= 2 && !inviteDismissed && (
-        <AccountInvitation onClose={() => setInviteDismissed(true)} />
+      {!activeSession && sessionReady && !session && progress.completedSampleIds.length >= 2 && !inviteDismissed && (
+        <AccountInvitation
+          onClose={() => setInviteDismissed(true)}
+          onCreate={() => navigate("/sign-up")}
+          onSignIn={() => navigate("/sign-in")}
+        />
       )}
     </>
   );

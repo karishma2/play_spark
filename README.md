@@ -19,6 +19,12 @@ After configuring the development MongoDB connection in `.env`, seed the reviewe
 npm run seed:catalog
 ```
 
+Prepare the parent-account collections and indexes before testing sign-up:
+
+```bash
+npm run setup:auth
+```
+
 The command validates `content/guest-samples.json`, creates or updates the approved catalogue collections and indexes, and upserts stable records. It is safe to run again after reviewed content changes.
 
 ## Commands

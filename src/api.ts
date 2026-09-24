@@ -4,18 +4,36 @@ interface ApiResponse<T> {
   data: T;
 }
 
+interface ApiErrorPayload {
+  error?: { code?: string; message?: string; fieldErrors?: Record<string, string> };
+}
+
+export interface AuthSession {
+  user: { id: string; email: string };
+  hasChildProfile: boolean;
+}
+
 export class ApiError extends Error {
-  constructor(message: string) {
+  code?: string;
+  fieldErrors?: Record<string, string>;
+
+  constructor(message: string, payload?: ApiErrorPayload["error"]) {
     super(message);
     this.name = "ApiError";
+    this.code = payload?.code;
+    this.fieldErrors = payload?.fieldErrors;
   }
 }
 
-async function getJson<T>(path: string): Promise<T> {
-  const response = await fetch(path, { headers: { Accept: "application/json" } });
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, {
+    ...init,
+    headers: { Accept: "application/json", ...init?.headers },
+  });
 
   if (!response.ok) {
-    throw new ApiError("We couldn't load this Play Path. Please try again.");
+    const payload = await response.json().catch(() => ({})) as ApiErrorPayload;
+    throw new ApiError(payload.error?.message ?? "Please try again.", payload.error);
   }
 
   const payload = (await response.json()) as ApiResponse<T>;
@@ -23,9 +41,33 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export function getGuestSamples() {
-  return getJson<GuestSampleSummary[]>("/api/v1/guest/samples");
+  return requestJson<GuestSampleSummary[]>("/api/v1/guest/samples");
 }
 
 export function getGuestSample(sampleId: string) {
-  return getJson<GuestSample>(`/api/v1/guest/samples/${encodeURIComponent(sampleId)}`);
+  return requestJson<GuestSample>(`/api/v1/guest/samples/${encodeURIComponent(sampleId)}`);
+}
+
+function submitCredentials(path: string, email: string, password: string) {
+  return requestJson<AuthSession>(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function signUp(email: string, password: string) {
+  return submitCredentials("/api/v1/auth/sign-up", email, password);
+}
+
+export function signIn(email: string, password: string) {
+  return submitCredentials("/api/v1/auth/sign-in", email, password);
+}
+
+export function getAuthSession() {
+  return requestJson<AuthSession>("/api/v1/auth/session");
+}
+
+export function signOut() {
+  return requestJson<{ signedOut: true }>("/api/v1/auth/sign-out", { method: "POST" });
 }
