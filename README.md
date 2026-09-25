@@ -27,6 +27,10 @@ npm run setup:auth
 
 The command validates `content/guest-samples.json`, creates or updates the approved catalogue collections and indexes, and upserts stable records. It is safe to run again after reviewed content changes.
 
+## Password reset email
+
+Set `APP_BASE_URL` to the public frontend origin used in verification and password-reset links. For local development this is normally `http://localhost:5173`. To send account emails, configure both `RESEND_API_KEY` and `RESEND_FROM_EMAIL`; use Resend's testing sender during local development or a verified domain for deployed environments. Restart the API after changing these values, then run `npm run setup:auth` to create the authentication token collections and indexes and mark accounts created before email verification as verified.
+
 ## Commands
 
 ```text

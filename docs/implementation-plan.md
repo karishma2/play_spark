@@ -62,6 +62,9 @@ Phase 2 is delivered as two independently reviewable vertical slices.
 - Confirm a single-use reset token that expires after 30 minutes.
 - Invalidate other sessions on password change and all sessions on forgotten-password reset.
 - Add the reviewed email provider through a small server-side adapter.
+- Send a 24-hour, single-use verification link after sign-up and allow a rate-limited replacement link.
+- Allow unverified parents to browse guest activities while requiring verification before child-profile onboarding.
+- Treat accounts created before email verification as verified during the authentication schema update.
 
 ## Phase 1 — Landing page and guest sample experience
 

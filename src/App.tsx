@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAuthSession, getGuestSample, getGuestSamples, signOut, type AuthSession } from "./api";
 import { AuthPage, OnboardingBoundary } from "./AuthPage";
+import { ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage } from "./PasswordPage";
+import { EmailVerificationPendingPage, VerifyEmailPage } from "./EmailVerificationPage";
 import {
   completeSample,
   readGuestProgress,
@@ -40,6 +42,8 @@ function Header({
   onSignIn,
   onSignUp,
   onSignOut,
+  onManageAccount,
+  onVerifyEmail,
   signOutError,
 }: {
   screen: ExploreScreen;
@@ -50,6 +54,8 @@ function Header({
   onSignIn: () => void;
   onSignUp: () => void;
   onSignOut: () => void;
+  onManageAccount: () => void;
+  onVerifyEmail: () => void;
   signOutError?: string;
 }) {
   return (
@@ -63,6 +69,8 @@ function Header({
         ) : session ? (
           <div className="guest-auth-actions" aria-label="Parent account">
             <span className="account-email">{session.user.email}</span>
+            {!session.emailVerified && <button onClick={onVerifyEmail}>Verify email</button>}
+            <button onClick={onManageAccount}>Password</button>
             <button onClick={onSignOut}>Sign out</button>
             <span className="guest-avatar" aria-hidden="true">●</span>
             {signOutError && <span className="account-action-error" role="alert">{signOutError}</span>}
@@ -174,11 +182,13 @@ function Landing({
   progress,
   onSelect,
   onGuest,
+  showNoSignInNeeded,
 }: {
   samples: GuestSampleSummary[];
   progress: GuestProgress;
   onSelect: (sampleId: string) => void;
   onGuest: () => void;
+  showNoSignInNeeded: boolean;
 }) {
   const [filter, setFilter] = useState<DurationFilter>("all");
   const visibleSamples = useMemo(
@@ -195,7 +205,7 @@ function Landing({
           <p className="hero-summary">60-second setup. Zero screens. Simple everyday play for 3–5 year olds.</p>
           <div className="hero-actions">
             <button className="button button-primary" onClick={onGuest}>Explore activities <span aria-hidden="true">→</span></button>
-            <span className="quiet-copy">No sign-in needed</span>
+            {showNoSignInNeeded && <span className="quiet-copy">No sign-in needed</span>}
           </div>
           <div className="reassurance-row" aria-label="Play Spark benefits">
             <span>♧ Household materials</span>
@@ -824,7 +834,18 @@ function App() {
     setSignOutError(undefined);
     setSession(nextSession);
     setSessionReady(true);
-    navigate(nextSession.hasChildProfile ? "/" : "/onboarding");
+    navigate(!nextSession.emailVerified ? "/verify-email-pending" : nextSession.hasChildProfile ? "/" : "/onboarding");
+  }
+
+  async function refreshSessionAfterVerification() {
+    sessionRequestVersion.current += 1;
+    try {
+      setSession(await getAuthSession());
+    } catch {
+      setSession(null);
+    } finally {
+      setSessionReady(true);
+    }
   }
 
   async function endSession() {
@@ -846,9 +867,49 @@ function App() {
   if (location.pathname === "/sign-up") {
     return <AuthPage mode="sign-up" onAuthenticated={authenticated} />;
   }
+  if (location.pathname === "/forgot-password") {
+    return <ForgotPasswordPage />;
+  }
+  if (location.pathname === "/reset-password") {
+    return (
+      <ResetPasswordPage
+        token={new URLSearchParams(location.search).get("token") ?? ""}
+        onReset={() => {
+          sessionRequestVersion.current += 1;
+          setSession(null);
+          setSessionReady(true);
+        }}
+      />
+    );
+  }
+  if (location.pathname === "/change-password") {
+    if (!sessionReady) return <LoadingState label="Opening account security…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    return <ChangePasswordPage onBack={() => navigate("/")} />;
+  }
+  if (location.pathname === "/verify-email") {
+    return (
+      <VerifyEmailPage
+        token={new URLSearchParams(location.search).get("token") ?? ""}
+        signedIn={Boolean(session)}
+        onVerified={refreshSessionAfterVerification}
+      />
+    );
+  }
+  if (location.pathname === "/verify-email-pending") {
+    if (!sessionReady) return <LoadingState label="Opening your account…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    if (session.emailVerified) {
+      return <OnboardingBoundary session={session} onSignOut={endSession} signOutError={signOutError} />;
+    }
+    return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
+  }
   if (location.pathname === "/onboarding") {
     if (!sessionReady) return <LoadingState label="Opening your account…" />;
     if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    if (!session.emailVerified) {
+      return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
+    }
     return <OnboardingBoundary session={session} onSignOut={endSession} signOutError={signOutError} />;
   }
 
@@ -874,6 +935,8 @@ function App() {
             onSignIn={() => navigate("/sign-in")}
             onSignUp={() => navigate("/sign-up")}
             onSignOut={endSession}
+            onManageAccount={() => navigate("/change-password")}
+            onVerifyEmail={() => navigate("/verify-email-pending")}
             signOutError={signOutError}
           />
           <main className="app-shell">
@@ -905,6 +968,7 @@ function App() {
                 progress={progress}
                 onSelect={(sampleId) => openSample(sampleId, "landing")}
                 onGuest={goGuest}
+                showNoSignInNeeded={sessionReady && !session}
               />
             )}
           </main>

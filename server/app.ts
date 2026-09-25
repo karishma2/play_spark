@@ -6,6 +6,11 @@ import { z } from "zod";
 import { createAuthRouter, createMongoAuthRepository, type AuthRepository, type PasswordHasher } from "./auth.js";
 import { createMongoCatalogRepository, type CatalogRepository } from "./catalog.js";
 import { createMongoClientProvider } from "./db.js";
+import {
+  createResendAuthEmailSender,
+  unavailableAuthEmailSender,
+  type AuthEmailSender,
+} from "./email.js";
 import { apiErrorHandler, apiNotFound, createAuthRateLimiter } from "./middleware.js";
 
 export interface CreateAppOptions {
@@ -14,6 +19,10 @@ export interface CreateAppOptions {
   catalog?: CatalogRepository;
   auth?: AuthRepository;
   passwordHasher?: PasswordHasher;
+  passwordResetBaseUrl?: string;
+  authEmailSender?: AuthEmailSender;
+  resendApiKey?: string;
+  resendFromEmail?: string;
   authCookieSecure?: boolean;
 }
 
@@ -26,16 +35,31 @@ export function createApp(options: CreateAppOptions) {
   const mongo = createMongoClientProvider(options.mongoUri);
   const catalog = options.catalog ?? createMongoCatalogRepository(mongo, options.databaseName);
   const auth = options.auth ?? createMongoAuthRepository(mongo, options.databaseName);
+  const authEmailSender = options.authEmailSender
+    ?? (options.resendApiKey && options.resendFromEmail
+      ? createResendAuthEmailSender(options.resendApiKey, options.resendFromEmail)
+      : unavailableAuthEmailSender);
 
   app.disable("x-powered-by");
   app.use(helmet());
   app.use(express.json({ limit: "100kb" }));
-  const authRateLimiter = createAuthRateLimiter();
-  app.use("/api/v1/auth/sign-up", authRateLimiter);
-  app.use("/api/v1/auth/sign-in", authRateLimiter);
+  const rateLimitedAuthPaths = [
+    "/api/v1/auth/sign-up",
+    "/api/v1/auth/sign-in",
+    "/api/v1/auth/change-password",
+    "/api/v1/auth/request-password-reset",
+    "/api/v1/auth/reset-password",
+    "/api/v1/auth/request-email-verification",
+    "/api/v1/auth/verify-email",
+  ];
+  for (const path of rateLimitedAuthPaths) {
+    app.use(path, createAuthRateLimiter());
+  }
   app.use("/api/v1/auth", createAuthRouter({
     repository: auth,
     passwordHasher: options.passwordHasher,
+    passwordResetBaseUrl: options.passwordResetBaseUrl ?? "http://localhost:3000",
+    authEmailSender,
     cookieSecure: options.authCookieSecure ?? process.env.NODE_ENV === "production",
   }));
 

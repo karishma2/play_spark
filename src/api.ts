@@ -11,6 +11,7 @@ interface ApiErrorPayload {
 export interface AuthSession {
   user: { id: string; email: string };
   hasChildProfile: boolean;
+  emailVerified: boolean;
 }
 
 export class ApiError extends Error {
@@ -70,4 +71,32 @@ export function getAuthSession() {
 
 export function signOut() {
   return requestJson<{ signedOut: true }>("/api/v1/auth/sign-out", { method: "POST" });
+}
+
+function postJson<T>(path: string, body: unknown) {
+  return requestJson<T>(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+export function changePassword(currentPassword: string, newPassword: string) {
+  return postJson<{ changed: true }>("/api/v1/auth/change-password", { currentPassword, newPassword });
+}
+
+export function requestPasswordReset(email: string) {
+  return postJson<{ accepted: true }>("/api/v1/auth/request-password-reset", { email });
+}
+
+export function resetPassword(token: string, newPassword: string) {
+  return postJson<{ reset: true }>("/api/v1/auth/reset-password", { token, newPassword });
+}
+
+export function requestEmailVerification() {
+  return postJson<{ accepted: true }>("/api/v1/auth/request-email-verification", {});
+}
+
+export function verifyEmail(token: string) {
+  return postJson<{ verified: true }>("/api/v1/auth/verify-email", { token });
 }

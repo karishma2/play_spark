@@ -86,6 +86,7 @@ export function AuthPage({
               {fieldErrors.password ?? (creating ? "Use at least 10 characters." : "Enter your account password.")}
             </small>
           </label>
+          {!creating && <Link className="auth-forgot-link" to="/forgot-password">Forgot your password?</Link>}
           <button className="button button-primary" disabled={submitting}>
             {submitting ? "Please wait…" : creating ? "Create parent account" : "Sign in"}
           </button>
