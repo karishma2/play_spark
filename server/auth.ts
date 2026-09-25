@@ -4,9 +4,12 @@ import { MongoServerError, ObjectId } from "mongodb";
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import type { MongoClientProvider } from "./db.js";
+import type { AuthEmailSender } from "./email.js";
 
 const sessionCookieName = "play_spark_session";
 const sessionLifetimeMs = 14 * 24 * 60 * 60 * 1000;
+const passwordResetLifetimeMs = 30 * 60 * 1000;
+const emailVerificationLifetimeMs = 24 * 60 * 60 * 1000;
 const scryptParameters = { N: 2 ** 15, r: 8, p: 3, maxmem: 64 * 1024 * 1024 };
 
 export interface AuthUser {
@@ -14,6 +17,7 @@ export interface AuthUser {
   email: string;
   passwordHash: string;
   hasChildProfile: boolean;
+  emailVerified: boolean;
 }
 
 export interface AuthRepository {
@@ -22,6 +26,11 @@ export interface AuthRepository {
   createSession(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
   findUserBySession(tokenHash: string, now: Date): Promise<AuthUser | null>;
   deleteSession(tokenHash: string): Promise<void>;
+  changePassword(userId: string, passwordHash: string, currentSessionTokenHash: string): Promise<void>;
+  createPasswordResetToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
+  consumePasswordResetToken(tokenHash: string, now: Date, passwordHash: string): Promise<boolean>;
+  createEmailVerificationToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
+  verifyEmailToken(tokenHash: string, now: Date): Promise<boolean>;
 }
 
 export interface PasswordHasher {
@@ -71,13 +80,43 @@ export function hashSessionToken(token: string) {
   return createHash("sha256").update(token).digest("base64url");
 }
 
+export function hashPasswordResetToken(token: string) {
+  return createHash("sha256").update(token).digest("base64url");
+}
+
+export function hashEmailVerificationToken(token: string) {
+  return createHash("sha256").update(token).digest("base64url");
+}
+
 function publicSession(user: AuthUser) {
-  return { user: { id: user.id, email: user.email }, hasChildProfile: user.hasChildProfile };
+  return {
+    user: { id: user.id, email: user.email },
+    hasChildProfile: user.hasChildProfile,
+    emailVerified: user.emailVerified,
+  };
 }
 
 const credentialsSchema = z.object({
   email: z.string().trim().email().max(254).transform(normalizeEmail),
   password: z.string().min(10).max(128),
+}).strict();
+
+const emailSchema = z.object({
+  email: z.string().trim().email().max(254).transform(normalizeEmail),
+}).strict();
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(10).max(128),
+  newPassword: z.string().min(10).max(128),
+}).strict();
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(32).max(256),
+  newPassword: z.string().min(10).max(128),
+}).strict();
+
+const verifyEmailSchema = z.object({
+  token: z.string().min(32).max(256),
 }).strict();
 
 const validators: Record<string, Document> = {
@@ -88,6 +127,8 @@ const validators: Record<string, Document> = {
       properties: {
         email: { bsonType: "string" },
         passwordHash: { bsonType: "string" },
+        emailVerificationRequired: { bsonType: "bool" },
+        emailVerifiedAt: { bsonType: "date" },
         status: { enum: ["active", "deletion_pending"] },
         createdAt: { bsonType: "date" },
         updatedAt: { bsonType: "date" },
@@ -108,6 +149,32 @@ const validators: Record<string, Document> = {
       },
     },
   },
+  passwordResetTokens: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId", "tokenHash", "expiresAt", "createdAt"],
+      properties: {
+        userId: { bsonType: "objectId" },
+        tokenHash: { bsonType: "string" },
+        expiresAt: { bsonType: "date" },
+        createdAt: { bsonType: "date" },
+        usedAt: { bsonType: "date" },
+      },
+    },
+  },
+  emailVerificationTokens: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId", "tokenHash", "expiresAt", "createdAt"],
+      properties: {
+        userId: { bsonType: "objectId" },
+        tokenHash: { bsonType: "string" },
+        expiresAt: { bsonType: "date" },
+        createdAt: { bsonType: "date" },
+        usedAt: { bsonType: "date" },
+      },
+    },
+  },
 };
 
 export async function ensureAuthCollections(db: Db) {
@@ -119,11 +186,29 @@ export async function ensureAuthCollections(db: Db) {
       await db.createCollection(name, { validator, validationLevel: "strict", validationAction: "error" });
     }
   }
+  await db.collection("users").updateMany(
+    { emailVerificationRequired: { $exists: false }, emailVerifiedAt: { $exists: false } },
+    [{ $set: { emailVerifiedAt: { $ifNull: ["$createdAt", "$$NOW"] } } }],
+  );
+  const resetTokenCollection = db.collection("passwordResetTokens");
+  const existingUserIndex = (await resetTokenCollection.indexes()).find((index) => (
+    index.key.userId === 1 && Object.keys(index.key).length === 1
+  ));
+  if (existingUserIndex && !existingUserIndex.unique && existingUserIndex.name) {
+    await resetTokenCollection.dropIndex(existingUserIndex.name);
+  }
+  const verificationTokenCollection = db.collection("emailVerificationTokens");
   await Promise.all([
     db.collection("users").createIndex({ email: 1 }, { unique: true }),
     db.collection("authSessions").createIndex({ tokenHash: 1 }, { unique: true }),
     db.collection("authSessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
     db.collection("authSessions").createIndex({ userId: 1 }),
+    resetTokenCollection.createIndex({ tokenHash: 1 }, { unique: true }),
+    resetTokenCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    resetTokenCollection.createIndex({ userId: 1 }, { unique: true }),
+    verificationTokenCollection.createIndex({ tokenHash: 1 }, { unique: true }),
+    verificationTokenCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    verificationTokenCollection.createIndex({ userId: 1 }, { unique: true }),
   ]);
 }
 
@@ -149,6 +234,7 @@ export function createMongoAuthRepository(mongo: MongoClientProvider, databaseNa
       email: document.email,
       passwordHash: document.passwordHash,
       hasChildProfile,
+      emailVerified: document.emailVerifiedAt instanceof Date,
     };
   }
 
@@ -165,12 +251,19 @@ export function createMongoAuthRepository(mongo: MongoClientProvider, databaseNa
         const result = await db.collection("users").insertOne({
           email,
           passwordHash,
+          emailVerificationRequired: true,
           status: "active",
           createdAt: now,
           updatedAt: now,
           lastSignedInAt: now,
         });
-        return { id: result.insertedId.toHexString(), email, passwordHash, hasChildProfile: false };
+        return {
+          id: result.insertedId.toHexString(),
+          email,
+          passwordHash,
+          hasChildProfile: false,
+          emailVerified: false,
+        };
       } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) throw new EmailAlreadyExistsError();
         throw error;
@@ -200,6 +293,85 @@ export function createMongoAuthRepository(mongo: MongoClientProvider, databaseNa
       const db = await ready();
       await db.collection("authSessions").deleteOne({ tokenHash });
     },
+    async changePassword(userId, passwordHash, currentSessionTokenHash) {
+      const db = await ready();
+      const objectId = new ObjectId(userId);
+      await db.collection("users").updateOne(
+        { _id: objectId, status: "active" },
+        { $set: { passwordHash, updatedAt: new Date() } },
+      );
+      await db.collection("authSessions").deleteMany({
+        userId: objectId,
+        tokenHash: { $ne: currentSessionTokenHash },
+      });
+    },
+    async createPasswordResetToken(userId, tokenHash, expiresAt) {
+      const db = await ready();
+      const objectId = new ObjectId(userId);
+      await db.collection("passwordResetTokens").updateOne(
+        { userId: objectId },
+        {
+          $set: { tokenHash, expiresAt, createdAt: new Date() },
+          $unset: { usedAt: "" },
+        },
+        { upsert: true },
+      );
+    },
+    async consumePasswordResetToken(tokenHash, now, passwordHash) {
+      const client = await mongo.getClient();
+      const db = client.db(databaseName);
+      const session = client.startSession();
+      let reset = false;
+      try {
+        await session.withTransaction(async () => {
+          reset = false;
+          const token = await db.collection("passwordResetTokens").findOneAndUpdate(
+            { tokenHash, expiresAt: { $gt: now }, usedAt: { $exists: false } },
+            { $set: { usedAt: now } },
+            { returnDocument: "before", session },
+          );
+          if (!token) return;
+          const passwordUpdate = await db.collection("users").updateOne(
+            { _id: token.userId, status: "active" },
+            { $set: { passwordHash, updatedAt: now } },
+            { session },
+          );
+          if (passwordUpdate.matchedCount !== 1) {
+            throw new Error("Password-reset user is unavailable.");
+          }
+          await db.collection("authSessions").deleteMany({ userId: token.userId }, { session });
+          reset = true;
+        });
+        return reset;
+      } finally {
+        await session.endSession();
+      }
+    },
+    async createEmailVerificationToken(userId, tokenHash, expiresAt) {
+      const db = await ready();
+      await db.collection("emailVerificationTokens").updateOne(
+        { userId: new ObjectId(userId) },
+        {
+          $set: { tokenHash, expiresAt, createdAt: new Date() },
+          $unset: { usedAt: "" },
+        },
+        { upsert: true },
+      );
+    },
+    async verifyEmailToken(tokenHash, now) {
+      const db = await ready();
+      const token = await db.collection("emailVerificationTokens").findOneAndUpdate(
+        { tokenHash, expiresAt: { $gt: now }, usedAt: { $exists: false } },
+        { $set: { usedAt: now } },
+        { returnDocument: "before" },
+      );
+      if (!token) return false;
+      const result = await db.collection("users").updateOne(
+        { _id: token.userId, status: "active" },
+        { $set: { emailVerifiedAt: now, updatedAt: now } },
+      );
+      return result.matchedCount === 1;
+    },
   };
 }
 
@@ -221,7 +393,9 @@ function validationError(response: Response, result: z.ZodSafeParseError<unknown
     if (!fieldErrors[field]) {
       fieldErrors[field] = field === "email"
         ? "Enter a valid email address."
-        : "Use a password between 10 and 128 characters.";
+        : field === "token"
+          ? "Use the complete password reset link."
+          : "Use a password between 10 and 128 characters.";
     }
   }
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Please check the highlighted fields.", fieldErrors } });
@@ -230,6 +404,8 @@ function validationError(response: Response, result: z.ZodSafeParseError<unknown
 export function createAuthRouter(options: {
   repository: AuthRepository;
   cookieSecure: boolean;
+  passwordResetBaseUrl: string;
+  authEmailSender: AuthEmailSender;
   passwordHasher?: PasswordHasher;
 }) {
   const router = Router();
@@ -254,6 +430,46 @@ export function createAuthRouter(options: {
     response.cookie(sessionCookieName, token, cookieOptions);
   }
 
+  async function authenticatedUser(request: Request) {
+    const token = readCookie(request);
+    if (!token) return null;
+    const tokenHash = hashSessionToken(token);
+    const user = await options.repository.findUserBySession(tokenHash, new Date());
+    return user ? { user, tokenHash } : null;
+  }
+
+  async function sendEmailVerification(user: AuthUser) {
+    const token = randomBytes(32).toString("base64url");
+    await options.repository.createEmailVerificationToken(
+      user.id,
+      hashEmailVerificationToken(token),
+      new Date(Date.now() + emailVerificationLifetimeMs),
+    );
+    const verificationUrl = new URL("/verify-email", options.passwordResetBaseUrl);
+    verificationUrl.searchParams.set("token", token);
+    await options.authEmailSender.sendEmailVerification({
+      to: user.email,
+      verificationUrl: verificationUrl.toString(),
+    });
+  }
+
+  async function sendPasswordResetIfEligible(email: string) {
+    const user = await options.repository.findUserByEmail(email);
+    if (!user?.emailVerified) return;
+    const token = randomBytes(32).toString("base64url");
+    await options.repository.createPasswordResetToken(
+      user.id,
+      hashPasswordResetToken(token),
+      new Date(Date.now() + passwordResetLifetimeMs),
+    );
+    const resetUrl = new URL("/reset-password", options.passwordResetBaseUrl);
+    resetUrl.searchParams.set("token", token);
+    await options.authEmailSender.sendPasswordReset({
+      to: user.email,
+      resetUrl: resetUrl.toString(),
+    });
+  }
+
   router.post("/sign-up", async (request, response) => {
     const parsed = credentialsSchema.safeParse(request.body);
     if (!parsed.success) return validationError(response, parsed);
@@ -261,6 +477,7 @@ export function createAuthRouter(options: {
       const passwordHash = await passwordHasher.hash(parsed.data.password);
       const user = await options.repository.createUser(parsed.data.email, passwordHash);
       await startSession(response, user);
+      await sendEmailVerification(user).catch(() => undefined);
       response.status(201).json({ data: publicSession(user) });
     } catch (error) {
       if (error instanceof EmailAlreadyExistsError) {
@@ -321,6 +538,123 @@ export function createAuthRouter(options: {
       response.json({ data: { signedOut: true } });
     } catch {
       response.status(503).json({ error: { code: "AUTH_UNAVAILABLE", message: "Account access is temporarily unavailable. Please try again." } });
+    }
+  });
+
+  router.post("/change-password", async (request, response) => {
+    const parsed = changePasswordSchema.safeParse(request.body);
+    if (!parsed.success) return validationError(response, parsed);
+    try {
+      const authenticated = await authenticatedUser(request);
+      if (!authenticated) {
+        response.clearCookie(sessionCookieName, clearCookieOptions);
+        response.status(401).json({ error: { code: "UNAUTHENTICATED", message: "Please sign in." } });
+        return;
+      }
+      const currentPasswordValid = await passwordHasher.verify(
+        parsed.data.currentPassword,
+        authenticated.user.passwordHash,
+      );
+      if (!currentPasswordValid) {
+        response.status(400).json({
+          error: {
+            code: "INVALID_CURRENT_PASSWORD",
+            message: "Your current password is incorrect.",
+            fieldErrors: { currentPassword: "Enter your current password." },
+          },
+        });
+        return;
+      }
+      const reusesCurrentPassword = await passwordHasher.verify(
+        parsed.data.newPassword,
+        authenticated.user.passwordHash,
+      );
+      if (reusesCurrentPassword) {
+        response.status(400).json({
+          error: {
+            code: "PASSWORD_UNCHANGED",
+            message: "Choose a different password.",
+            fieldErrors: { newPassword: "Your new password must be different." },
+          },
+        });
+        return;
+      }
+      const passwordHash = await passwordHasher.hash(parsed.data.newPassword);
+      await options.repository.changePassword(authenticated.user.id, passwordHash, authenticated.tokenHash);
+      response.json({ data: { changed: true } });
+    } catch {
+      response.status(503).json({ error: { code: "AUTH_UNAVAILABLE", message: "Password changes are temporarily unavailable. Please try again." } });
+    }
+  });
+
+  router.post("/request-password-reset", async (request, response) => {
+    const parsed = emailSchema.safeParse(request.body);
+    if (!parsed.success) return validationError(response, parsed);
+    response.status(202).json({ data: { accepted: true } });
+    void sendPasswordResetIfEligible(parsed.data.email).catch(() => {
+      // Delivery remains private so account and provider state cannot be inferred.
+    });
+  });
+
+  router.post("/reset-password", async (request, response) => {
+    const parsed = resetPasswordSchema.safeParse(request.body);
+    if (!parsed.success) return validationError(response, parsed);
+    try {
+      const passwordHash = await passwordHasher.hash(parsed.data.newPassword);
+      const reset = await options.repository.consumePasswordResetToken(
+        hashPasswordResetToken(parsed.data.token),
+        new Date(),
+        passwordHash,
+      );
+      if (!reset) {
+        response.status(400).json({
+          error: { code: "INVALID_RESET_TOKEN", message: "This reset link is invalid or has expired." },
+        });
+        return;
+      }
+      response.clearCookie(sessionCookieName, clearCookieOptions);
+      response.json({ data: { reset: true } });
+    } catch {
+      response.status(503).json({ error: { code: "AUTH_UNAVAILABLE", message: "Password reset is temporarily unavailable. Please try again." } });
+    }
+  });
+
+  router.post("/request-email-verification", async (request, response) => {
+    try {
+      const authenticated = await authenticatedUser(request);
+      if (!authenticated) {
+        response.clearCookie(sessionCookieName, clearCookieOptions);
+        response.status(401).json({ error: { code: "UNAUTHENTICATED", message: "Please sign in." } });
+        return;
+      }
+      if (!authenticated.user.emailVerified) await sendEmailVerification(authenticated.user);
+      response.status(202).json({ data: { accepted: true } });
+    } catch {
+      response.status(503).json({
+        error: { code: "EMAIL_UNAVAILABLE", message: "We couldn't send the verification email. Please try again." },
+      });
+    }
+  });
+
+  router.post("/verify-email", async (request, response) => {
+    const parsed = verifyEmailSchema.safeParse(request.body);
+    if (!parsed.success) return validationError(response, parsed);
+    try {
+      const verified = await options.repository.verifyEmailToken(
+        hashEmailVerificationToken(parsed.data.token),
+        new Date(),
+      );
+      if (!verified) {
+        response.status(400).json({
+          error: { code: "INVALID_VERIFICATION_TOKEN", message: "This verification link is invalid or has expired." },
+        });
+        return;
+      }
+      response.json({ data: { verified: true } });
+    } catch {
+      response.status(503).json({
+        error: { code: "AUTH_UNAVAILABLE", message: "Email verification is temporarily unavailable. Please try again." },
+      });
     }
   });
 

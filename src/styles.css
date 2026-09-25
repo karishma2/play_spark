@@ -120,6 +120,11 @@ nav .nav-active { color: white; background: var(--primary); }
 .auth-form label small[id$="error"] { color: var(--secondary-deep); }
 .auth-form .button { width: 100%; margin-top: 4px; }
 .auth-error { padding: 12px 14px; color: #842f1a; background: var(--secondary-soft); border-radius: 12px; font-size: 12px; font-weight: 700; }
+.auth-success { margin: 24px 0; padding: 16px; color: var(--primary); background: var(--primary-soft); border-radius: 14px; font-size: 13px; }
+.auth-success p { margin: 6px 0 0; font-size: 12px; }
+.auth-forgot-link { justify-self: end; margin-top: -8px; color: var(--primary); font-size: 11px; font-weight: 700; text-decoration: underline; }
+.verification-actions { margin-top: 28px; display: grid; gap: 12px; }
+.verification-primary { width: 100%; margin-top: 28px; }
 .auth-switch { margin: 20px 0 4px; text-align: center; font-size: 12px; }
 .auth-switch a { color: var(--primary); font-weight: 700; text-decoration: underline; }
 .auth-back { display: block; margin: 14px auto 0; text-align: center; }
@@ -509,7 +514,7 @@ footer p { max-width: 540px; margin: 0; text-align: right; font-size: 11px; }
   .guest-auth-actions { gap: 4px; }
   .guest-auth-actions button { padding: 8px; font-size: 10px; }
   .guest-avatar { display: none; }
-  .account-email { max-width: 120px; }
+  .account-email { display: none; }
   .header-account-actions { gap: 2px; }
   .header-sign-in { padding-inline: 7px; }
   .hero { padding: 42px 0 46px; }

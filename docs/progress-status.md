@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 24 September 2026
+**Last updated:** 25 September 2026
 
 ## Status meanings
 
@@ -20,7 +20,7 @@
 | 0 | Application and server foundation | Complete |
 | 1 | Landing page and guest sample experience | Complete |
 | 1.1 | MongoDB-backed activity catalogue and seeding | Complete |
-| 2 | Parent accounts and secure authentication | In progress |
+| 2 | Parent accounts and secure authentication | Complete |
 | 3 | Child-profile onboarding and editing | Planned |
 | 4 | Dashboard, filters, and rule-based recommendations | Planned |
 | 5 | Active Play Sessions and mission actions | Planned |
@@ -28,6 +28,25 @@
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
 ## Completed features
+
+### Password management and email verification
+
+- **Status:** Complete
+- **Branch:** `feature/password-management`
+- **Completed:** 25 September 2026
+- **Delivered:**
+  - Authenticated password changes that verify the current password, reject reuse, preserve the current session, and invalidate other sessions.
+  - Privacy-safe password-reset requests with 30-minute, single-use hashed tokens and invalidation of all sessions after reset.
+  - Resend-backed authentication email delivery through a provider-neutral server adapter and validated environment configuration.
+  - Verification emails for new accounts using 24-hour, single-use hashed tokens; requesting a replacement invalidates the earlier link.
+  - Guest activity access for unverified parents with onboarding and future parent-owned features held behind an email-verification checkpoint.
+  - Safe migration of pre-existing accounts as verified without allowing later setup runs to verify new accounts accidentally.
+  - Responsive password and verification screens with safe loading, success, invalid-link, validation, and provider-unavailable states.
+  - The landing-page “No sign-in needed” helper now appears only for confirmed signed-out visitors.
+- **Key files or routes:** `server/auth.ts`, `server/email.ts`, `src/EmailVerificationPage.tsx`, `src/PasswordPage.tsx`, `POST /api/v1/auth/request-email-verification`, `POST /api/v1/auth/verify-email`, `POST /api/v1/auth/change-password`, `POST /api/v1/auth/request-password-reset`, `POST /api/v1/auth/reset-password`
+- **Validation:** `npm run verify` passed before review fixes with TypeScript checks, catalogue validation, 23 automated tests, the production build, and the progress guard. After the review and testing fixes, `npm run check` and 10 focused authentication tests pass. Authentication collection setup completed against `play_spark_dev`. Password-reset and verification screens were visually inspected at desktop and 390 px widths. Resend accepted a delivery through the configured API key and testing sender.
+- **Follow-up:** Configure and verify a production sending domain before accepting external beta accounts; Resend's development sender restricts recipients.
+- **Feature-log note:** Review and testing fixes persist the new-account verification marker, make forgotten-password updates and session revocation transactional, return reset-request responses independently of account lookup and email-delivery latency, and isolate rate-limit budgets by authentication action.
 
 ### Parent account access
 
@@ -50,6 +69,7 @@
 - **Validation:** `npm run verify` passes TypeScript checks, catalogue validation, 19 automated tests, the production build, and the progress guard. `npm audit --omit=dev` reports no production vulnerabilities. Authentication collections were prepared in `play_spark_dev`; the sign-up and sign-in screens were checked at desktop and 390 px mobile widths. Independent review passed after its three findings were fixed. Independent feature testing verified signed-in sample browsing, hidden guest account prompts, home-navigation cleanup, and session preservation with a safe retry message when sign-out fails.
 - **Follow-up:** Password change, session invalidation after credential changes, and forgotten-password reset remain Phase 2.2.
 - **Feature-log note:** Finalization fixed account-prompt flashes during session restoration, removed runtime schema-management work from authentication requests, and cleared stale form state when switching between sign-up and sign-in.
+- **Feature-log note:** The landing-page “No sign-in needed” helper is shown only after confirming the visitor is signed out, so authenticated parents do not see guest-only guidance.
 
 ### MongoDB-backed activity catalogue
 
