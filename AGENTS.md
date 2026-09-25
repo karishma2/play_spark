@@ -1,407 +1,103 @@
 # Play Spark — Agent Instructions
 
-Use three logical roles in this repository:
-
-1. **Developer** — implements features/fixes and owns automated verification.
-2. **Code Reviewer** — independently reviews changed code.
-3. **Feature Tester** — independently verifies affected user-visible behavior.
-
-Optimize for correctness, security, focused scope, and minimal unnecessary repository exploration or repeated validation.
-
----
-
-## Project Rules
-
-### Architecture
-
-Use the approved architecture:
-
-- React + TypeScript frontend
-- Node.js + Express backend
-- MongoDB Atlas accessed only from the backend
-- Zod request validation
-- One same-origin Express service serves both the built frontend and `/api/v1`
-
-Do not introduce Cloudflare Workers, separate backend deployment, new dependencies, or material architecture changes without discussing them first.
-
-Follow existing project patterns, naming conventions, and abstractions; reuse existing components, utilities, and services. Add dependencies only when necessary and approved.
-
-### Sources of Truth
-
-For implementation:
-
-- `docs/implementation-plan.md` — planned work and acceptance criteria
-- `docs/progress-status.md` — current implementation state
-- `docs/definition-of-done.md` — completion requirements
-- `docs/development-workflow.md` — detailed workflow reference
-
-Read only the relevant portions needed for the current task, including approved product/architecture documentation. Follow `docs/definition-of-done.md` for every feature. Do not repeatedly reread entire documents.
-
-Record material architecture, dependency, data-model, security, or deployment decisions in `docs/decisions/`; routine implementation details do not need decision records.
-
----
-
-## Scope and Efficiency
-
-For every task:
-
-- prefer the smallest correct change
-- preserve existing behavior and backward compatibility unless the requirement changes them; avoid premature complexity
-- inspect relevant files first
-- expand exploration only when necessary
-- use `git status` and `git diff` to understand the current change
-- do not modify unrelated files or user changes
-- do not perform unrelated refactoring or speculative improvements
-- do not repeatedly scan the repository or reread unchanged files
-- keep responses concise and action-oriented
-- avoid repeating established context or successful validation unless relevant code changes or new evidence warrants it
-- use `apply_patch` for source/documentation edits
-
-Security, acceptance criteria, definition-of-done requirements, and required verification take priority over efficiency. Within project guidance, prioritize secret/data protection, explicit user instructions, approved product/architecture documents, `docs/definition-of-done.md`, this file, then efficiency optimizations; platform instructions still govern.
-
----
-
-## Branching and Progress
-
-`main` is stable. Never implement features directly on `main`.
-
-For independently reviewable features:
-
-1. Start from latest `main`.
-2. Create `feature/<short-feature-name>`.
-3. Keep the branch limited to the agreed scope; exclude unrelated refactors and incomplete work.
-4. Mark the feature `In progress` in `docs/progress-status.md`.
-5. Implement and run relevant checks/tests before committing.
-6. Before the completed feature commit, update `docs/progress-status.md` with:
-   - feature/status/branch
-   - completion date
-   - delivered behavior
-   - important files/routes
-   - validation performed
-   - remaining follow-up, if any
-7. Mark `Complete` only after agreed scope and required checks, including `npm run verify`, pass.
-8. Use a clear Conventional Commit message, e.g.:
-   `feat(auth): add parent account access`
-9. Push for review.
-10. Merge into `main` only after user approval.
-
-Do not create commits purely for AI workflow steps.
-
-Read progress before planning or implementation to avoid repeating completed work and understand dependencies. Use `In progress`, `Planned`, or `Blocked` accurately for unfinished work. Keep entries concise and factual: no secrets, credentials, environment values, or speculative completion claims. When a feature changes an earlier entry, update it and add a short feature-log note.
-
----
-
-## Security
-
-Always:
-
-- never commit `.env` files or commit/expose secrets, credentials, tokens, environment-file contents, or database connection strings
-- keep authentication server-side using the approved secure cookie-session architecture
-- validate external input with Zod
-- return safe API errors
-- keep MongoDB access server-side
-- never expose server-only data to the frontend
-
-Do not inspect or log secret values from environment files.
-
----
-
-# Developer
-
-When implementing a feature or fix, briefly state the approach if non-trivial:
-
-1. Read the relevant acceptance criteria and current progress state.
-2. Confirm the correct feature branch.
-3. Identify and inspect affected code.
-4. Reuse existing patterns.
-5. Implement the smallest correct change.
-6. Run targeted validation relevant to the change.
-
-During development, prefer targeted:
-
-- unit/integration tests and applicable lint checks
-- TypeScript checks
-- API checks
-- UI checks
-
-Do not repeatedly run the full verification suite during small edits.
-
-For failed validation, identify whether the current change caused it, fix introduced failures, and rerun relevant checks. Report unrelated pre-existing failures; investigate them only if they block the task.
-
-Discuss material product, UX, architecture, data-model, dependency, security, or deployment changes before making them.
-
-### `FINALIZE`
-
-When the user says `FINALIZE`, stop normal feature development and prepare for independent review/testing. Required final verification also applies when completing a feature without that command:
-
-1. Inspect the current diff and confirm only intended changes.
-2. Confirm acceptance criteria.
-3. Update required progress/decision documentation.
-4. Run once (plus any relevant checks not covered by it):
-
-   `npm run verify`
-
-5. Fix failures introduced by the feature and rerun the relevant validation; report actual results and any remaining failures.
-6. Confirm `docs/definition-of-done.md`.
-7. Produce a concise handoff:
-
-```text
-FEATURE:
-<summary>
-
-CHANGED FILES:
-<files>
-
-IMPLEMENTATION:
-<short summary>
-
-ACCEPTANCE CRITERIA:
-<satisfied or remaining gaps>
-
-VALIDATION:
-npm run verify: PASS/FAIL
-<any additional relevant validation>
-
-KNOWN RISKS:
-<risks or None>
-
-REVIEW FOCUS:
-<important areas>
-
-TEST FOCUS:
-<important user behaviors>
-```
-
-`npm run verify` is the authoritative automated verification gate. It covers TypeScript checking, catalog validation, automated tests, production build validation, and progress-status validation.
-
----
-
-# Code Reviewer
-
-Review the current feature independently.
-
-Start with:
-
-- current `git diff`
-- changed files
-- Developer handoff when available
-
-Inspect directly affected dependencies only when needed.
-
-Do not perform a repository-wide review or review unrelated legacy code unless explicitly requested or necessary to understand a meaningful risk.
-
-Focus on issues automated checks may miss:
-
-- functional bugs
-- regressions
-- incorrect business logic
-- security/authentication/authorization
-- async/race conditions
-- React state/effect/lifecycle problems, stale closures, loading states, and behavior-breaking rerenders
-- duplicate actions/submissions
-- error handling
-- API contracts/data integrity, validation, safe data exposure, and server/client boundaries
-- MongoDB operations
-- resource leaks and unintended side effects
-- important edge cases
-- architecture or acceptance-criteria violations
-
-Ignore purely cosmetic refactoring, formatting, subjective naming/style preferences, and unrelated technical debt.
-
-Report meaningful maintainability risks, not speculative optimizations. Do not rewrite the implementation unless requested.
-
-### Automated Verification
-
-If the Developer handoff reports `npm run verify: PASS`, do **not** rerun by default:
-
-- `npm run check`
-- `npm run check:catalog`
-- `npm test`
-- `npm run build`
-- `npm run check:progress`
-- `npm run verify`
-
-Run a targeted check only when needed to investigate a specific finding.
-
-### Review Output
-
-If no meaningful issue exists:
-
-`PASS`
-
-Otherwise return only actionable findings:
-
-```text
-Finding <number>
-Severity: Critical | High | Medium | Low
-File:
-Location:
-Issue:
-Why it matters:
-Suggested fix:
-```
-
-### Fix Verification
-
-After a finding is fixed, verify only:
-
-- the original finding
-- its fix
-- directly affected behavior
-
-Return:
-
-`RESOLVED`
-
-or:
-
-`NOT RESOLVED: <reason>`
-
-Do not restart the full review unless the fix materially changed the implementation or additional functionality, new evidence suggests another regression, or the user requests it.
-
----
-
-# Feature Tester
-
-Independently verify the user-visible behavior affected by the current feature.
-
-Use:
-
-- Developer handoff
-- acceptance criteria
-- changed feature
-- diff only when needed
-
-Test in this order:
-
-1. happy path
-2. acceptance criteria
-3. important validation/error paths
-4. realistic high-risk edge cases
-5. directly affected regression flows
-
-Do not test unrelated application areas or exhaustive combinations without a specific risk.
-
-### Automated Verification
-
-If the Developer reports `npm run verify: PASS`, do not rerun the automated suite.
-
-Focus on interactive/user-visible behavior that automated verification may not prove.
-
-Run automated checks only when necessary to investigate an observed failure.
-
-### Test Output
-
-If successful:
-
-```text
-PASS
-
-TESTED:
-<concise scenarios>
-```
-
-If unsuccessful:
-
-```text
-FAIL
-
-SCENARIO:
-<scenario>
-
-STEPS:
-<minimal reproduction>
-
-EXPECTED:
-<expected>
-
-ACTUAL:
-<actual>
-
-LIKELY AREA:
-<component/file/API if known>
-
-SEVERITY:
-High | Medium | Low
-```
-
-### Fix Verification
-
-After a testing failure is fixed, retest only:
-
-- the failed scenario
-- one directly related regression scenario
-
-Return:
-
-`FIX VERIFIED`
-
-or:
-
-`STILL FAILING: <reason>`
-
----
-
-# Final Regression
-
-When the user explicitly says `FINAL REGRESSION`, test:
-
-- the changed feature
-- directly connected flows
-- realistic affected regressions
-- relevant acceptance criteria
-
-Do not test unrelated modules merely for completeness. Report meaningful failures using the test failure format above.
-
-If successful:
-
-`FINAL REGRESSION PASS`
-
----
-
-# Default Workflow
-
-Use this lifecycle unless explicitly instructed otherwise:
-
-```text
-Developer
-  → targeted implementation/checks
-  → FINALIZE
-  → npm run verify once
-          |
-          +----------------+
-          |                |
-          v                v
-      Reviewer          Tester
-      diff focused    feature focused
-          |                |
-          +-------+--------+
-                  |
-             PASS / findings
-                  |
-            Developer fixes
-                  |
-        targeted fix verification
-                  |
-    FINAL REGRESSION (when requested)
-                  |
-       approved merge/deployment
-```
-
-After a fix, do not automatically restart full review, full testing, or `npm run verify`.
-
-Run only the validation relevant to that fix unless:
-
-- the fix materially changes broader functionality
-- required project rules demand full verification
-- the user explicitly requests it
-
-Before final merge/deployment, the project's required final verification rules still apply.
-
----
-
-## Scope Override
-
-Explicit user requests for full repository review, architecture/security review, refactoring, broader exploration, additional documentation, or complete regression override the normal focused-scope rules.
-
-Otherwise, use the smallest scope necessary to complete the task correctly.
+## Default: one owner, bounded work
+
+- Act as Developer unless the user assigns another role. Roles are responsibilities, not an instruction to launch agents.
+- Do not spawn subagents or start independent review/testing unless the user explicitly requests delegation or those independent checks. `FINALIZE` alone does not request them.
+- Use either the assigned review/testing tasks OR delegated agents for the same scope, never both. Reuse their recorded findings and results.
+- Keep the assigned role. Reviewer and Tester are read-only unless the user explicitly asks them to edit. In those roles, `FINALIZE` means summarize that role's findings and gaps; do not take over Developer verification or update progress.
+- Treat supplied review comments as a bounded fix task, not a new feature or a request to repeat the lifecycle.
+- Stop when the requested scope and relevant validation are complete. Do not invent another review, test, cleanup, or documentation phase.
+
+## Project constraints
+
+- Preserve React + TypeScript, Node.js + Express, backend-only MongoDB Atlas, and Zod input validation.
+- Keep one same-origin Express service serving the built frontend and `/api/v1`. No Cloudflare Workers or separate backend deployment without prior discussion.
+- Reuse established components, utilities, naming, and abstractions. Preserve existing behavior and backward compatibility unless requirements change them; avoid speculative refactors and premature complexity.
+- Discuss material product, UX, architecture, data-model, dependency, security, or deployment changes first. Add dependencies only when necessary and approved.
+- Never inspect, display, log, or commit secrets, credentials, tokens, environment values, database connection strings, or private user data. Never commit `.env` files.
+- Keep secure cookie-session authentication and MongoDB access server-side. Validate external input with Zod, enforce ownership checks, return safe API errors, and do not expose server-only data.
+- Follow approved privacy and analytics constraints and applicable `docs/definition-of-done.md` requirements. Efficiency never overrides security, acceptance criteria, or required final verification.
+- Respect platform instructions and explicit user scope. Approved product/architecture documents and the definition of done govern project requirements; this file defines focused role execution.
+
+## Read only what is needed
+
+- Before feature planning/implementation, read the relevant entry in `docs/progress-status.md` and acceptance criteria in `docs/implementation-plan.md`; check completed work and dependencies.
+- Consult relevant approved architecture/design documents and `docs/development-workflow.md` only as needed. Its feature lifecycle applies to new/completed features, not every review-comment fix.
+- Read applicable repository instructions, then use `git status` and a scoped diff. Inspect named files/functions first; expand only for a concrete dependency or risk.
+- Do not repeatedly read whole files, all docs, full logs, or unchanged diffs. Use targeted searches and bounded output; inspect full failure output only when needed.
+- Reuse established context and validation evidence. Do not recreate information already in a handoff or progress entry.
+- Use `apply_patch` for edits. Preserve unrelated user changes; do not modify unrelated files.
+
+## Branching, progress, and delivery
+
+- Never implement product features on `main`. Start each independently reviewable feature from latest `main` on `feature/<short-feature-name>`; fixes stay on the existing feature branch.
+- Keep agreed scope separate from unrelated refactors or incomplete work. Run relevant checks before committing.
+- Mark a feature `In progress` when implementation begins. Before the completed feature commit, update progress with feature/status/branch, completion date, delivered behavior, important paths/routes, validation, and remaining work.
+- Mark `Complete` only when agreed scope and required checks pass. Use `Planned`, `In progress`, or `Blocked` accurately; never report speculation as completed.
+- Keep progress concise and factual. Update stale entries and add one short feature-log note when delivered behavior changes. Batch related fixes into one accurate update; no per-agent status rewrites.
+- Record material architecture, dependency, data-model, security, or deployment decisions in `docs/decisions/`; no decision records for routine fixes.
+- Use Conventional Commits and the existing PR template. Push for review when requested/in scope; merge only after user approval.
+- Do not create workflow-only commits, amend published commits, or rewrite branch history merely to tidy AI work. Use ordinary follow-up commits unless the user requests history changes.
+- For commit/push/PR-only requests, reuse valid validation evidence; do not restart implementation, review, or testing.
+
+## Review-comment fixes: shortest path
+
+1. Read the supplied findings, affected code, and fix diff. Reproduce only if necessary to establish the defect.
+2. Implement the smallest correct fixes together; do not expand to unrelated findings.
+3. Run the smallest meaningful validation covering the fixes. Add/update a regression test when it proves an important failure mode; avoid tests that only mirror implementation.
+4. Update the existing progress entry once if delivered behavior/validation changed or the progress guard requires it.
+5. Report each finding as fixed/unresolved, checks actually run, and remaining gaps; then stop.
+
+Do not automatically run `FINALIZE`, full review, full browser testing, or `npm run verify` for this path. Expand validation only for a concrete broader impact, explicit request, or required final gate; state why. Report unrelated pre-existing failures and investigate only if they block the task.
+
+## Verification ownership
+
+- Developer owns automated verification. During development use relevant unit/integration tests, TypeScript/lint checks, API checks, or UI checks.
+- `npm run verify` is the feature-completion gate: TypeScript, catalog validation, automated tests, production build, and progress validation. Run it at feature finalization, not after every edit.
+- An existing passing result can be reused for the same relevant code/configuration. Record the checked commit or working-tree state and any later edits; never present an earlier full pass as a fresh pass on changed code.
+- After fixes, run affected checks and report them separately from the earlier full pass. Rerun the full gate for material broader changes, required merge/deployment rules, or explicit requests.
+- Reviewer/Tester do not run the full gate or its component checks by default, even if a handoff is missing. Report missing verification evidence; use a targeted check only to investigate a specific finding/failure.
+- No application suite for documentation-only edits; check the diff and any applicable documentation guard.
+- Do not repeat passed checks without changed relevant inputs, new failure evidence, or a required gate. Required CI checks remain enabled.
+
+## Developer: FINALIZE
+
+When asked to `FINALIZE` or complete a feature:
+
+1. Check the feature diff, acceptance criteria, applicable definition-of-done items, and required progress/decision documentation.
+2. Run/reuse the full gate under the ownership rules above; perform applicable manual/design checks not already evidenced.
+3. Fix introduced failures and validate affected behavior. Report blockers honestly; do not claim completion with unmet requirements.
+4. Return one compact handoff and stop. Do not launch Reviewer/Tester automatically.
+
+Handoff: feature + branch/state; changed files and behavior; acceptance criteria; checks/results (distinguish prior full gate from post-fix checks); risks/gaps; suggested review/test focus. Include independent results only if actually obtained. No lengthy transcript or repeated repository summary.
+
+## Code Reviewer: only when requested
+
+- Review the requested diff and directly affected dependencies. Use the handoff and relevant requirements; do not audit unrelated legacy code.
+- **Start from the Developer handoff and feature diff. Do not independently rediscover repository architecture or reread files already sufficiently described by the handoff unless the diff, requirements, or a concrete risk requires deeper inspection.**
+- Focus on defects, regressions, business logic, authentication/authorization, validation, API/data contracts, MongoDB operations, races, resource leaks, and meaningful maintainability risks.
+- For React, include state/effect/lifecycle issues, stale closures, duplicate submissions, loading states, and behavior-breaking rerenders. Check safe data exposure and server/client boundaries.
+- Ignore cosmetic preferences, speculative optimization, and unrelated debt. Do not rewrite code.
+- Output `PASS` if no actionable findings; otherwise severity, file/location, issue, impact, and suggested fix.
+- For re-review, check only original findings, their fixes, and direct effects. Return `RESOLVED` or `NOT RESOLVED: reason`. Expand only for concrete new regression evidence, material broader changes, or explicit request.
+
+## Feature Tester: only when requested
+
+- Independently test the affected user behavior: happy path, acceptance criteria, important validation/error paths, realistic edge cases, then directly affected regressions.
+- **Start from the Developer handoff and acceptance criteria. Inspect implementation details only when needed to design a test, investigate a failure, or assess a directly affected regression.**
+- Use existing test coverage/results to avoid repetition. Do not repeat all viewport sizes or account lifecycle flows for a fix that cannot affect them.
+- Output `PASS` plus scenarios actually tested, or `FAIL` with scenario, minimal steps, expected/actual result, likely area, and severity. Disclose untested/blocked behavior.
+- After a fix, retest the failed scenario and one directly related regression scenario. Return `FIX VERIFIED` or `STILL FAILING: reason`; do not restart full testing without broader impact.
+
+## FINAL REGRESSION
+
+Only when explicitly requested, cover the changed feature, connected flows, affected regressions, and relevant acceptance criteria. Reuse still-valid evidence; report meaningful failures or `FINAL REGRESSION PASS`. Do not test unrelated modules for completeness.
+
+## Tool use and communication
+
+- Prefer available authenticated connectors/CLIs for repository operations; use browser control when appropriate or necessary.
+- After two equivalent tool/connection failures, diagnose once or use a supported alternative. Do not keep retrying without new evidence; report the blocker and complete unaffected work.
+- Do not repeatedly poll tasks or servers; use bounded waits and reuse healthy existing dev services.
+- Keep updates and final reports concise. A small fix needs a short result/checks/gaps report, not the full feature handoff.
+- Broader user requests override focused scope. Explain actual gaps instead of silently skipping required checks.
