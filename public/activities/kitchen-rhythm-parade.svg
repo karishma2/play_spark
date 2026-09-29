@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="title desc">
+  <title id="title">Kitchen rhythm parade</title><desc id="desc">A wooden spoon, bright bowl, scarf, and music notes form a gentle home parade.</desc>
+  <rect width="720" height="480" fill="#fff4e7"/><circle cx="585" cy="95" r="110" fill="#f7d8ca"/><path d="M0 355h720v125H0z" fill="#e5d6c3"/>
+  <ellipse cx="300" cy="326" rx="150" ry="36" fill="#7ba5b6"/><path d="M150 315q8 105 150 105t150-105" fill="#93bcc8"/><path d="M194 323q102 54 210 0" fill="none" stroke="#dcebf0" stroke-width="8"/>
+  <g transform="rotate(-28 225 190)"><rect x="211" y="68" width="28" height="235" rx="14" fill="#a97144"/><ellipse cx="225" cy="69" rx="35" ry="47" fill="#bf8754"/></g>
+  <path d="M465 248q58-94 132-24-52 24-44 101-50-55-88-77z" fill="#d96b43"/><path d="M477 249q57-52 104-19" fill="none" stroke="#f7b79f" stroke-width="8"/>
+  <g fill="#214e34"><path d="M120 116v72q-22-10-35 6-12 16 8 27 31 13 45-21v-53l48-12v43q-22-10-35 6-12 16 8 27 31 13 45-21V94z"/><path d="M505 72v63q-22-10-35 6-12 16 8 27 31 13 45-21V91l39 15V78z"/></g>
+  <circle cx="104" cy="73" r="15" fill="#dda74a"/><circle cx="626" cy="193" r="18" fill="#79a583"/>
+</svg>

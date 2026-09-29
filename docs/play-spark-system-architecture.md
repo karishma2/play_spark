@@ -1,10 +1,10 @@
 # System Architecture Document
 ## Play Spark — Private Beta Web Application
 
-**Version:** 1.3  
+**Version:** 1.4
 **Status:** Approved private-beta architecture  
-**Deployment model:** Single Node.js web service on free managed hosting  
-**Last updated:** 21 September 2026
+**Deployment model:** One same-origin Vercel project with a Vite build and Express function
+**Last updated:** 29 September 2026
 
 ## 1. Architecture purpose
 
@@ -29,7 +29,7 @@ Play Spark uses a **modular monolith**: one deployable application, with interna
 |---|---|---|
 | Frontend | React, TypeScript, Vite | Parent-facing responsive interface |
 | Backend API | Node.js 20+, Express, TypeScript | Accounts, activities, recommendations, sessions, favourites, and feedback |
-| Web hosting | Render Web Service, free beta tier | Runs Express and serves the built React files |
+| Web hosting | Vercel Hobby project | Serves the Vite build and runs Express as one same-origin function |
 | Database | MongoDB Atlas Free cluster | Separate development and beta data stores |
 | Database access | Official MongoDB Node.js driver | Pooled access from a conventional Node runtime |
 | Validation | Zod | Request, response, and form schemas |
@@ -45,7 +45,7 @@ The Node/Express connection to the Atlas development database has been confirmed
 ```mermaid
 flowchart LR
     P[Parent browser]
-    R[Render Web Service\nNode.js + Express]
+    R[Vercel project\nVite static build + Express function]
     UI[React build\nstatic files]
     API[REST API\n/api/v1]
     DB[(MongoDB Atlas\nplay_spark_beta)]
@@ -141,7 +141,7 @@ Analytics must not contain email addresses, child nicknames, birth data, free te
 ## 12. Security controls
 
 - HTTPS is required for deployment.
-- Render environment variables store secrets; secrets are never committed or sent to browser code.
+- Vercel environment variables store secrets; secrets are never committed or sent to browser code.
 - API requests are schema-validated, authenticated where required, and ownership-checked.
 - Sign-up, sign-in, and password-reset endpoints are rate-limited.
 - Express configures security headers, JSON body-size limits, and structured server logging.
@@ -151,7 +151,7 @@ Analytics must not contain email addresses, child nicknames, birth data, free te
 
 ### Temporary beta network exception
 
-The free Render service does not give this beta a static outbound IP address to allow-list in Atlas. Atlas may therefore require a temporary `0.0.0.0/0` access-list entry for the beta API.
+The Vercel Hobby runtime does not provide a dedicated static outbound IP address for this beta. Atlas may therefore require a temporary `0.0.0.0/0` access-list entry for the beta API.
 
 This is accepted only for the small private beta, with TLS-only connections, unique long credentials, an isolated least-privilege database user, no direct browser access, and no credentials in source code. Replace the broad rule with a production-safe network arrangement before public release.
 
@@ -166,16 +166,16 @@ This is accepted only for the small private beta, with TLS-only connections, uni
 
 Each environment uses its own least-privilege database user. Development data is never copied into beta.
 
-### Render deployment flow
+### Vercel deployment flow
 
 1. Commit reviewed changes to the private repository.
-2. Render builds with `npm run build`.
-3. Render starts Express with `npm run start`.
-4. Configure `MONGODB_URI`, `MONGODB_DB_NAME`, session secret, and email/analytics settings as Render environment variables.
+2. Vercel builds the Vite application with `npm run build` and publishes `dist`.
+3. Vercel deploys `api/index.ts` as the same-origin Express function and routes `/api/v1/*` to it.
+4. Configure `MONGODB_URI`, `MONGODB_DB_NAME`, session secret, `APP_BASE_URL`, and email settings as Vercel environment variables.
 5. Run deployed health and database checks without exposing secrets.
 6. Share the private beta URL with the invited parent group.
 
-The free Render service can sleep after inactivity, so the first beta request after an idle period may be delayed. This is acceptable for the small private beta but not a production hosting model.
+The Vercel function may have a cold start after inactivity. This is acceptable for the small private beta but must be measured before wider release.
 
 ## 14. Backup and recovery
 
@@ -195,13 +195,11 @@ Review this architecture before public launch if usage grows, a custom domain or
 
 - React and TypeScript provide the web UI.
 - Node.js, Express, and the official MongoDB driver provide the backend.
-- One Render Web Service serves React and `/api/v1` from the same origin.
+- One Vercel project serves React and the Express `/api/v1` function from the same origin.
 - MongoDB Atlas uses isolated `play_spark_dev` and `play_spark_beta` databases.
 - Zod validates API and form schemas; server-side sessions use 14-day secure cookies.
 - Recommendations stay rule-based; two guest sample Play Paths are permitted.
 - PostHog analytics excludes identifying data and recordings.
 - Manual encrypted weekly backups are required.
 - Mission Wall elements stay embedded in `missionWallScenes`; mission labels stay embedded as `tagKeys`.
-- The free Render tier is private-beta hosting only and is reassessed before production.
-
-
+- The Vercel Hobby deployment is private-beta hosting only and is reassessed before production.

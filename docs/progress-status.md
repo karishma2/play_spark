@@ -21,11 +21,21 @@
 | 1 | Landing page and guest sample experience | Complete |
 | 1.1 | MongoDB-backed activity catalogue and seeding | Complete |
 | 2 | Parent accounts and secure authentication | Complete |
-| 3 | Child-profile onboarding and editing | Planned |
+| 3 | Child-profile onboarding and editing | In progress |
 | 4 | Dashboard, filters, and rule-based recommendations | Planned |
 | 5 | Active Play Sessions and mission actions | Planned |
 | 6 | Mission Wall, favourites, history, and feedback | Planned |
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
+
+## In-progress features
+
+### Child onboarding
+
+- **Status:** In progress
+- **Branch:** `feature/child-onboarding`
+- **Scope:** One verified-parent-owned beta child profile with optional nickname, birth month/year, MongoDB-backed curated interests and play styles, secure profile APIs, and responsive onboarding.
+- **Implemented so far:** Repeatable profile-option seeding, verified-parent profile creation/read APIs, one-active-profile enforcement, session-state refresh, a four-step responsive onboarding flow with a completion screen, and four additional seeded sample Play Paths for post-onboarding exploration. All six Play Paths now name their purpose and show the developmental skills they support on catalogue and detail screens. A Vercel adapter keeps the Vite frontend and Express `/api/v1` routes in one same-origin project.
+- **Validation so far:** TypeScript checks, catalogue and profile-option validation, four focused child-profile API tests, and the production build pass. Thirteen reviewed profile options and six sample Play Paths were seeded in `play_spark_dev`; the live API returns all six paths and three ordered missions for the checked new path. Focused local HTTP checks through the Vercel adapter returned `200` for the rewritten health route and all six sample paths.
 
 ## Completed features
 
@@ -78,14 +88,15 @@
 - **Completed:** 23 September 2026
 - **Delivered:**
   - MongoDB-backed guest sample list and detail queries using normalized Play Paths, missions, ordering links, and Mission Wall scenes.
-  - Schema-validated, repeatable seed content for the two reviewed guest samples.
+  - Schema-validated, repeatable seed content for six reviewed guest samples.
   - Essential MongoDB collection validators and catalogue indexes.
   - Database-owned Mission Wall labels and reveal messages while completion progress remains browser-only.
   - One-time migration of browser progress from the former readable sample and mission identifiers to catalogue ObjectIds.
   - Conflict-free reseeding when existing guest samples exchange display positions.
   - Safe not-found and catalogue-unavailable API responses.
 - **Key files or routes:** `content/guest-samples.json`, `server/seedCatalog.ts`, `server/catalog.ts`, `GET /api/v1/guest/samples`, `GET /api/v1/guest/samples/:sampleId`
-- **Validation:** `npm run verify` passes catalogue validation, TypeScript checks, 14 automated tests, the production build, and the progress guard. The seed completed repeatedly against `play_spark_dev`; the live API returned two samples and three ordered missions for the first sample.
+- **Validation:** `npm run verify` passed for the original catalogue delivery. The seed completed repeatedly against `play_spark_dev`; each sample returns three ordered missions.
+- **Feature-log note:** Phase 3.1 expands the reviewed sample catalogue from two to six Play Paths with repository-owned artwork, distinct Mission Wall scenes for the four additions, and clear parent-facing goals and supported skills for every path.
 - **Follow-up:** Replace the remote prototype activity images with owned production assets before public release.
 
 ### Application and server foundation

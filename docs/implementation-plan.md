@@ -16,7 +16,7 @@ This document describes delivery order and acceptance criteria. Approved archite
 | Phase | Outcome | Depends on |
 |---|---|---|
 | 0 — Foundation | React/Express application, safe configuration, MongoDB connectivity, tests, and production build | None |
-| 1 — Guest experience | Landing page and two complete browser-only sample Play Paths | Phase 0 |
+| 1 — Guest experience | Landing page and complete browser-only sample Play Paths | Phase 0 |
 | 1.1 — Activity catalogue persistence | MongoDB-backed guest Play Paths, missions, Mission Wall scenes, and repeatable content seeding | Phase 1 |
 | 2 — Parent accounts | Sign-up, sign-in, sign-out, password management, and secure server-side sessions | Phase 0 |
 | 3 — Child onboarding | One active beta child profile with curated interests and play styles | Phase 2 |
@@ -24,6 +24,41 @@ This document describes delivery order and acceptance criteria. Approved archite
 | 5 — Active play | Session start/resume, mission completion, skip, replacement, and completion | Phase 4 |
 | 6 — Progress and retention | Mission Wall, favourites, history, and fixed-choice feedback | Phase 5 |
 | 7 — Private-beta readiness | Account deletion, analytics, accessibility review, deployment, backup, and operational checks | Phases 2–6 |
+
+## Phase 3 — Child-profile onboarding and editing
+
+Phase 3 is delivered as two independently reviewable vertical slices.
+
+### Phase 3.1 — Child onboarding
+
+**Branch:** `feature/child-onboarding`
+
+#### Scope
+
+- Let a verified parent create one active beta child profile using an optional nickname, birth month/year, curated interests, and curated play styles.
+- Store profile options in MongoDB and manage them through a repeatable, schema-validated seed file.
+- Implement `GET /api/v1/profile-options`, `POST /api/v1/child-profile`, and `GET /api/v1/child-profile` with session, verification, ownership, and safe-error checks.
+- Calculate and validate the supported 3–5 age range on the server without collecting a full birth date.
+- Replace the onboarding placeholder with a responsive, keyboard-usable guided flow and a completion screen that links back to sample activities.
+
+#### Acceptance criteria
+
+- Only a signed-in, email-verified parent can create or read a child profile.
+- A parent can save one active beta profile with an optional nickname, valid birth month/year, at least one supported interest, and at least one supported play style.
+- Unsupported option keys, duplicate keys, future dates, and ages outside 3–5 receive safe field errors.
+- A second or concurrent creation attempt returns `CONFLICT` without creating a duplicate profile.
+- Parent ownership is derived from the secure session; profile ownership fields are never accepted from the browser.
+- Curated options are returned from MongoDB in reviewed order and can be reseeded without duplicates.
+- Saving onboarding updates restored session state so `hasChildProfile` is true.
+- Database failures return safe errors, existing guest/authentication journeys continue to work, and the applicable Definition of Done is met.
+
+### Phase 3.2 — Child-profile editing
+
+**Proposed branch:** `feature/child-profile-editing`
+
+- Implement `PATCH /api/v1/child-profile` for parent-owned editable fields.
+- Add an authenticated profile screen for reviewing and updating the active profile.
+- Apply changes to future recommendations without rewriting historical activity sessions.
 
 ## Phase 2 — Parent accounts and secure authentication
 
@@ -76,7 +111,7 @@ Phase 2 is delivered as two independently reviewable vertical slices.
 
 - Establish shared design tokens and foundational UI components from the approved Stitch design system.
 - Build the responsive landing and exploration experience.
-- Provide two curated sample Play Paths with ordered missions.
+- Provide a curated set of sample Play Paths with ordered missions.
 - Give each sample a detail overview and a browser-only active session that presents one mission at a time.
 - Implement `GET /api/v1/guest/samples` and `GET /api/v1/guest/samples/:sampleId`.
 - Keep guest progress and sample-completion count in browser storage.
@@ -88,7 +123,7 @@ Phase 2 is delivered as two independently reviewable vertical slices.
 - A visitor can read and complete every mission in a sample Play Path.
 - Starting a sample moves from its detail overview into a focused active session and advances one mission at a time.
 - Guest progress is never written to MongoDB.
-- Refreshing the browser preserves the local two-sample count.
+- Refreshing the browser preserves local sample completion progress.
 - Completing the second sample shows the account invitation.
 - Invalid or unavailable sample identifiers return the documented safe API error.
 - The experience works at relevant mobile and desktop sizes and meets the applicable Definition of Done.
@@ -102,7 +137,7 @@ Phase 2 is delivered as two independently reviewable vertical slices.
 ### Scope
 
 - Store published guest Play Paths, missions, their ordering, and Mission Wall scenes in the approved MongoDB collections.
-- Seed the two reviewed guest samples through a repeatable, schema-validated command.
+- Seed the reviewed guest samples through a repeatable, schema-validated command.
 - Read both guest sample endpoints from MongoDB without a runtime hardcoded-content fallback.
 - Keep guest completion progress in browser storage; this phase persists developer-managed content only.
 - Return safe API errors when the catalogue database is unavailable or a sample is not published.

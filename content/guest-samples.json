@@ -2,8 +2,10 @@
   "samples": [
     {
       "id": "64b100000000000000000001",
-      "title": "Build & Deliver",
-      "description": "Turn cushions, blocks, and a spoon into a tiny delivery route.",
+      "title": "Build & Deliver: Plan a Toy Route",
+      "description": "Build, test, and improve a route before making one final pretend delivery.",
+      "goal": "Plan and improve a route while solving simple problems about space and movement.",
+      "supports": ["Planning and problem-solving", "Spatial language", "Pretend storytelling"],
       "durationMinutes": 20,
       "themeKey": "vehicles",
       "eligibility": {
@@ -77,8 +79,10 @@
     },
     {
       "id": "64b100000000000000000002",
-      "title": "Kitchen Shadow Safari",
-      "description": "Make gentle animal shadows with a torch and everyday kitchen tools.",
+      "title": "Kitchen Shadow Safari: Explore Light & Stories",
+      "description": "Change the size and shape of shadows, discover creatures, and tell their story.",
+      "goal": "Explore how light and distance change shadows, then turn those observations into a story.",
+      "supports": ["Cause and effect", "Observation and vocabulary", "Story sequencing"],
       "durationMinutes": 15,
       "themeKey": "animals",
       "eligibility": {
@@ -147,6 +151,314 @@
           "sayThis": "Where is our creature going before bedtime?",
           "childChallenge": "Tell a beginning, middle, and ending for the creature's adventure.",
           "tidyUp": "Turn on the room light before returning the torch and tools."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000003",
+      "title": "Rainbow Route Challenge: Listen, Remember & Move",
+      "description": "Follow short colour directions, remember the route, and become the leader who guides a grown-up.",
+      "goal": "Help your child follow two- and three-step directions, remember a sequence, and plan one for you.",
+      "supports": ["Listening and working memory", "Balance and motor planning", "Giving clear directions"],
+      "durationMinutes": 15,
+      "themeKey": "art",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["art", "nature"],
+        "playStyleKeys": ["move", "create"],
+        "energyLevels": ["ready_to_play", "full_energy"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "position": 3,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Movement",
+        "secondaryCategory": "Memory Game",
+        "imageUrl": "/activities/rainbow-floor-trail.svg",
+        "imageAlt": "Colourful paper stepping stones arranged as an indoor movement trail.",
+        "materials": ["6 sheets of coloured paper", "painter's tape"],
+        "safetyNote": "Tape paper flat on a dry floor and keep the trail away from stairs and sharp furniture."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000003",
+        "key": "rainbow-trail",
+        "title": "Rainbow Trail",
+        "background": { "assetRef": "inline-svg:rainbow-trail", "alt": "A colourful Rainbow Trail Mission Wall" },
+        "elements": [
+          { "key": "stepping-stones", "label": "Colour sequence", "revealMessage": "Colour route revealed!", "assetRef": "inline-svg:stepping-stones", "layer": 1 },
+          { "key": "rainbow", "label": "Memory rainbow", "revealMessage": "Memory rainbow revealed!", "assetRef": "inline-svg:rainbow", "layer": 2 },
+          { "key": "finish-flag", "label": "Route leader flag", "revealMessage": "Route leader flag revealed!", "assetRef": "inline-svg:finish-flag", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000007",
+          "position": 1,
+          "wallElementKey": "stepping-stones",
+          "title": "Learn the colour route",
+          "durationMinutes": 4,
+          "setupSteps": ["Lay the coloured sheets in a gentle curve.", "Tape each corner flat."],
+          "sayThis": "Let's name the colours in order as we walk the route together.",
+          "childChallenge": "Choose the colour order, walk it once, and say each colour aloud.",
+          "tidyUp": "Press down any paper edge that starts to lift."
+        },
+        {
+          "id": "64b300000000000000000008",
+          "position": 2,
+          "wallElementKey": "rainbow",
+          "title": "Listen and remember",
+          "durationMinutes": 6,
+          "setupSteps": ["Stand beside the route where every colour is easy to see."],
+          "sayThis": "Listen first: blue, yellow. Can you visit those colours in that order?",
+          "childChallenge": "Follow two two-colour directions, then try one three-colour direction without a reminder.",
+          "tidyUp": "Pause and retape any sheet that starts to move."
+        },
+        {
+          "id": "64b300000000000000000009",
+          "position": 3,
+          "wallElementKey": "finish-flag",
+          "title": "Become the route leader",
+          "durationMinutes": 5,
+          "setupSteps": ["Let the child stand where they can see the whole route."],
+          "sayThis": "Now you are the leader. Which three colours should I visit, and in what order?",
+          "childChallenge": "Create a three-step colour direction, say it clearly, and check whether the grown-up follows it.",
+          "tidyUp": "Peel up the tape slowly and stack the paper for another day."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000004",
+      "title": "Pillow Animal Rescue: Move, Care & Pretend",
+      "description": "Build a safe route, rescue toy animals with care, and prepare their cosy home.",
+      "goal": "Move carefully through a simple route while creating a caring rescue story.",
+      "supports": ["Gross-motor control", "Empathy and caring play", "Story sequencing"],
+      "durationMinutes": 20,
+      "themeKey": "animals",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["animals", "stories"],
+        "playStyleKeys": ["move", "pretend"],
+        "energyLevels": ["calm", "ready_to_play"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "position": 4,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Pretend Play",
+        "secondaryCategory": "Animals",
+        "imageUrl": "/activities/pillow-animal-rescue.svg",
+        "imageAlt": "Soft cushions making a rescue route for small toy animals.",
+        "materials": ["3 cushions", "2 toy animals", "small basket"],
+        "safetyNote": "Keep cushions flat on the floor and use only soft, lightweight toys."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000004",
+        "key": "animal-rescue",
+        "title": "Animal Rescue Meadow",
+        "background": { "assetRef": "inline-svg:animal-rescue", "alt": "A cosy animal rescue Mission Wall" },
+        "elements": [
+          { "key": "rescue-path", "label": "Soft rescue path", "revealMessage": "Rescue path revealed!", "assetRef": "inline-svg:rescue-path", "layer": 1 },
+          { "key": "animal-friend", "label": "Animal friend", "revealMessage": "Animal friend revealed!", "assetRef": "inline-svg:animal-friend", "layer": 2 },
+          { "key": "cosy-home", "label": "Cosy animal home", "revealMessage": "Cosy home revealed!", "assetRef": "inline-svg:cosy-home", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000010",
+          "position": 1,
+          "wallElementKey": "rescue-path",
+          "title": "Make a safe rescue path",
+          "durationMinutes": 5,
+          "setupSteps": ["Place three cushions in a short line.", "Put the basket at the far end."],
+          "sayThis": "Our animals need a safe path home. Where should it go?",
+          "childChallenge": "Arrange the cushions and test the path with one careful walk.",
+          "tidyUp": "Move any hard toys away from the path."
+        },
+        {
+          "id": "64b300000000000000000011",
+          "position": 2,
+          "wallElementKey": "animal-friend",
+          "title": "Rescue each animal",
+          "durationMinutes": 9,
+          "setupSteps": ["Place one toy animal beside the first cushion and one beside the last."],
+          "sayThis": "What does each animal need on the journey?",
+          "childChallenge": "Carry each animal across while copying the way it moves.",
+          "tidyUp": "Return each rescued animal to the basket."
+        },
+        {
+          "id": "64b300000000000000000012",
+          "position": 3,
+          "wallElementKey": "cosy-home",
+          "title": "Prepare the cosy home",
+          "durationMinutes": 6,
+          "setupSteps": ["Use one cushion beside the basket as a soft roof."],
+          "sayThis": "How will the animals know they are safely home?",
+          "childChallenge": "Make a welcome sound and tell a short ending to the rescue story.",
+          "tidyUp": "Put the animals away and return the cushions together."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000005",
+      "title": "Kitchen Rhythm Parade: Copy & Create Beats",
+      "description": "Listen to a simple beat, copy its pattern, and create one for a home parade.",
+      "goal": "Listen, remember, and create simple rhythm patterns while moving together.",
+      "supports": ["Listening and memory", "Pattern recognition", "Rhythm and self-regulation"],
+      "durationMinutes": 10,
+      "themeKey": "music",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["music", "stories"],
+        "playStyleKeys": ["move", "create"],
+        "energyLevels": ["calm", "ready_to_play", "full_energy"],
+        "noiseLevel": "moderate",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "parent_guided"
+      },
+      "guestPreview": {
+        "position": 5,
+        "setupMinutes": 1,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Music",
+        "secondaryCategory": "Movement",
+        "imageUrl": "/activities/kitchen-rhythm-parade.svg",
+        "imageAlt": "A wooden spoon, bowl, and scarf ready for a gentle kitchen rhythm parade.",
+        "materials": ["wooden spoon", "plastic bowl", "small scarf"],
+        "safetyNote": "Use a plastic bowl, tap gently, and keep the parade route clear."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000005",
+        "key": "rhythm-parade",
+        "title": "Rhythm Parade",
+        "background": { "assetRef": "inline-svg:rhythm-parade", "alt": "A musical parade Mission Wall" },
+        "elements": [
+          { "key": "drum", "label": "Parade drum", "revealMessage": "Parade drum revealed!", "assetRef": "inline-svg:drum", "layer": 1 },
+          { "key": "music-notes", "label": "Dancing music notes", "revealMessage": "Music notes revealed!", "assetRef": "inline-svg:music-notes", "layer": 2 },
+          { "key": "parade-flag", "label": "Parade flag", "revealMessage": "Parade flag revealed!", "assetRef": "inline-svg:parade-flag", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000013",
+          "position": 1,
+          "wallElementKey": "drum",
+          "title": "Find a gentle beat",
+          "durationMinutes": 3,
+          "setupSteps": ["Turn the plastic bowl upside down.", "Hold the wooden spoon loosely."],
+          "sayThis": "Can we make a quiet beat that sounds like walking feet?",
+          "childChallenge": "Tap four slow beats, pause, then repeat them.",
+          "tidyUp": "Keep the spoon resting beside the bowl between turns."
+        },
+        {
+          "id": "64b300000000000000000014",
+          "position": 2,
+          "wallElementKey": "music-notes",
+          "title": "Copy the rhythm",
+          "durationMinutes": 3,
+          "setupSteps": ["Choose a two-beat pattern together."],
+          "sayThis": "I will tap a pattern. Can you echo it back?",
+          "childChallenge": "Copy two patterns, then invent one for the grown-up to copy.",
+          "tidyUp": "Use soft taps so the bowl stays in place."
+        },
+        {
+          "id": "64b300000000000000000015",
+          "position": 3,
+          "wallElementKey": "parade-flag",
+          "title": "Lead the tiny parade",
+          "durationMinutes": 4,
+          "setupSteps": ["Hold the scarf as a parade flag.", "Choose a short clear route."],
+          "sayThis": "Where should our music parade travel?",
+          "childChallenge": "March the route while humming the beat, then finish with a quiet bow.",
+          "tidyUp": "Return the bowl and spoon, then fold the scarf."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000006",
+      "title": "Nature Detective Lab: Find Patterns & Explain Why",
+      "description": "Look for evidence, test two ways of grouping the same objects, and challenge a grown-up with a secret rule.",
+      "goal": "Practise early science and maths by comparing objects in different ways and explaining the rule used.",
+      "supports": ["Observation and comparison", "Flexible thinking", "Reasoning and descriptive language"],
+      "durationMinutes": 15,
+      "themeKey": "nature",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["nature", "building"],
+        "playStyleKeys": ["discover", "sensory"],
+        "energyLevels": ["calm", "ready_to_play"],
+        "noiseLevel": "quiet",
+        "messLevel": "low",
+        "spaceLevel": "small",
+        "independenceLevel": "parent_guided"
+      },
+      "guestPreview": {
+        "position": 6,
+        "setupMinutes": 3,
+        "parentEffort": "Low",
+        "messLevel": "Low",
+        "category": "Nature",
+        "secondaryCategory": "Early Science",
+        "imageUrl": "/activities/nature-sorting-lab.svg",
+        "imageAlt": "Leaves, smooth stones, and seed pods arranged in a simple sorting tray.",
+        "materials": ["4–6 safe nature finds", "muffin tray or 3 bowls", "small cloth"],
+        "safetyNote": "A grown-up chooses clean, non-toxic items that are too large to swallow; wash hands afterward."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000006",
+        "key": "nature-lab",
+        "title": "Nature Detective Lab",
+        "background": { "assetRef": "inline-svg:nature-lab", "alt": "A calm nature detective Mission Wall" },
+        "elements": [
+          { "key": "sorting-tray", "label": "Evidence table", "revealMessage": "Evidence table revealed!", "assetRef": "inline-svg:sorting-tray", "layer": 1 },
+          { "key": "leaf-collection", "label": "Pattern groups", "revealMessage": "Pattern groups revealed!", "assetRef": "inline-svg:leaf-collection", "layer": 2 },
+          { "key": "magnifier", "label": "Nature detective badge", "revealMessage": "Detective badge revealed!", "assetRef": "inline-svg:magnifier", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000016",
+          "position": 1,
+          "wallElementKey": "sorting-tray",
+          "title": "Collect the evidence",
+          "durationMinutes": 4,
+          "setupSteps": ["Spread the cloth on a table or floor.", "Place the tray and nature finds on top."],
+          "sayThis": "Detectives look closely. What is one detail you can see or feel on each object?",
+          "childChallenge": "Inspect every object and describe at least one clue about its colour, shape, size, or texture.",
+          "tidyUp": "Keep every nature find on the cloth."
+        },
+        {
+          "id": "64b300000000000000000017",
+          "position": 2,
+          "wallElementKey": "leaf-collection",
+          "title": "Test two pattern rules",
+          "durationMinutes": 7,
+          "setupSteps": ["Put the bowls or tray sections within easy reach."],
+          "sayThis": "Can the same objects belong to different groups when we change the rule?",
+          "childChallenge": "Group the objects by one rule, explain it, then mix them up and choose a completely different rule.",
+          "tidyUp": "Return mixed items to the middle before starting the next sort."
+        },
+        {
+          "id": "64b300000000000000000018",
+          "position": 3,
+          "wallElementKey": "magnifier",
+          "title": "Create a secret rule",
+          "durationMinutes": 4,
+          "setupSteps": ["Ask the grown-up to look away while the child makes two groups."],
+          "sayThis": "Make a secret sorting rule. I will study your evidence and try to guess it.",
+          "childChallenge": "Sort the objects using a secret rule, listen to the grown-up's guess, then explain the evidence that proves the answer.",
+          "tidyUp": "Return outdoor items responsibly and wash hands together."
         }
       ]
     }

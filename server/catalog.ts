@@ -5,6 +5,8 @@ export interface GuestSampleSummary {
   id: string;
   title: string;
   summary: string;
+  goal: string;
+  supports: string[];
   durationMinutes: number;
   setupMinutes: number;
   parentEffort: "Low";
@@ -61,6 +63,8 @@ interface PlayPathDocument {
   _id: ObjectId;
   title: string;
   description: string;
+  goal: string;
+  supports: string[];
   durationMinutes: number;
   wallSceneId: ObjectId;
   status: "draft" | "published" | "retired";
@@ -108,6 +112,8 @@ function toSummary(playPath: PlayPathDocument, missionCount: number): GuestSampl
     id: playPath._id.toHexString(),
     title: playPath.title,
     summary: playPath.description,
+    goal: playPath.goal,
+    supports: playPath.supports,
     durationMinutes: playPath.durationMinutes,
     setupMinutes: preview.setupMinutes,
     parentEffort: preview.parentEffort,

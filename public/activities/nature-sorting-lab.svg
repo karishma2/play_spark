@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="title desc">
+  <title id="title">Nature sorting lab</title><desc id="desc">Leaves, smooth stones, and seed pods are arranged in a simple wooden sorting tray.</desc>
+  <rect width="720" height="480" fill="#edf3e9"/><circle cx="104" cy="88" r="74" fill="#f5ddb0"/><path d="M0 350h720v130H0z" fill="#cbb79d"/>
+  <rect x="115" y="125" width="490" height="260" rx="28" fill="#c9935f"/><rect x="137" y="147" width="446" height="216" rx="18" fill="#ecd8b9"/>
+  <path d="M286 147v216M434 147v216M137 255h446" stroke="#c9935f" stroke-width="12"/>
+  <g fill="#6d9b6d"><path d="M187 201q42-75 80 0-34 45-80 0z"/><path d="M463 307q40-70 76 0-32 42-76 0z"/></g>
+  <path d="M224 177v51M501 285v47" stroke="#365f41" stroke-width="5"/>
+  <g fill="#8b8174"><ellipse cx="360" cy="204" rx="38" ry="25"/><ellipse cx="523" cy="202" rx="30" ry="23"/><ellipse cx="206" cy="310" rx="34" ry="22"/></g>
+  <g fill="#dda74a"><ellipse cx="342" cy="307" rx="14" ry="34"/><ellipse cx="378" cy="310" rx="15" ry="31"/><path d="M342 274l-7-23M378 279l10-24" stroke="#8b6832" stroke-width="5"/></g>
+  <g transform="translate(545 65)"><circle cx="0" cy="0" r="54" fill="none" stroke="#214e34" stroke-width="14"/><path d="M38 38l72 72" stroke="#214e34" stroke-width="18" stroke-linecap="round"/><circle cx="-12" cy="-10" r="8" fill="#fff" opacity=".7"/></g>
+</svg>

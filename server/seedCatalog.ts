@@ -30,6 +30,8 @@ const sample = z.object({
   id: objectId,
   title: z.string().min(1),
   description: z.string().min(1),
+  goal: z.string().min(1),
+  supports: z.array(z.string().min(1)).min(2).max(3),
   durationMinutes: z.number().int().positive(),
   themeKey: z.string().min(1),
   eligibility,
@@ -40,7 +42,10 @@ const sample = z.object({
     messLevel: z.enum(["None", "Low"]),
     category: z.string().min(1),
     secondaryCategory: z.string().min(1),
-    imageUrl: z.string().url(),
+    imageUrl: z.string().refine(
+      (value) => value.startsWith("/") || URL.canParse(value),
+      "Image URL must be absolute or a rooted application path",
+    ),
     imageAlt: z.string().min(1),
     materials: z.array(z.string().min(1)).min(1),
     safetyNote: z.string().min(1),
@@ -71,10 +76,10 @@ const sample = z.object({
     }
   }
 });
-const seedSchema = z.object({ samples: z.array(sample).length(2) });
+const seedSchema = z.object({ samples: z.array(sample).min(2) });
 
 const validators: Record<string, Document> = {
-  playPaths: { $jsonSchema: { bsonType: "object", required: ["title", "description", "durationMinutes", "themeKey", "wallSceneId", "eligibility", "status", "contentVersion", "createdAt", "updatedAt"], properties: { status: { enum: ["draft", "published", "retired"] } } } },
+  playPaths: { $jsonSchema: { bsonType: "object", required: ["title", "description", "goal", "supports", "durationMinutes", "themeKey", "wallSceneId", "eligibility", "status", "contentVersion", "createdAt", "updatedAt"], properties: { goal: { bsonType: "string" }, supports: { bsonType: "array", minItems: 2, items: { bsonType: "string" } }, status: { enum: ["draft", "published", "retired"] } } } },
   missions: { $jsonSchema: { bsonType: "object", required: ["title", "durationMinutes", "parentEffort", "materials", "setupSteps", "childChallenge", "eligibility", "tagKeys", "status", "contentVersion", "createdAt", "updatedAt"], properties: { status: { enum: ["draft", "published", "retired"] } } } },
   playPathMissions: { $jsonSchema: { bsonType: "object", required: ["playPathId", "missionId", "position", "wallElementKey"] } },
   missionWallScenes: { $jsonSchema: { bsonType: "object", required: ["key", "title", "background", "elements", "status", "createdAt", "updatedAt"], properties: { status: { enum: ["draft", "published", "retired"] } } } },
@@ -116,16 +121,21 @@ async function seed() {
     const db = client.db(databaseName);
     await ensureCollections(db);
     const now = new Date();
-    const seededPathIds = content.samples.map((entry) => new ObjectId(entry.id));
-
-    // Remove seeded paths from the unique guest-order index before assigning the
-    // reviewed positions. This lets two existing samples safely exchange places.
+    // Treat the reviewed seed as the source of truth for guest availability.
+    // Backfill newly required meaning fields while disabling current previews;
+    // this keeps existing records valid during repeatable schema migrations.
     await db.collection("playPaths").updateMany(
-      { _id: { $in: seededPathIds } },
-      {
-        $set: { "guestPreview.enabled": false },
-        $unset: { "guestPreview.position": "" },
-      },
+      { "guestPreview.enabled": true },
+      [
+        {
+          $set: {
+            "guestPreview.enabled": false,
+            goal: { $ifNull: ["$goal", "$description"] },
+            supports: { $ifNull: ["$supports", ["Guided play", "Parent-child connection"]] },
+          },
+        },
+        { $unset: "guestPreview.position" },
+      ],
     );
 
     for (const entry of content.samples) {
@@ -138,7 +148,7 @@ async function seed() {
       );
       await db.collection("playPaths").updateOne(
         { _id: pathId },
-        { $set: { title: entry.title, description: entry.description, durationMinutes: entry.durationMinutes, themeKey: entry.themeKey, wallSceneId: sceneId, eligibility: entry.eligibility, status: "published", contentVersion: 1, guestPreview: { enabled: true, ...entry.guestPreview }, updatedAt: now }, $setOnInsert: { createdAt: now } },
+        { $set: { title: entry.title, description: entry.description, goal: entry.goal, supports: entry.supports, durationMinutes: entry.durationMinutes, themeKey: entry.themeKey, wallSceneId: sceneId, eligibility: entry.eligibility, status: "published", contentVersion: 1, guestPreview: { enabled: true, ...entry.guestPreview }, updatedAt: now }, $setOnInsert: { createdAt: now } },
         { upsert: true },
       );
 

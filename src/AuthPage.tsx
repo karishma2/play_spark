@@ -110,31 +110,3 @@ export function AuthPage({
     </main>
   );
 }
-
-export function OnboardingBoundary({
-  session,
-  onSignOut,
-  signOutError,
-}: {
-  session: AuthSession;
-  onSignOut: () => void;
-  signOutError?: string;
-}) {
-  return (
-    <main className="auth-page onboarding-boundary">
-      <section className="auth-panel">
-        <span className="invite-spark" aria-hidden="true">✓</span>
-        <p className="eyebrow">Account ready</p>
-        <h1>Welcome to Play Spark</h1>
-        <p>Your secure parent account is active as <strong>{session.user.email}</strong>.</p>
-        <div className="boundary-note">
-          <strong>Next: tell us a little about your child</strong>
-          <p>Child profile setup is the next development phase. You can browse the sample activities now and your parent account will remain signed in.</p>
-        </div>
-        <Link className="button button-primary" to="/guest-preview">Browse sample activities</Link>
-        {signOutError && <div className="auth-error" role="alert">{signOutError}</div>}
-        <button className="text-button" onClick={onSignOut}>Sign out</button>
-      </section>
-    </main>
-  );
-}

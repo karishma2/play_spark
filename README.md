@@ -25,7 +25,13 @@ Prepare the parent-account collections and indexes before testing sign-up:
 npm run setup:auth
 ```
 
-The command validates `content/guest-samples.json`, creates or updates the approved catalogue collections and indexes, and upserts stable records. It is safe to run again after reviewed content changes.
+Prepare the child-profile collections and seed the reviewed onboarding choices:
+
+```bash
+npm run seed:profiles
+```
+
+The catalogue command validates `content/guest-samples.json`, creates or updates the approved catalogue collections and indexes, and upserts stable records. The profile command does the same for the curated interests and play styles in `content/profile-options.json`. Both seed commands are safe to run again after reviewed content changes.
 
 ## Password reset email
 
@@ -41,7 +47,19 @@ npm run build
 npm run start
 ```
 
-For Render, use `npm run build` as the build command and `npm run start` as the start command. Add `MONGODB_URI` and `MONGODB_DB_NAME` as Render environment variables; neither is stored in this repository.
+## Vercel deployment
+
+The repository includes a Vercel function adapter and same-origin routing. Vercel builds the Vite frontend into `dist` and sends `/api/v1/*` to the existing Express application.
+
+Configure these Vercel environment variables for Production and Preview as appropriate:
+
+- `MONGODB_URI`
+- `MONGODB_DB_NAME` (`play_spark_beta` for the private beta)
+- `SESSION_SECRET` (at least 32 characters and different from development)
+- `APP_BASE_URL` (the stable HTTPS Vercel production URL)
+- `RESEND_API_KEY` and `RESEND_FROM_EMAIL` together when account email is enabled
+
+Do not seed during the Vercel build. Before beta use, run `npm run setup:auth`, `npm run seed:catalog`, and `npm run seed:profiles` once from an authorized environment configured for the beta database. All commands are repeatable.
 
 Generate a local session secret without sharing it:
 
@@ -49,4 +67,4 @@ Generate a local session secret without sharing it:
 node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
 ```
 
-Render also requires `SESSION_SECRET`; it must be a different value from the development secret.
+Vercel automatically deploys previews from feature branches and production from the configured production branch.

@@ -9,6 +9,8 @@ const guestSample: GuestSample = {
   id: sampleId,
   title: "Build & Deliver",
   summary: "Build a delivery route.",
+  goal: "Plan and improve a route.",
+  supports: ["Planning", "Spatial language"],
   durationMinutes: 20,
   setupMinutes: 2,
   parentEffort: "Low",

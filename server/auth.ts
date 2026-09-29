@@ -386,6 +386,12 @@ function readCookie(request: Request) {
   return undefined;
 }
 
+export async function findAuthenticatedUser(request: Request, repository: AuthRepository) {
+  const token = readCookie(request);
+  if (!token) return null;
+  return repository.findUserBySession(hashSessionToken(token), new Date());
+}
+
 function validationError(response: Response, result: z.ZodSafeParseError<unknown>) {
   const fieldErrors: Record<string, string> = {};
   for (const issue of result.error.issues) {

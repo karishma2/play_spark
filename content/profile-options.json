@@ -1,0 +1,19 @@
+{
+  "interests": [
+    { "key": "vehicles", "label": "Vehicles" },
+    { "key": "animals", "label": "Animals" },
+    { "key": "building", "label": "Building" },
+    { "key": "music", "label": "Music & Rhythm" },
+    { "key": "stories", "label": "Stories" },
+    { "key": "nature", "label": "Nature" },
+    { "key": "art", "label": "Art & Making" }
+  ],
+  "playStyles": [
+    { "key": "move", "label": "Moving" },
+    { "key": "build", "label": "Building" },
+    { "key": "create", "label": "Creating" },
+    { "key": "pretend", "label": "Pretend Play" },
+    { "key": "discover", "label": "Exploring" },
+    { "key": "sensory", "label": "Sensory Play" }
+  ]
+}
