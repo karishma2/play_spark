@@ -5,6 +5,11 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { createAuthRouter, createMongoAuthRepository, type AuthRepository, type PasswordHasher } from "./auth.js";
 import { createMongoCatalogRepository, type CatalogRepository } from "./catalog.js";
+import {
+  createChildProfileRouter,
+  createMongoChildProfileRepository,
+  type ChildProfileRepository,
+} from "./childProfile.js";
 import { createMongoClientProvider } from "./db.js";
 import {
   createResendAuthEmailSender,
@@ -18,6 +23,7 @@ export interface CreateAppOptions {
   mongoUri?: string;
   catalog?: CatalogRepository;
   auth?: AuthRepository;
+  childProfiles?: ChildProfileRepository;
   passwordHasher?: PasswordHasher;
   passwordResetBaseUrl?: string;
   authEmailSender?: AuthEmailSender;
@@ -35,6 +41,7 @@ export function createApp(options: CreateAppOptions) {
   const mongo = createMongoClientProvider(options.mongoUri);
   const catalog = options.catalog ?? createMongoCatalogRepository(mongo, options.databaseName);
   const auth = options.auth ?? createMongoAuthRepository(mongo, options.databaseName);
+  const childProfiles = options.childProfiles ?? createMongoChildProfileRepository(mongo, options.databaseName);
   const authEmailSender = options.authEmailSender
     ?? (options.resendApiKey && options.resendFromEmail
       ? createResendAuthEmailSender(options.resendApiKey, options.resendFromEmail)
@@ -62,6 +69,7 @@ export function createApp(options: CreateAppOptions) {
     authEmailSender,
     cookieSecure: options.authCookieSecure ?? process.env.NODE_ENV === "production",
   }));
+  app.use("/api/v1", createChildProfileRouter({ repository: childProfiles, authRepository: auth }));
 
   app.get("/api/v1/health", (_request, response) => {
     response.json(json({ service: "play-spark-api", status: "ok" }));

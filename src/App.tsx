@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAuthSession, getGuestSample, getGuestSamples, signOut, type AuthSession } from "./api";
-import { AuthPage, OnboardingBoundary } from "./AuthPage";
+import { AuthPage } from "./AuthPage";
 import { ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage } from "./PasswordPage";
 import { EmailVerificationPendingPage, VerifyEmailPage } from "./EmailVerificationPage";
+import { OnboardingPage } from "./OnboardingPage";
 import {
   completeSample,
   readGuestProgress,
@@ -17,7 +18,7 @@ import type { GuestSample, GuestSampleSummary } from "./guestTypes";
 const heroImage =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAtjRgej7iCWGfqmoHsWwfo6nRSZeuWby6e4xgpEDnJTsXCEM9EgL3l6yqyB6P-aHu6mJpHbAZlQEsBAjZypunyB7Lx6tKyrXQKhth60JnVP4S5YZJ8aiNIpfpMR3pXRPxRJkoIQXIGQP-Zn2rEL-x0o4c9hfFLe27khlofMSwcI9RyYDgo18BAGdYY9kvsy4UtgwcoSe8zzJtXmW-MytqejDRyPG3Q5AH8g8Vo5Pxl6lDDnt1qcHKJqQ";
 
-type DurationFilter = "all" | 15 | 20;
+type DurationFilter = "all" | 10 | 15 | 20;
 type ExploreScreen = "landing" | "guest";
 type DetailOrigin = ExploreScreen;
 
@@ -146,6 +147,7 @@ function SampleCard({
             {completed && <span className="completed-badge">Completed</span>}
           </div>
           <p>{sample.summary}</p>
+          <p className="sample-purpose"><strong>Purpose:</strong> {sample.goal}</p>
         </div>
         <div className="materials-line">
           <span aria-hidden="true">⌂</span>
@@ -234,10 +236,10 @@ function Landing({
         <div className="section-heading-row">
           <div>
             <p className="eyebrow">Screen-free micro-rituals</p>
-            <h2>Tonight's quick sparks — under 20 minutes</h2>
+            <h2>Tonight's quick sparks — 20 minutes or less</h2>
           </div>
           <div className="filters" aria-label="Filter by duration">
-            {(["all", 15, 20] as DurationFilter[]).map((value) => (
+            {(["all", 10, 15, 20] as DurationFilter[]).map((value) => (
               <button
                 className={filter === value ? "active" : ""}
                 key={value}
@@ -316,21 +318,21 @@ function GuestPreview({
       <header className="guest-preview-hero">
         <p className="eyebrow">Screen-free play, made simple</p>
         <h1>A small spark for their<br />next free moment.</h1>
-        <p>Try two ready-made activity plans. Each one helps your child play independently while you stay close by.</p>
+        <p>Try ready-made activity plans that help your child play independently while you stay close by.</p>
         <span className="guest-preview-badge"><span aria-hidden="true">✦</span> {!sessionReady
           ? "Checking your account…"
           : session
           ? `Signed in as ${session.user.email}`
-          : "Try both sample paths — no account needed."}</span>
+          : "Explore sample paths — no account needed."}</span>
       </header>
 
       <div className="guest-preview-heading">
         <div>
           <span className="guest-preview-label"><span aria-hidden="true" /> {!sessionReady
-            ? "Sample activities · Two ready-to-play paths"
+            ? "Sample activities · Ready-to-play paths"
             : session
-            ? "Sample activities · Two ready-to-play paths"
-            : "Guest preview · Two free samples"}</span>
+            ? "Sample activities · Ready-to-play paths"
+            : "Guest preview · Free sample activities"}</span>
           <h2>Choose a play path</h2>
         </div>
         <p>Everything you need is on one calm, parent-friendly plan.</p>
@@ -351,6 +353,11 @@ function GuestPreview({
                   {completed && <span className="completed-badge">Completed</span>}
                 </div>
                 <p className="guest-path-summary">{sample.summary}</p>
+                <div className="guest-path-purpose">
+                  <strong>What your child practises</strong>
+                  <p>{sample.goal}</p>
+                  <ul>{sample.supports.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+                </div>
                 <div className="guest-path-metadata" aria-label={`${sample.title} details`}>
                   <span>◷ {sample.durationMinutes} min</span>
                   <span>☷ {sample.missionCount} missions</span>
@@ -377,7 +384,7 @@ function GuestPreview({
             ? "Your sample activities are ready while we check your account."
             : session
             ? "Your parent account stays signed in while you explore and play these samples."
-            : "No account or credit card needed to try these two sample paths right now."}</p>
+            : "No account or credit card needed to try these sample paths right now."}</p>
         </div>
       </aside>
 
@@ -436,7 +443,7 @@ function MissionWallPreview({
               <circle className="mission-wall-wheel" cx="101" cy="114" r="7" />
             </g>
           </>
-        ) : (
+        ) : sample.wallSceneKey === "shadow-safari" ? (
           <>
             <g className={`mission-wall-piece${revealed[0] ? " revealed" : ""}${highlightedMissionIndex === 0 ? " newly-revealed" : ""}`}>
               <circle className="mission-wall-moon" cx="68" cy="48" r="24" />
@@ -452,7 +459,55 @@ function MissionWallPreview({
               <circle className="mission-wall-leaves" cx="288" cy="64" r="21" />
             </g>
           </>
-        )}
+        ) : sample.wallSceneKey === "rainbow-trail" ? (
+          <>
+            <g className={`mission-wall-piece${revealed[0] ? " revealed" : ""}${highlightedMissionIndex === 0 ? " newly-revealed" : ""}`}>
+              <ellipse cx="75" cy="112" rx="34" ry="14" fill="#d96b43" /><ellipse cx="145" cy="92" rx="34" ry="14" fill="#dda74a" /><ellipse cx="218" cy="112" rx="34" ry="14" fill="#79a583" />
+            </g>
+            <g className={`mission-wall-piece${revealed[1] ? " revealed" : ""}${highlightedMissionIndex === 1 ? " newly-revealed" : ""}`}>
+              <path d="M116 78a66 66 0 0 1 132 0" fill="none" stroke="#d96b43" strokeWidth="13" /><path d="M130 78a52 52 0 0 1 104 0" fill="none" stroke="#dda74a" strokeWidth="13" /><path d="M144 78a38 38 0 0 1 76 0" fill="none" stroke="#79a583" strokeWidth="13" />
+            </g>
+            <g className={`mission-wall-piece${revealed[2] ? " revealed" : ""}${highlightedMissionIndex === 2 ? " newly-revealed" : ""}`}>
+              <path d="M292 118V38" stroke="#214e34" strokeWidth="7" strokeLinecap="round" /><path d="M296 42h45l-15 18 15 18h-45z" fill="#d96b43" /><circle cx="292" cy="122" r="10" fill="#214e34" />
+            </g>
+          </>
+        ) : sample.wallSceneKey === "animal-rescue" ? (
+          <>
+            <g className={`mission-wall-piece${revealed[0] ? " revealed" : ""}${highlightedMissionIndex === 0 ? " newly-revealed" : ""}`}>
+              <path d="M26 125C94 74 136 132 202 88" fill="none" stroke="#dda74a" strokeWidth="18" strokeLinecap="round" strokeDasharray="18 12" />
+            </g>
+            <g className={`mission-wall-piece${revealed[1] ? " revealed" : ""}${highlightedMissionIndex === 1 ? " newly-revealed" : ""}`}>
+              <ellipse cx="220" cy="91" rx="42" ry="34" fill="#c58a55" /><path d="M186 66l8-25 19 23M231 62l20-22 6 31" fill="#c58a55" /><circle cx="207" cy="86" r="4" fill="#263b2d" /><circle cx="231" cy="86" r="4" fill="#263b2d" /><path d="M212 101q9 7 18 0" fill="none" stroke="#263b2d" strokeWidth="4" strokeLinecap="round" />
+            </g>
+            <g className={`mission-wall-piece${revealed[2] ? " revealed" : ""}${highlightedMissionIndex === 2 ? " newly-revealed" : ""}`}>
+              <path d="M274 74l39-32 39 32v52h-78z" fill="#7ba5b6" /><path d="M263 78l50-42 50 42" fill="none" stroke="#214e34" strokeWidth="8" strokeLinejoin="round" /><path d="M300 126V92h26v34" fill="#f7f2e9" />
+            </g>
+          </>
+        ) : sample.wallSceneKey === "rhythm-parade" ? (
+          <>
+            <g className={`mission-wall-piece${revealed[0] ? " revealed" : ""}${highlightedMissionIndex === 0 ? " newly-revealed" : ""}`}>
+              <ellipse cx="94" cy="78" rx="48" ry="17" fill="#7ba5b6" /><path d="M46 78l9 51h78l9-51" fill="#93bcc8" /><path d="M60 87l-18-45M126 87l25-42" stroke="#a97144" strokeWidth="7" strokeLinecap="round" />
+            </g>
+            <g className={`mission-wall-piece${revealed[1] ? " revealed" : ""}${highlightedMissionIndex === 1 ? " newly-revealed" : ""}`}>
+              <path d="M186 42v58q-19-7-28 8-8 14 9 20 28 8 32-24V63l40-11v42q-18-8-28 7-9 14 9 21 28 8 33-24V28z" fill="#214e34" />
+            </g>
+            <g className={`mission-wall-piece${revealed[2] ? " revealed" : ""}${highlightedMissionIndex === 2 ? " newly-revealed" : ""}`}>
+              <path d="M292 128V34" stroke="#214e34" strokeWidth="7" strokeLinecap="round" /><path d="M296 38q28-22 56 0v35q-28-22-56 0z" fill="#d96b43" /><circle cx="292" cy="130" r="10" fill="#dda74a" />
+            </g>
+          </>
+        ) : sample.wallSceneKey === "nature-lab" ? (
+          <>
+            <g className={`mission-wall-piece${revealed[0] ? " revealed" : ""}${highlightedMissionIndex === 0 ? " newly-revealed" : ""}`}>
+              <rect x="28" y="65" width="150" height="67" rx="13" fill="#d6ad78" /><path d="M78 67v63M128 67v63" stroke="#f4dfbd" strokeWidth="7" />
+            </g>
+            <g className={`mission-wall-piece${revealed[1] ? " revealed" : ""}${highlightedMissionIndex === 1 ? " newly-revealed" : ""}`}>
+              <path d="M210 106q36-72 70 0-29 35-70 0z" fill="#79a583" /><path d="M245 78v53" stroke="#365f41" strokeWidth="5" /><ellipse cx="205" cy="126" rx="22" ry="13" fill="#8b8174" />
+            </g>
+            <g className={`mission-wall-piece${revealed[2] ? " revealed" : ""}${highlightedMissionIndex === 2 ? " newly-revealed" : ""}`}>
+              <circle cx="300" cy="65" r="31" fill="none" stroke="#214e34" strokeWidth="9" /><path d="M322 87l35 35" stroke="#214e34" strokeWidth="11" strokeLinecap="round" /><circle cx="290" cy="55" r="6" fill="#fff" opacity=".8" />
+            </g>
+          </>
+        ) : null}
       </svg>
       <strong>{revealedCount} of {sample.missions.length} scene elements revealed</strong>
       <ol className="mission-wall-key">
@@ -533,6 +588,11 @@ function SampleDetail({
           <p className="eyebrow">Guest Play Path</p>
           <h1>{sample.title}</h1>
           <p className="path-overview-summary">{sample.summary}</p>
+          <div className="path-purpose">
+            <p className="path-purpose-label">What this Play Path helps build</p>
+            <p>{sample.goal}</p>
+            <ul>{sample.supports.map((benefit) => <li key={benefit}>{benefit}</li>)}</ul>
+          </div>
           <p className="safety-note"><strong>Stay safe:</strong> {sample.safetyNote}</p>
         </div>
         <img src={sample.imageUrl} alt={sample.imageAlt} />
@@ -900,7 +960,7 @@ function App() {
     if (!sessionReady) return <LoadingState label="Opening your account…" />;
     if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
     if (session.emailVerified) {
-      return <OnboardingBoundary session={session} onSignOut={endSession} signOutError={signOutError} />;
+      return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
     }
     return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
   }
@@ -910,7 +970,7 @@ function App() {
     if (!session.emailVerified) {
       return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
     }
-    return <OnboardingBoundary session={session} onSignOut={endSession} signOutError={signOutError} />;
+    return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
   }
 
   return (

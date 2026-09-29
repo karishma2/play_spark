@@ -131,6 +131,7 @@ erDiagram
 |---|---|
 | `users` | Parent accounts and authentication-related data. |
 | `childProfiles` | Child age, optional nickname, interests, and play styles. |
+| `profileOptions` | Ordered developer-curated interests and play styles used by onboarding. |
 | `playPaths` | Reusable themed activity plans, such as Car City — 20 minutes. |
 | `missions` | Reusable individual activity missions. |
 | `playPathMissions` | Connects a Play Path to its missions, controls sequence, and identifies the Mission Wall element to reveal. |
@@ -170,5 +171,4 @@ Each `playPathMissions` document stores a `wallElementKey`, such as `road` or `b
 - Mission Wall history is reconstructed from completed `sessionMissions`; the application does not store a large image for every completed session.
 - Parent feedback uses fixed options only; no free-text feedback is stored in the MVP.
 - Recommendations use child interests, embedded mission tag keys, time, environment, parent effort, and feedback—not gender.
-
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="title desc">
+  <title id="title">Rainbow floor trail</title><desc id="desc">Colourful paper stepping stones curve across a calm playroom floor.</desc>
+  <rect width="720" height="480" fill="#f7f1e8"/><circle cx="610" cy="82" r="96" fill="#e6f0e7"/><path d="M0 348h720v132H0z" fill="#dfd2bf"/>
+  <path d="M85 370C170 280 220 410 314 314s168-1 300-124" fill="none" stroke="#fffaf2" stroke-width="88" stroke-linecap="round"/>
+  <g transform="rotate(-8 130 340)"><rect x="82" y="303" width="105" height="72" rx="14" fill="#d96b43"/></g>
+  <g transform="rotate(7 260 340)"><rect x="205" y="302" width="105" height="72" rx="14" fill="#dda74a"/></g>
+  <g transform="rotate(-5 386 284)"><rect x="335" y="247" width="105" height="72" rx="14" fill="#79a583"/></g>
+  <g transform="rotate(9 510 235)"><rect x="458" y="198" width="105" height="72" rx="14" fill="#7ba5b6"/></g>
+  <path d="M510 170a90 90 0 0 1 180 0" fill="none" stroke="#d96b43" stroke-width="18"/><path d="M528 170a72 72 0 0 1 144 0" fill="none" stroke="#dda74a" stroke-width="18"/><path d="M546 170a54 54 0 0 1 108 0" fill="none" stroke="#79a583" stroke-width="18"/>
+  <circle cx="104" cy="95" r="28" fill="#fff" opacity=".72"/><circle cx="149" cy="104" r="38" fill="#fff" opacity=".72"/><circle cx="196" cy="92" r="27" fill="#fff" opacity=".72"/>
+</svg>

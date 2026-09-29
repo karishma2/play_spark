@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="title desc">
+  <title id="title">Pillow animal rescue</title><desc id="desc">Soft cushions create a path for toy animals to reach a cosy basket home.</desc>
+  <rect width="720" height="480" fill="#eef3ea"/><path d="M0 340h720v140H0z" fill="#d9c9b4"/><circle cx="92" cy="88" r="56" fill="#f8ddab" opacity=".8"/>
+  <g stroke="#c4a98d" stroke-width="6"><rect x="70" y="300" width="170" height="92" rx="32" fill="#f0b7a1"/><rect x="274" y="264" width="170" height="92" rx="32" fill="#b8d2be"/><rect x="468" y="302" width="150" height="82" rx="30" fill="#b9cbd2"/></g>
+  <g transform="translate(290 180)"><ellipse cx="68" cy="72" rx="58" ry="42" fill="#d9a96f"/><circle cx="45" cy="36" r="34" fill="#d9a96f"/><path d="M18 15l12-27 17 29M58 14L78-8l7 33" fill="#d9a96f"/><circle cx="34" cy="34" r="4" fill="#28342c"/><circle cx="55" cy="34" r="4" fill="#28342c"/><path d="M42 46q8 7 16 0" fill="none" stroke="#28342c" stroke-width="4" stroke-linecap="round"/></g>
+  <g transform="translate(548 178)"><path d="M0 68h118l-12 116H12z" fill="#b88658"/><path d="M8 70q51-54 102 0" fill="none" stroke="#8c6343" stroke-width="14"/><path d="M15 98h90M13 128h94M10 158h99" stroke="#8c6343" stroke-width="5" opacity=".6"/></g>
+  <path d="M124 168q48-58 96 0" fill="none" stroke="#7ba5b6" stroke-width="12" stroke-linecap="round"/><circle cx="123" cy="169" r="12" fill="#7ba5b6"/><circle cx="220" cy="169" r="12" fill="#7ba5b6"/>
+</svg>

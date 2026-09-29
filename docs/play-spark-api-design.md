@@ -13,7 +13,7 @@ The API is designed to be simple for the beta and reusable by a future native mo
 
 ### Runtime and deployment context
 
-For the beta, one Node.js/Express service serves both the built React application and this API from a Render Web Service. The browser calls the same origin at `/api/v1`, so normal web use does not need CORS. The API contract stays runtime-independent, allowing a future native client or hosting change without route redesign.
+For the beta, one Vercel project serves the built React application and exposes the existing Node.js/Express API as one function. The browser calls the same origin at `/api/v1`, so normal web use does not need CORS. The API contract stays runtime-independent, allowing a future native client or hosting change without route redesign.
 
 ## 2. API principles
 
@@ -102,7 +102,7 @@ Logging out invalidates the matching server-side session immediately. The fronte
 
 #### `POST /auth/sign-up`
 
-Creates a parent account. Email verification is intentionally not required for the beta.
+Creates a parent account and sends a single-use email-verification link. Guest samples remain available before verification, while parent-owned profile features require a verified email.
 
 ```json
 {
@@ -242,11 +242,11 @@ There is no free-text “other interest” in the beta.
 
 ## 6. Guest samples and activity content API
 
-Guests can explore the two selected sample Play Paths without creating an account. Guest use is read-only; no activity history or favourites are stored in the backend or carried into a new account.
+Guests and signed-in parents can explore the curated sample Play Paths. Guest use is read-only; no activity history or favourites are stored in the backend or carried into a new account.
 
 | Method | Path | Purpose | Access |
 |---|---|---|---|
-| `GET` | `/guest/samples` | List the two available sample Play Paths | Guest |
+| `GET` | `/guest/samples` | List the available sample Play Paths | Guest |
 | `GET` | `/guest/samples/:sampleId` | Read one sample with its ordered missions | Guest |
 | `POST` | `/recommendations` | Return ranked suitable Play Paths | Signed-in parent |
 | `GET` | `/play-paths/:playPathId` | Read a selected current Play Path with missions | Signed-in parent |
@@ -430,5 +430,3 @@ Not required in the beta:
 - Native-mobile-specific features
 
 The `/api/v1` version, resource-based paths, and session authentication let these be added later without breaking the beta web application.
-
-

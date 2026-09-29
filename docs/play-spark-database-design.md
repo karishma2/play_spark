@@ -73,7 +73,7 @@ Stores a parent account. Passwords are never stored in readable form.
 **Rules**
 
 - Unique index on `email`.
-- The beta has no email-verification requirement.
+- New beta accounts require email verification before parent-owned profile features are available; accounts created before verification was introduced are migrated as verified.
 - No billing fields are required now. Future plans can be added without changing child ownership.
 
 ### 5.2 `childProfiles`
@@ -98,6 +98,7 @@ Stores the preferences that personalise recommendations.
 - The beta service allows one active profile per account, but the schema supports more later.
 - Edits change future recommendations immediately; historical sessions are not rewritten.
 - A future subscription/entitlement record can set the allowed profile count without changing this collection.
+- Allowed interests and play styles are stored as ordered, enabled records in `profileOptions` and managed through a reviewed repeatable seed. Submitted profile keys must match enabled options.
 
 ### 5.3 `authSessions`
 
@@ -375,5 +376,3 @@ Not required for the beta, but supported by the model later:
 - content-management accounts and audit logs;
 - native mobile clients;
 - advanced recommendation models.
-
-

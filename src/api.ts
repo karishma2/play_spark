@@ -73,6 +73,28 @@ export function signOut() {
   return requestJson<{ signedOut: true }>("/api/v1/auth/sign-out", { method: "POST" });
 }
 
+export interface ProfileOption {
+  key: string;
+  label: string;
+}
+
+export interface ProfileOptions {
+  interests: ProfileOption[];
+  playStyles: ProfileOption[];
+}
+
+export interface ChildProfileInput {
+  nickname?: string;
+  birthMonth: number;
+  birthYear: number;
+  interestKeys: string[];
+  playStyleKeys: string[];
+}
+
+export interface ChildProfile extends ChildProfileInput {
+  id: string;
+}
+
 function postJson<T>(path: string, body: unknown) {
   return requestJson<T>(path, {
     method: "POST",
@@ -99,4 +121,12 @@ export function requestEmailVerification() {
 
 export function verifyEmail(token: string) {
   return postJson<{ verified: true }>("/api/v1/auth/verify-email", { token });
+}
+
+export function getProfileOptions() {
+  return requestJson<ProfileOptions>("/api/v1/profile-options");
+}
+
+export function createChildProfile(input: ChildProfileInput) {
+  return postJson<ChildProfile>("/api/v1/child-profile", input);
 }

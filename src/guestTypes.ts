@@ -2,6 +2,8 @@ export interface GuestSampleSummary {
   id: string;
   title: string;
   summary: string;
+  goal: string;
+  supports: string[];
   durationMinutes: number;
   setupMinutes: number;
   parentEffort: "Low";
