@@ -21,6 +21,7 @@ const heroImage =
 type DurationFilter = "all" | 10 | 15 | 20;
 type ExploreScreen = "landing" | "guest";
 type DetailOrigin = ExploreScreen;
+const guestSampleLimit = 2;
 
 function Brand({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -771,6 +772,9 @@ function App() {
   const [signOutError, setSignOutError] = useState<string>();
   const sessionRequestVersion = useRef(0);
   const previousPath = useRef(location.pathname);
+  const guestSamples = samples.slice(0, guestSampleLimit);
+  const canBrowseFullCatalogue = Boolean(session?.emailVerified && session.hasChildProfile);
+  const landingSamples = canBrowseFullCatalogue ? samples : guestSamples;
 
   function loadSamples() {
     setLoading(true);
@@ -1014,7 +1018,7 @@ function App() {
               />
             ) : screen === "guest" ? (
               <GuestPreview
-                samples={samples}
+                samples={guestSamples}
                 progress={progress}
                 onSelect={(sampleId) => openSample(sampleId, "guest")}
                 session={session}
@@ -1024,7 +1028,7 @@ function App() {
               />
             ) : (
               <Landing
-                samples={samples}
+                samples={landingSamples}
                 progress={progress}
                 onSelect={(sampleId) => openSample(sampleId, "landing")}
                 onGuest={goGuest}

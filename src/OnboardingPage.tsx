@@ -157,7 +157,7 @@ export function OnboardingPage({
           <p className="eyebrow">Profile ready</p>
           <h1 id="onboarding-complete-title">You’re ready for more personal play ideas.</h1>
           <p>Your child’s profile is saved securely and will shape recommendations in the next phase.</p>
-          <Link className="button button-primary" to="/guest-preview">Explore activities</Link>
+          <Link className="button button-primary" to="/">Explore activities</Link>
           {signOutError && <div className="auth-error" role="alert">{signOutError}</div>}
           <button className="text-button" onClick={onSignOut}>Sign out</button>
         </section>
