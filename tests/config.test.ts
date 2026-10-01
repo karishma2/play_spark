@@ -12,6 +12,7 @@ test("loads valid configuration", () => {
   assert.equal(config.databaseName, "play_spark_test");
   assert.equal(config.port, 3100);
   assert.equal(config.passwordResetBaseUrl, "http://localhost:3100");
+  assert.equal(config.requireEmailVerification, true);
 });
 
 test("loads paired Resend configuration and validates the application URL", () => {
@@ -26,6 +27,18 @@ test("loads paired Resend configuration and validates the application URL", () =
   assert.equal(config.resendApiKey, "test-key");
   assert.throws(() => loadConfig({ ...environment, APP_BASE_URL: "not-a-url" }), /APP_BASE_URL/);
   assert.throws(() => loadConfig({ ...environment, RESEND_FROM_EMAIL: "" }), /configured together/);
+});
+
+test("loads the private-beta email verification policy", () => {
+  const environment = {
+    SESSION_SECRET: "a-very-long-test-secret-that-is-at-least-32-characters",
+    REQUIRE_EMAIL_VERIFICATION: "false",
+  };
+  assert.equal(loadConfig(environment).requireEmailVerification, false);
+  assert.throws(
+    () => loadConfig({ ...environment, REQUIRE_EMAIL_VERIFICATION: "sometimes" }),
+    /REQUIRE_EMAIL_VERIFICATION/,
+  );
 });
 
 test("rejects a missing or short session secret", () => {

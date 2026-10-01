@@ -24,14 +24,14 @@ function createMemoryAuthRepository() {
     async findUserByEmail(email) {
       return users.get(email) ?? null;
     },
-    async createUser(email, passwordHash) {
+    async createUser(email, passwordHash, emailVerificationRequired = true) {
       if (users.has(email)) throw new EmailAlreadyExistsError();
       const user = {
         id: String(nextId++).padStart(24, "0"),
         email,
         passwordHash,
         hasChildProfile: false,
-        emailVerified: false,
+        emailVerified: !emailVerificationRequired,
       };
       users.set(email, user);
       return user;
@@ -100,7 +100,11 @@ const catalog: CatalogRepository = {
   async findGuestSample() { return null; },
 };
 
-function createAuthTestApp(auth: AuthRepository, authEmailSender?: AuthEmailSender) {
+function createAuthTestApp(
+  auth: AuthRepository,
+  authEmailSender?: AuthEmailSender,
+  requireEmailVerification = true,
+) {
   return createApp({
     databaseName: "play_spark_test",
     catalog,
@@ -108,6 +112,7 @@ function createAuthTestApp(auth: AuthRepository, authEmailSender?: AuthEmailSend
     passwordHasher,
     passwordResetBaseUrl: "https://play-spark.test",
     authEmailSender,
+    requireEmailVerification,
     authCookieSecure: false,
   });
 }
@@ -178,6 +183,26 @@ test("scrypt password hashes are salted and verify without storing plaintext", a
   assert.equal(first.includes(password), false);
   assert.equal(await scryptPasswordHasher.verify(password, first), true);
   assert.equal(await scryptPasswordHasher.verify("wrong password", first), false);
+});
+
+test("allows beta accounts to continue without sending verification email", async () => {
+  const memory = createMemoryAuthRepository();
+  let verificationDeliveries = 0;
+  const emailSender: AuthEmailSender = {
+    async sendPasswordReset() {},
+    async sendEmailVerification() { verificationDeliveries += 1; },
+  };
+  const agent = request.agent(createAuthTestApp(memory.repository, emailSender, false));
+
+  const signUp = await agent.post("/api/v1/auth/sign-up")
+    .send({ email: "beta@example.com", password: "a-beta-parent-password" })
+    .expect(201);
+
+  assert.equal(signUp.body.data.emailVerified, true);
+  assert.equal(memory.users.get("beta@example.com")?.emailVerified, true);
+  assert.equal(verificationDeliveries, 0);
+  const session = await agent.get("/api/v1/auth/session").expect(200);
+  assert.equal(session.body.data.emailVerified, true);
 });
 
 test("changes a password after verification and keeps only the current session", async () => {
@@ -314,7 +339,7 @@ test("requests a non-enumerating reset and consumes the 30-minute token once", a
 
 test("returns the password-reset response without waiting for email delivery", async () => {
   const memory = createMemoryAuthRepository();
-  const user = await memory.repository.createUser("parent@example.com", "test:current-password");
+  const user = await memory.repository.createUser("parent@example.com", "test:current-password", true);
   user.emailVerified = true;
   let deliveryStarted = false;
   let releaseDelivery!: () => void;

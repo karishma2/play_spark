@@ -5,6 +5,7 @@ import { AuthPage } from "./AuthPage";
 import { ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage } from "./PasswordPage";
 import { EmailVerificationPendingPage, VerifyEmailPage } from "./EmailVerificationPage";
 import { OnboardingPage } from "./OnboardingPage";
+import { ChildProfilePage } from "./ChildProfilePage";
 import {
   completeSample,
   readGuestProgress,
@@ -45,6 +46,7 @@ function Header({
   onSignUp,
   onSignOut,
   onManageAccount,
+  onManageProfile,
   onVerifyEmail,
   signOutError,
 }: {
@@ -57,6 +59,7 @@ function Header({
   onSignUp: () => void;
   onSignOut: () => void;
   onManageAccount: () => void;
+  onManageProfile: () => void;
   onVerifyEmail: () => void;
   signOutError?: string;
 }) {
@@ -72,6 +75,7 @@ function Header({
           <div className="guest-auth-actions" aria-label="Parent account">
             <span className="account-email">{session.user.email}</span>
             {!session.emailVerified && <button onClick={onVerifyEmail}>Verify email</button>}
+            {session.emailVerified && session.hasChildProfile && <button onClick={onManageProfile}>Child profile</button>}
             <button onClick={onManageAccount}>Password</button>
             <button onClick={onSignOut}>Sign out</button>
             <span className="guest-avatar" aria-hidden="true">●</span>
@@ -976,6 +980,17 @@ function App() {
     }
     return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
   }
+  if (location.pathname === "/child-profile") {
+    if (!sessionReady) return <LoadingState label="Opening the child profile…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    if (!session.emailVerified) {
+      return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
+    }
+    if (!session.hasChildProfile) {
+      return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
+    }
+    return <ChildProfilePage />;
+  }
 
   return (
     <>
@@ -1000,6 +1015,7 @@ function App() {
             onSignUp={() => navigate("/sign-up")}
             onSignOut={endSession}
             onManageAccount={() => navigate("/change-password")}
+            onManageProfile={() => navigate("/child-profile")}
             onVerifyEmail={() => navigate("/verify-email-pending")}
             signOutError={signOutError}
           />

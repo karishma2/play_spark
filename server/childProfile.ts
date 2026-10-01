@@ -22,6 +22,8 @@ export interface ChildProfileInput {
   playStyleKeys: string[];
 }
 
+export type ChildProfileUpdate = Partial<ChildProfileInput>;
+
 export interface ChildProfile extends ChildProfileInput {
   id: string;
 }
@@ -30,6 +32,7 @@ export interface ChildProfileRepository {
   listOptions(): Promise<ProfileOptions>;
   findActiveByUserId(userId: string): Promise<ChildProfile | null>;
   create(userId: string, input: ChildProfileInput): Promise<ChildProfile>;
+  update(userId: string, input: ChildProfileUpdate): Promise<ChildProfile | null>;
 }
 
 export class ChildProfileAlreadyExistsError extends Error {}
@@ -161,6 +164,24 @@ export function createMongoChildProfileRepository(
         throw error;
       }
     },
+    async update(userId, input) {
+      const setFields: Document = { updatedAt: new Date() };
+      for (const key of ["birthMonth", "birthYear", "interestKeys", "playStyleKeys"] as const) {
+        if (input[key] !== undefined) setFields[key] = input[key];
+      }
+      if (input.nickname) setFields.nickname = input.nickname;
+      const update: Document = {
+        $set: setFields,
+      };
+      if (Object.hasOwn(input, "nickname") && !input.nickname) update.$unset = { nickname: "" };
+      const document = await (await database()).collection<ProfileDocument>("childProfiles")
+        .findOneAndUpdate(
+          { userId: new ObjectId(userId), isActive: true },
+          update,
+          { returnDocument: "after" },
+        );
+      return document ? toProfile(document) : null;
+    },
   };
 }
 
@@ -170,13 +191,18 @@ const uniqueKeys = z.array(z.string().min(1)).min(1).superRefine((values, contex
   }
 });
 
-const createProfileSchema = z.object({
+const profileInputSchema = z.object({
   nickname: z.string().trim().max(40).optional().transform((value) => value || undefined),
   birthMonth: z.number().int().min(1).max(12),
   birthYear: z.number().int(),
   interestKeys: uniqueKeys,
   playStyleKeys: uniqueKeys,
 }).strict();
+
+const profileUpdateSchema = profileInputSchema.partial().refine(
+  (value) => Object.keys(value).length > 0,
+  { message: "Provide at least one profile field to update." },
+);
 
 function validationError(response: Response, fieldErrors: Record<string, string>) {
   response.status(400).json({
@@ -197,14 +223,14 @@ function ageInYears(birthMonth: number, birthYear: number, now: Date) {
   return now.getUTCFullYear() - birthYear - (now.getUTCMonth() + 1 < birthMonth ? 1 : 0);
 }
 
-function allowedKeys(options: ProfileOptions, input: ChildProfileInput) {
+function allowedKeys(options: ProfileOptions, input: ChildProfileUpdate) {
   const interestKeys = new Set(options.interests.map(({ key }) => key));
   const playStyleKeys = new Set(options.playStyles.map(({ key }) => key));
   const errors: Record<string, string> = {};
-  if (input.interestKeys.some((key) => !interestKeys.has(key))) {
+  if (input.interestKeys?.some((key) => !interestKeys.has(key))) {
     errors.interestKeys = "Choose interests from the available options.";
   }
-  if (input.playStyleKeys.some((key) => !playStyleKeys.has(key))) {
+  if (input.playStyleKeys?.some((key) => !playStyleKeys.has(key))) {
     errors.playStyleKeys = "Choose play styles from the available options.";
   }
   return errors;
@@ -213,6 +239,7 @@ function allowedKeys(options: ProfileOptions, input: ChildProfileInput) {
 export function createChildProfileRouter(options: {
   repository: ChildProfileRepository;
   authRepository: AuthRepository;
+  requireEmailVerification?: boolean;
   now?: () => Date;
 }) {
   const router = Router();
@@ -224,9 +251,9 @@ export function createChildProfileRouter(options: {
       response.status(401).json({ error: { code: "UNAUTHENTICATED", message: "Please sign in." } });
       return null;
     }
-    if (!user.emailVerified) {
+    if ((options.requireEmailVerification ?? true) && !user.emailVerified) {
       response.status(403).json({
-        error: { code: "EMAIL_VERIFICATION_REQUIRED", message: "Verify your email before creating a child profile." },
+        error: { code: "EMAIL_VERIFICATION_REQUIRED", message: "Verify your email before managing a child profile." },
       });
       return null;
     }
@@ -258,7 +285,7 @@ export function createChildProfileRouter(options: {
   });
 
   router.post("/child-profile", async (request, response) => {
-    const parsed = createProfileSchema.safeParse(request.body);
+    const parsed = profileInputSchema.safeParse(request.body);
     if (!parsed.success) {
       zodValidationError(response, parsed.error);
       return;
@@ -285,6 +312,41 @@ export function createChildProfileRouter(options: {
         return;
       }
       response.status(503).json({ error: { code: "PROFILE_UNAVAILABLE", message: "We couldn't save the child profile. Please try again." } });
+    }
+  });
+
+  router.patch("/child-profile", async (request, response) => {
+    const parsed = profileUpdateSchema.safeParse(request.body);
+    if (!parsed.success) {
+      zodValidationError(response, parsed.error);
+      return;
+    }
+    try {
+      const user = await verifiedUser(request, response);
+      if (!user) return;
+      const currentProfile = await options.repository.findActiveByUserId(user.id);
+      if (!currentProfile) {
+        response.status(404).json({ error: { code: "NOT_FOUND", message: "No child profile has been created yet." } });
+        return;
+      }
+      const birthMonth = parsed.data.birthMonth ?? currentProfile.birthMonth;
+      const birthYear = parsed.data.birthYear ?? currentProfile.birthYear;
+      const currentAge = ageInYears(birthMonth, birthYear, now());
+      if (currentAge < 3 || currentAge > 5) {
+        validationError(response, { birthYear: "Play Spark currently supports children aged 3 to 5." });
+        return;
+      }
+      const availableOptions = await options.repository.listOptions();
+      const optionErrors = allowedKeys(availableOptions, parsed.data);
+      if (Object.keys(optionErrors).length > 0) {
+        validationError(response, optionErrors);
+        return;
+      }
+      const profile = await options.repository.update(user.id, parsed.data);
+      if (!profile) throw new Error("Active profile disappeared during update");
+      response.json({ data: profile });
+    } catch {
+      response.status(503).json({ error: { code: "PROFILE_UNAVAILABLE", message: "We couldn't update the child profile. Please try again." } });
     }
   });
 

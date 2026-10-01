@@ -130,3 +130,15 @@ export function getProfileOptions() {
 export function createChildProfile(input: ChildProfileInput) {
   return postJson<ChildProfile>("/api/v1/child-profile", input);
 }
+
+export function getChildProfile() {
+  return requestJson<ChildProfile>("/api/v1/child-profile");
+}
+
+export function updateChildProfile(input: ChildProfileInput) {
+  return requestJson<ChildProfile>("/api/v1/child-profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}

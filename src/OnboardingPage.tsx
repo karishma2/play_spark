@@ -10,12 +10,12 @@ import {
   type ProfileOptions,
 } from "./api";
 
-const months = [
+export const birthMonths = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
 
-function OptionChoices({
+export function ProfileOptionChoices({
   legend,
   hint,
   options,
@@ -218,7 +218,7 @@ export function OnboardingPage({
                   <span>Birth month</span>
                   <select value={birthMonth} onChange={(event) => setBirthMonth(event.target.value)} aria-invalid={Boolean(fieldErrors.birthMonth)}>
                     <option value="">Choose month</option>
-                    {months.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
+                    {birthMonths.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
                   </select>
                   {fieldErrors.birthMonth && <small className="onboarding-field-error">{fieldErrors.birthMonth}</small>}
                 </label>
@@ -237,14 +237,14 @@ export function OnboardingPage({
             <div className="onboarding-step">
               <p className="eyebrow">Their favourite things</p>
               <h1 id="onboarding-title">What lights them up?</h1>
-              <OptionChoices legend="Interests" hint="Choose one or more. You can change these later." options={options.interests} selected={interestKeys} onToggle={(key) => toggle(key, interestKeys, setInterestKeys)} error={fieldErrors.interestKeys} />
+              <ProfileOptionChoices legend="Interests" hint="Choose one or more. You can change these later." options={options.interests} selected={interestKeys} onToggle={(key) => toggle(key, interestKeys, setInterestKeys)} error={fieldErrors.interestKeys} />
             </div>
           )}
           {step === 3 && (
             <div className="onboarding-step">
               <p className="eyebrow">How they like to play</p>
               <h1 id="onboarding-title">Which kinds of play feel natural?</h1>
-              <OptionChoices legend="Play styles" hint="Choose one or more styles that fit most days." options={options.playStyles} selected={playStyleKeys} onToggle={(key) => toggle(key, playStyleKeys, setPlayStyleKeys)} error={fieldErrors.playStyleKeys} />
+              <ProfileOptionChoices legend="Play styles" hint="Choose one or more styles that fit most days." options={options.playStyles} selected={playStyleKeys} onToggle={(key) => toggle(key, playStyleKeys, setPlayStyleKeys)} error={fieldErrors.playStyleKeys} />
             </div>
           )}
           {step === 4 && (
@@ -253,7 +253,7 @@ export function OnboardingPage({
               <h1 id="onboarding-title">Does this look right?</h1>
               <dl className="profile-review">
                 <div><dt>Nickname</dt><dd>{nickname.trim() || "Not added"}</dd></div>
-                <div><dt>Birth month and year</dt><dd>{months[Number(birthMonth) - 1]} {birthYear}</dd></div>
+                <div><dt>Birth month and year</dt><dd>{birthMonths[Number(birthMonth) - 1]} {birthYear}</dd></div>
                 <div><dt>Interests</dt><dd>{interestLabels.join(", ")}</dd></div>
                 <div><dt>Play styles</dt><dd>{playStyleLabels.join(", ")}</dd></div>
               </dl>

@@ -29,6 +29,7 @@ export interface CreateAppOptions {
   authEmailSender?: AuthEmailSender;
   resendApiKey?: string;
   resendFromEmail?: string;
+  requireEmailVerification?: boolean;
   authCookieSecure?: boolean;
 }
 
@@ -46,6 +47,7 @@ export function createApp(options: CreateAppOptions) {
     ?? (options.resendApiKey && options.resendFromEmail
       ? createResendAuthEmailSender(options.resendApiKey, options.resendFromEmail)
       : unavailableAuthEmailSender);
+  const requireEmailVerification = options.requireEmailVerification ?? true;
 
   app.disable("x-powered-by");
   app.use(helmet());
@@ -67,9 +69,14 @@ export function createApp(options: CreateAppOptions) {
     passwordHasher: options.passwordHasher,
     passwordResetBaseUrl: options.passwordResetBaseUrl ?? "http://localhost:3000",
     authEmailSender,
+    requireEmailVerification,
     cookieSecure: options.authCookieSecure ?? process.env.NODE_ENV === "production",
   }));
-  app.use("/api/v1", createChildProfileRouter({ repository: childProfiles, authRepository: auth }));
+  app.use("/api/v1", createChildProfileRouter({
+    repository: childProfiles,
+    authRepository: auth,
+    requireEmailVerification,
+  }));
 
   app.get("/api/v1/health", (_request, response) => {
     response.json(json({ service: "play-spark-api", status: "ok" }));
