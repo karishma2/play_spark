@@ -22,7 +22,7 @@ export interface AuthUser {
 
 export interface AuthRepository {
   findUserByEmail(email: string): Promise<AuthUser | null>;
-  createUser(email: string, passwordHash: string): Promise<AuthUser>;
+  createUser(email: string, passwordHash: string, emailVerificationRequired: boolean): Promise<AuthUser>;
   createSession(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
   findUserBySession(tokenHash: string, now: Date): Promise<AuthUser | null>;
   deleteSession(tokenHash: string): Promise<void>;
@@ -88,11 +88,11 @@ export function hashEmailVerificationToken(token: string) {
   return createHash("sha256").update(token).digest("base64url");
 }
 
-function publicSession(user: AuthUser) {
+function publicSession(user: AuthUser, requireEmailVerification = true) {
   return {
     user: { id: user.id, email: user.email },
     hasChildProfile: user.hasChildProfile,
-    emailVerified: user.emailVerified,
+    emailVerified: user.emailVerified || !requireEmailVerification,
   };
 }
 
@@ -234,7 +234,7 @@ export function createMongoAuthRepository(mongo: MongoClientProvider, databaseNa
       email: document.email,
       passwordHash: document.passwordHash,
       hasChildProfile,
-      emailVerified: document.emailVerifiedAt instanceof Date,
+      emailVerified: document.emailVerificationRequired === false || document.emailVerifiedAt instanceof Date,
     };
   }
 
@@ -244,14 +244,14 @@ export function createMongoAuthRepository(mongo: MongoClientProvider, databaseNa
       const user = await db.collection("users").findOne({ email, status: "active" });
       return user ? toAuthUser(user, db) : null;
     },
-    async createUser(email, passwordHash) {
+    async createUser(email, passwordHash, emailVerificationRequired) {
       const db = await ready();
       const now = new Date();
       try {
         const result = await db.collection("users").insertOne({
           email,
           passwordHash,
-          emailVerificationRequired: true,
+          emailVerificationRequired,
           status: "active",
           createdAt: now,
           updatedAt: now,
@@ -262,7 +262,7 @@ export function createMongoAuthRepository(mongo: MongoClientProvider, databaseNa
           email,
           passwordHash,
           hasChildProfile: false,
-          emailVerified: false,
+          emailVerified: !emailVerificationRequired,
         };
       } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) throw new EmailAlreadyExistsError();
@@ -412,10 +412,12 @@ export function createAuthRouter(options: {
   cookieSecure: boolean;
   passwordResetBaseUrl: string;
   authEmailSender: AuthEmailSender;
+  requireEmailVerification?: boolean;
   passwordHasher?: PasswordHasher;
 }) {
   const router = Router();
   const passwordHasher = options.passwordHasher ?? scryptPasswordHasher;
+  const requireEmailVerification = options.requireEmailVerification ?? true;
   const cookieOptions = {
     httpOnly: true,
     secure: options.cookieSecure,
@@ -461,7 +463,7 @@ export function createAuthRouter(options: {
 
   async function sendPasswordResetIfEligible(email: string) {
     const user = await options.repository.findUserByEmail(email);
-    if (!user?.emailVerified) return;
+    if (!user || (requireEmailVerification && !user.emailVerified)) return;
     const token = randomBytes(32).toString("base64url");
     await options.repository.createPasswordResetToken(
       user.id,
@@ -481,10 +483,14 @@ export function createAuthRouter(options: {
     if (!parsed.success) return validationError(response, parsed);
     try {
       const passwordHash = await passwordHasher.hash(parsed.data.password);
-      const user = await options.repository.createUser(parsed.data.email, passwordHash);
+      const user = await options.repository.createUser(
+        parsed.data.email,
+        passwordHash,
+        requireEmailVerification,
+      );
       await startSession(response, user);
-      await sendEmailVerification(user).catch(() => undefined);
-      response.status(201).json({ data: publicSession(user) });
+      if (requireEmailVerification) await sendEmailVerification(user).catch(() => undefined);
+      response.status(201).json({ data: publicSession(user, requireEmailVerification) });
     } catch (error) {
       if (error instanceof EmailAlreadyExistsError) {
         response.status(409).json({ error: { code: "CONFLICT", message: "An account with this email already exists." } });
@@ -507,7 +513,7 @@ export function createAuthRouter(options: {
         return;
       }
       await startSession(response, user);
-      response.json({ data: publicSession(user) });
+      response.json({ data: publicSession(user, requireEmailVerification) });
     } catch {
       response.status(503).json({ error: { code: "AUTH_UNAVAILABLE", message: "Account access is temporarily unavailable. Please try again." } });
     }
@@ -526,7 +532,7 @@ export function createAuthRouter(options: {
         response.status(401).json({ error: { code: "UNAUTHENTICATED", message: "Please sign in." } });
         return;
       }
-      response.json({ data: publicSession(user) });
+      response.json({ data: publicSession(user, requireEmailVerification) });
     } catch {
       response.status(503).json({ error: { code: "AUTH_UNAVAILABLE", message: "Account access is temporarily unavailable. Please try again." } });
     }
@@ -633,7 +639,9 @@ export function createAuthRouter(options: {
         response.status(401).json({ error: { code: "UNAUTHENTICATED", message: "Please sign in." } });
         return;
       }
-      if (!authenticated.user.emailVerified) await sendEmailVerification(authenticated.user);
+      if (requireEmailVerification && !authenticated.user.emailVerified) {
+        await sendEmailVerification(authenticated.user);
+      }
       response.status(202).json({ data: { accepted: true } });
     } catch {
       response.status(503).json({

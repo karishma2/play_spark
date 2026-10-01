@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 25 September 2026
+**Last updated:** 30 September 2026
 
 ## Status meanings
 
@@ -21,23 +21,35 @@
 | 1 | Landing page and guest sample experience | Complete |
 | 1.1 | MongoDB-backed activity catalogue and seeding | Complete |
 | 2 | Parent accounts and secure authentication | Complete |
-| 3 | Child-profile onboarding and editing | In progress |
+| 3 | Child-profile onboarding and editing | Complete |
 | 4 | Dashboard, filters, and rule-based recommendations | Planned |
 | 5 | Active Play Sessions and mission actions | Planned |
 | 6 | Mission Wall, favourites, history, and feedback | Planned |
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
-## In-progress features
+## Completed features
+
+### Child-profile editing and private-beta access
+
+- **Status:** Complete
+- **Branch:** `feature/child-profile-editing`
+- **Completed:** 1 October 2026
+- **Scope:** Let parents review and update their existing child profile, and allow controlled private-beta account access while production email delivery is unavailable.
+- **Delivered:** A parent-owned partial profile-update API; an authenticated review/edit screen with retry, cancel, validation, nickname removal, and save-success states; and an explicit server-side beta policy that skips verification delivery and stores new beta accounts as verification-exempt while preserving the production verification flow for later activation.
+- **Key files or routes:** `src/ChildProfilePage.tsx`, `server/childProfile.ts`, `server/auth.ts`, `PATCH /api/v1/child-profile`, `/child-profile`, `REQUIRE_EMAIL_VERIFICATION`
+- **Validation:** `npm run verify` passes with TypeScript and content validation, 33 automated tests, the production build, and the progress documentation guard. Focused coverage includes production verification behavior, beta sign-up without email delivery, beta child-profile access, partial updates, ownership, validation, and safe failure handling.
+- **Follow-up:** Configure `REQUIRE_EMAIL_VERIFICATION=false` in private-beta environments. Before public launch, verify a production sending domain, switch the setting to `true`, and smoke-test verification and password-reset delivery.
 
 ### Child onboarding
 
-- **Status:** In progress
+- **Status:** Complete
 - **Branch:** `feature/child-onboarding`
+- **Completed:** 29 September 2026
 - **Scope:** One verified-parent-owned beta child profile with optional nickname, birth month/year, MongoDB-backed curated interests and play styles, secure profile APIs, and responsive onboarding.
-- **Implemented so far:** Repeatable profile-option seeding, verified-parent profile creation/read APIs, one-active-profile enforcement, session-state refresh, a four-step responsive onboarding flow with a completion screen, and four additional seeded Play Paths for post-onboarding exploration. Public landing and guest-preview routes remain limited to two samples, while verified parents with a completed child profile can browse all six from the main application route. All Play Paths name their purpose and show the developmental skills they support on catalogue and detail screens. A Vercel adapter keeps the Vite frontend and Express `/api/v1` routes in one same-origin project.
-- **Validation so far:** TypeScript checks, catalogue and profile-option validation, four focused child-profile API tests, and the production build pass. Thirteen reviewed profile options and six sample Play Paths were seeded in `play_spark_dev`; the live API returns all six paths and three ordered missions for the checked new path. Focused local HTTP checks through the Vercel adapter returned `200` for the rewritten health route and all six sample paths.
-
-## Completed features
+- **Delivered:** Repeatable profile-option seeding, secure verified-parent profile APIs, one-active-profile enforcement, session refresh, and a responsive four-step onboarding flow. The catalogue contains six purpose-led Play Paths; public and guest routes expose two samples, while verified parents with a completed profile can browse all six from the main route. The same-origin Vercel adapter serves the frontend and Express API together.
+- **Key files or routes:** `src/OnboardingPage.tsx`, `server/childProfile.ts`, `content/profile-options.json`, `GET /api/v1/profile-options`, `POST /api/v1/child-profile`, `GET /api/v1/child-profile`
+- **Validation:** `npm run verify` passed with TypeScript and content validation, 29 automated tests, the production build, and the progress guard. GitHub and Vercel checks passed on PRs #6 and #7; profile options and six Play Paths were seeded and checked through the live development API. Production smoke testing confirmed healthy frontend routes, API and database connectivity, two public landing samples, two guest-preview samples, the signed-out account invitation, a working sign-in entry, and protected unauthenticated onboarding.
+- **Follow-up:** Child-profile editing remains Phase 3.2. Rule-based recommendations remain Phase 4.
 
 ### Password management and email verification
 

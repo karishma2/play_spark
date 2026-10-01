@@ -5,6 +5,7 @@ export interface AppConfig {
   port: number;
   resendApiKey?: string;
   resendFromEmail?: string;
+  requireEmailVerification: boolean;
   sessionSecret: string;
 }
 
@@ -39,6 +40,11 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     throw new Error("RESEND_API_KEY and RESEND_FROM_EMAIL must be configured together.");
   }
 
+  const rawRequireEmailVerification = environment.REQUIRE_EMAIL_VERIFICATION ?? "true";
+  if (rawRequireEmailVerification !== "true" && rawRequireEmailVerification !== "false") {
+    throw new Error("REQUIRE_EMAIL_VERIFICATION must be either true or false.");
+  }
+
   return {
     databaseName: environment.MONGODB_DB_NAME ?? "play_spark_dev",
     mongoUri: environment.MONGODB_URI,
@@ -46,6 +52,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     port,
     resendApiKey,
     resendFromEmail,
+    requireEmailVerification: rawRequireEmailVerification === "true",
     sessionSecret,
   };
 }

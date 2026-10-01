@@ -37,7 +37,7 @@ Phase 3 is delivered as two independently reviewable vertical slices.
 
 - Let a verified parent create one active beta child profile using an optional nickname, birth month/year, curated interests, and curated play styles.
 - Store profile options in MongoDB and manage them through a repeatable, schema-validated seed file.
-- Implement `GET /api/v1/profile-options`, `POST /api/v1/child-profile`, and `GET /api/v1/child-profile` with session, verification, ownership, and safe-error checks.
+- Implement `GET /api/v1/profile-options`, `POST /api/v1/child-profile`, and `GET /api/v1/child-profile` with session, configured verification policy, ownership, and safe-error checks.
 - Calculate and validate the supported 3–5 age range on the server without collecting a full birth date.
 - Replace the onboarding placeholder with a responsive, keyboard-usable guided flow and a completion screen that links back to sample activities.
 
@@ -56,9 +56,21 @@ Phase 3 is delivered as two independently reviewable vertical slices.
 
 **Proposed branch:** `feature/child-profile-editing`
 
-- Implement `PATCH /api/v1/child-profile` for parent-owned editable fields.
+#### Scope
+
+- Implement `PATCH /api/v1/child-profile` for the existing parent-owned editable fields.
 - Add an authenticated profile screen for reviewing and updating the active profile.
 - Apply changes to future recommendations without rewriting historical activity sessions.
+
+#### Acceptance criteria
+
+- A verified signed-in parent with an active child profile can review and update its nickname, birth month/year, interests, and play styles.
+- The API derives ownership from the secure session, updates only that parent's active profile, and never accepts an ownership identifier from the browser.
+- Updates reuse onboarding validation for supported ages, curated option keys, required choices, and duplicate choices.
+- Removing the optional nickname clears it from the stored profile, while the profile identity remains unchanged.
+- Missing profiles, unauthenticated access, accounts blocked by the configured verification policy, invalid input, and database failures return safe responses.
+- The profile screen provides loading, retry, validation, cancel, success, and responsive states and explains that changes affect future recommendations only.
+- Existing onboarding, authentication, guest activity, and historical activity behavior remains unchanged.
 
 ## Phase 2 — Parent accounts and secure authentication
 
@@ -100,6 +112,7 @@ Phase 2 is delivered as two independently reviewable vertical slices.
 - Send a 24-hour, single-use verification link after sign-up and allow a rate-limited replacement link.
 - Allow unverified parents to browse guest activities while requiring verification before child-profile onboarding.
 - Treat accounts created before email verification as verified during the authentication schema update.
+- Allow the controlled private beta to disable the verification gate explicitly until a production sending domain is available; preserve verification for later activation and exempt accounts created under the beta policy.
 
 ## Phase 1 — Landing page and guest sample experience
 

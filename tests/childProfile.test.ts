@@ -8,6 +8,7 @@ import {
   type ChildProfile,
   type ChildProfileInput,
   type ChildProfileRepository,
+  type ChildProfileUpdate,
   type ProfileOptions,
 } from "../server/childProfile.js";
 import type { CatalogRepository } from "../server/catalog.js";
@@ -61,6 +62,14 @@ function createMemoryState() {
       if (user) user.hasChildProfile = true;
       return profile;
     },
+    async update(userId, input: ChildProfileUpdate) {
+      const current = profiles.get(userId);
+      if (!current) return null;
+      const profile = { ...current, ...input };
+      if (Object.hasOwn(input, "nickname") && !input.nickname) delete profile.nickname;
+      profiles.set(userId, profile);
+      return profile;
+    },
   };
 
   function addUser(id: string, token: string, emailVerified = true) {
@@ -77,12 +86,13 @@ function createMemoryState() {
   return { auth, childProfiles, profiles, addUser };
 }
 
-function createProfileApp(state: ReturnType<typeof createMemoryState>) {
+function createProfileApp(state: ReturnType<typeof createMemoryState>, requireEmailVerification = true) {
   return createApp({
     databaseName: "play_spark_test",
     catalog,
     auth: state.auth,
     childProfiles: state.childProfiles,
+    requireEmailVerification,
     authCookieSecure: false,
   });
 }
@@ -114,6 +124,15 @@ test("requires a verified parent before returning profile options", async () => 
 
   state.addUser("verified", "verified-token");
   const response = await signedIn(request(app).get("/api/v1/profile-options"), "verified-token").expect(200);
+  assert.deepEqual(response.body.data, profileOptions);
+});
+
+test("allows an unverified parent through the child-profile gate during private beta", async () => {
+  const state = createMemoryState();
+  state.addUser("beta-parent", "beta-token", false);
+  const app = createProfileApp(state, false);
+
+  const response = await signedIn(request(app).get("/api/v1/profile-options"), "beta-token").expect(200);
   assert.deepEqual(response.body.data, profileOptions);
 });
 
@@ -165,6 +184,36 @@ test("rejects unsupported ages, option keys, and duplicate choices", async () =>
   assert.equal(state.profiles.size, 0);
 });
 
+test("updates only the signed-in parent's profile and can remove the nickname", async () => {
+  const state = createMemoryState();
+  state.addUser("parent-one", "parent-one-token");
+  state.addUser("parent-two", "parent-two-token");
+  state.addUser("parent-without-profile", "parent-without-profile-token");
+  const parentOne = await state.childProfiles.create("parent-one", validProfile());
+  const parentTwo = await state.childProfiles.create("parent-two", validProfile({ nickname: "Jo" }));
+  const app = createProfileApp(state);
+
+  const updated = await signedIn(request(app).patch("/api/v1/child-profile"), "parent-one-token")
+    .send({ nickname: "", interestKeys: ["animals"], playStyleKeys: ["pretend"] })
+    .expect(200);
+
+  assert.equal(updated.body.data.id, parentOne.id);
+  assert.equal(updated.body.data.nickname, undefined);
+  assert.deepEqual(updated.body.data.interestKeys, ["animals"]);
+  assert.deepEqual(updated.body.data.playStyleKeys, ["pretend"]);
+  assert.deepEqual(state.profiles.get("parent-two"), parentTwo);
+
+  const notFound = await signedIn(request(app).patch("/api/v1/child-profile"), "parent-without-profile-token")
+    .send(validProfile())
+    .expect(404);
+  assert.equal(notFound.body.error.code, "NOT_FOUND");
+
+  const missing = await signedIn(request(app).patch("/api/v1/child-profile"), "missing-token")
+    .send(validProfile())
+    .expect(401);
+  assert.equal(missing.body.error.code, "UNAUTHENTICATED");
+});
+
 test("returns safe errors when profile storage is unavailable", async () => {
   const state = createMemoryState();
   state.addUser("parent", "parent-token");
@@ -172,6 +221,7 @@ test("returns safe errors when profile storage is unavailable", async () => {
     async listOptions() { throw new Error("private database detail"); },
     async findActiveByUserId() { throw new Error("private database detail"); },
     async create() { throw new Error("private database detail"); },
+    async update() { throw new Error("private database detail"); },
   };
   const app = createApp({
     databaseName: "play_spark_test",

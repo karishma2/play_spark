@@ -33,9 +33,11 @@ npm run seed:profiles
 
 The catalogue command validates `content/guest-samples.json`, creates or updates the approved catalogue collections and indexes, and upserts stable records. The profile command does the same for the curated interests and play styles in `content/profile-options.json`. Both seed commands are safe to run again after reviewed content changes.
 
-## Password reset email
+## Account email policy
 
 Set `APP_BASE_URL` to the public frontend origin used in verification and password-reset links. For local development this is normally `http://localhost:5173`. To send account emails, configure both `RESEND_API_KEY` and `RESEND_FROM_EMAIL`; use Resend's testing sender during local development or a verified domain for deployed environments. Restart the API after changing these values, then run `npm run setup:auth` to create the authentication token collections and indexes and mark accounts created before email verification as verified.
+
+Set `REQUIRE_EMAIL_VERIFICATION=false` for the controlled private beta while production email delivery is unavailable. New accounts created in this mode can proceed directly to child-profile onboarding and remain verification-exempt if the requirement is enabled later. Set it to `true` after a production sending domain is verified. Password-reset delivery still requires configured email delivery.
 
 ## Commands
 
@@ -57,6 +59,7 @@ Configure these Vercel environment variables for Production and Preview as appro
 - `MONGODB_DB_NAME` (`play_spark_beta` for the private beta)
 - `SESSION_SECRET` (at least 32 characters and different from development)
 - `APP_BASE_URL` (the stable HTTPS Vercel production URL)
+- `REQUIRE_EMAIL_VERIFICATION` (`false` for the controlled private beta; `true` when production email is ready)
 - `RESEND_API_KEY` and `RESEND_FROM_EMAIL` together when account email is enabled
 
 Do not seed during the Vercel build. Before beta use, run `npm run setup:auth`, `npm run seed:catalog`, and `npm run seed:profiles` once from an authorized environment configured for the beta database. All commands are repeatable.
