@@ -49,6 +49,10 @@ export function getGuestSample(sampleId: string) {
   return requestJson<GuestSample>(`/api/v1/guest/samples/${encodeURIComponent(sampleId)}`);
 }
 
+export function getPlayPath(playPathId: string) {
+  return requestJson<GuestSample>(`/api/v1/play-paths/${encodeURIComponent(playPathId)}`);
+}
+
 function submitCredentials(path: string, email: string, password: string) {
   return requestJson<AuthSession>(path, {
     method: "POST",
@@ -93,6 +97,32 @@ export interface ChildProfileInput {
 
 export interface ChildProfile extends ChildProfileInput {
   id: string;
+}
+
+export type RecommendationState = "calm" | "ready_to_play" | "full_energy";
+export type RecommendationConstraint = "small_space" | "quiet" | "low_mess" | "mostly_independent";
+
+export interface RecommendationSelection {
+  availableMinutes: 10 | 20 | 30;
+  currentState: RecommendationState;
+  constraints: RecommendationConstraint[];
+  themeKey?: string;
+}
+
+export interface RecommendationCard {
+  playPathId: string;
+  title: string;
+  summary: string;
+  goal: string;
+  supports: string[];
+  durationMinutes: number;
+  setupMinutes: number;
+  parentEffort: "independent_after_setup" | "check_in_occasionally" | "parent_guided";
+  imageUrl: string;
+  imageAlt: string;
+  materials: string[];
+  matchType: "exact" | "best_available";
+  explanation: string;
 }
 
 function postJson<T>(path: string, body: unknown) {
@@ -141,4 +171,8 @@ export function updateChildProfile(input: ChildProfileInput) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
+}
+
+export function getRecommendations(selection: RecommendationSelection) {
+  return postJson<{ recommendations: RecommendationCard[] }>("/api/v1/recommendations", selection);
 }

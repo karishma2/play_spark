@@ -98,6 +98,7 @@ const passwordHasher: PasswordHasher = {
 const catalog: CatalogRepository = {
   async listGuestSamples() { return []; },
   async findGuestSample() { return null; },
+  async findPublishedPlayPath() { return null; },
 };
 
 function createAuthTestApp(

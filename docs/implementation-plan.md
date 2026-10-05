@@ -72,6 +72,47 @@ Phase 3 is delivered as two independently reviewable vertical slices.
 - The profile screen provides loading, retry, validation, cancel, success, and responsive states and explains that changes affect future recommendations only.
 - Existing onboarding, authentication, guest activity, and historical activity behavior remains unchanged.
 
+## Phase 4 — Discovery
+
+Phase 4 is delivered as two independently reviewable vertical slices.
+
+### Phase 4.1 — Rule-based personalized recommendations
+
+**Branch:** `feature/personalized-recommendations`
+
+#### Scope
+
+- Implement authenticated `POST /api/v1/recommendations` using the active child profile and published Play Path eligibility data.
+- Validate the immediate situation: 10, 20, or 30 available minutes; current energy; practical constraints; and an optional theme.
+- Rank age-suitable content deterministically by interests, play styles, current energy, theme, time, and constraints.
+- Return at most three useful recommendation cards with an exact or best-available label and a short parent-facing explanation.
+
+#### Acceptance criteria
+
+- Only a signed-in parent allowed by the configured email-verification policy and owning an active child profile can request recommendations.
+- Child age eligibility is mandatory and ownership is always derived from the secure session.
+- Exact matches are ranked ahead of fallback matches; ties have stable deterministic ordering.
+- When immediate preferences cannot all be met, age-suitable best-available results identify the relaxed preference instead of returning an empty screen.
+- Invalid input, missing profiles, unauthenticated access, verification-policy failures, and storage failures return safe API errors.
+- Recommendation logic remains in a dedicated server module and has focused ranking and route coverage.
+
+### Phase 4.2 — Parent discovery dashboard
+
+#### Scope
+
+- Replace the signed-in full-catalogue landing state with a focused parent discovery dashboard.
+- Let the parent choose available time, current energy, practical constraints, and an optional interest before refreshing recommendations.
+- Present recommendation reasoning, purpose, materials, effort, setup time, and exact or best-available status.
+- Open recommended content through the authenticated Play Path detail boundary while leaving guest discovery unchanged.
+
+#### Acceptance criteria
+
+- A signed-in parent with an active child profile receives recommendations on the dashboard without seeing guest account prompts.
+- Changing and submitting discovery choices refreshes the ranked results while preserving clear loading, retry, and no-result states.
+- Recommendation cards explain why an activity was selected and clearly label relaxed-preference results.
+- Selecting a recommendation opens the complete age-suitable Play Path detail through an authenticated API route.
+- The discovery dashboard remains keyboard usable and responsive at supported mobile and desktop widths.
+
 ## Phase 2 — Parent accounts and secure authentication
 
 Phase 2 is delivered as two independently reviewable vertical slices.

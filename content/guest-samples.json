@@ -19,6 +19,7 @@
         "independenceLevel": "check_in_occasionally"
       },
       "guestPreview": {
+        "enabled": true,
         "position": 1,
         "setupMinutes": 2,
         "parentEffort": "Low",
@@ -96,6 +97,7 @@
         "independenceLevel": "parent_guided"
       },
       "guestPreview": {
+        "enabled": true,
         "position": 2,
         "setupMinutes": 1,
         "parentEffort": "Low",
@@ -173,6 +175,7 @@
         "independenceLevel": "check_in_occasionally"
       },
       "guestPreview": {
+        "enabled": false,
         "position": 3,
         "setupMinutes": 2,
         "parentEffort": "Low",
@@ -250,6 +253,7 @@
         "independenceLevel": "check_in_occasionally"
       },
       "guestPreview": {
+        "enabled": false,
         "position": 4,
         "setupMinutes": 2,
         "parentEffort": "Low",
@@ -327,6 +331,7 @@
         "independenceLevel": "parent_guided"
       },
       "guestPreview": {
+        "enabled": false,
         "position": 5,
         "setupMinutes": 1,
         "parentEffort": "Low",
@@ -404,6 +409,7 @@
         "independenceLevel": "parent_guided"
       },
       "guestPreview": {
+        "enabled": false,
         "position": 6,
         "setupMinutes": 3,
         "parentEffort": "Low",
@@ -459,6 +465,474 @@
           "sayThis": "Make a secret sorting rule. I will study your evidence and try to guess it.",
           "childChallenge": "Sort the objects using a secret rule, listen to the grown-up's guess, then explain the evidence that proves the answer.",
           "tidyUp": "Return outdoor items responsibly and wash hands together."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000007",
+      "title": "Jump the Secret Code: Look, Move & Remember",
+      "description": "Follow a tiny floor code with your feet, remember it, and invent a new route for a grown-up.",
+      "goal": "Turn a simple tape path into a playful challenge for attention, balance, and working memory.",
+      "supports": ["Visual attention", "Balance and coordination", "Working memory"],
+      "durationMinutes": 10,
+      "themeKey": "art",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["art", "building"],
+        "playStyleKeys": ["move", "discover"],
+        "energyLevels": ["ready_to_play", "full_energy"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "independent_after_setup"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 7,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Movement",
+        "secondaryCategory": "Focus Game",
+        "imageUrl": "/activities/jump-secret-code.svg",
+        "imageAlt": "A short tape path of circles with different foot-position lines.",
+        "materials": ["painter's tape"],
+        "safetyNote": "Make a short path on a dry floor away from furniture and stairs. Remove tape slowly afterward."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000007",
+        "key": "secret-code-path",
+        "title": "Secret Code Path",
+        "background": { "assetRef": "inline-svg:secret-code-path", "alt": "A bright movement-code Mission Wall" },
+        "elements": [
+          { "key": "code-circles", "label": "Code circles", "revealMessage": "Code circles revealed!", "assetRef": "inline-svg:code-circles", "layer": 1 },
+          { "key": "footprints", "label": "Clever footprints", "revealMessage": "Footprints revealed!", "assetRef": "inline-svg:footprints", "layer": 2 },
+          { "key": "code-flag", "label": "Code-maker flag", "revealMessage": "Code-maker flag revealed!", "assetRef": "inline-svg:code-flag", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000019",
+          "position": 1,
+          "wallElementKey": "code-circles",
+          "title": "Build a three-move code",
+          "durationMinutes": 3,
+          "setupSteps": ["Tape three circles or squares in a short line.", "Add one straight line inside each shape in a different direction."],
+          "sayThis": "Each mark is a secret instruction for our feet.",
+          "childChallenge": "Step into each shape and turn both feet to match its line.",
+          "tidyUp": "Press down any loose tape edge before moving."
+        },
+        {
+          "id": "64b300000000000000000020",
+          "position": 2,
+          "wallElementKey": "footprints",
+          "title": "Remember the route",
+          "durationMinutes": 3,
+          "setupSteps": ["Look at all three marks together.", "Start one step before the first shape."],
+          "sayThis": "Can your feet remember the whole code without stopping?",
+          "childChallenge": "Travel the route twice, then try once while looking toward the finish.",
+          "tidyUp": "Pause if the floor or tape starts to slip."
+        },
+        {
+          "id": "64b300000000000000000021",
+          "position": 3,
+          "wallElementKey": "code-flag",
+          "title": "Become the code maker",
+          "durationMinutes": 4,
+          "setupSteps": ["Let the child point to a new order for the three shapes."],
+          "sayThis": "You made the code. Can I solve it?",
+          "childChallenge": "Guide a grown-up through the route and spot one funny mistake.",
+          "tidyUp": "Peel up the tape slowly and roll it into one small ball."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000008",
+      "title": "Wake the Paper Worms: Colour, Predict & Watch",
+      "description": "Make tiny paper worms, predict what water will do, and watch them uncurl together.",
+      "goal": "Create a quick transformation that encourages fine-motor control, prediction, and close observation.",
+      "supports": ["Fine-motor control", "Prediction and cause-and-effect", "Colour patterning"],
+      "durationMinutes": 10,
+      "themeKey": "nature",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["nature", "art"],
+        "playStyleKeys": ["create", "discover", "sensory"],
+        "energyLevels": ["calm", "ready_to_play"],
+        "noiseLevel": "quiet",
+        "messLevel": "low",
+        "spaceLevel": "small",
+        "independenceLevel": "parent_guided"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 8,
+        "setupMinutes": 3,
+        "parentEffort": "Low",
+        "messLevel": "Low",
+        "category": "Make & Reveal",
+        "secondaryCategory": "Mini Science",
+        "imageUrl": "/activities/paper-worms.svg",
+        "imageAlt": "Colourful rolled paper worms beginning to uncurl on a plate.",
+        "materials": ["kitchen tissue", "washable markers", "plate with a spoonful of water"],
+        "safetyNote": "An adult handles the water and prepares the tight paper rolls. The worms are for play, not eating."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000008",
+        "key": "paper-worm-garden",
+        "title": "Paper Worm Garden",
+        "background": { "assetRef": "inline-svg:paper-worm-garden", "alt": "A colourful paper-worm Mission Wall" },
+        "elements": [
+          { "key": "colour-pattern", "label": "Colour pattern", "revealMessage": "Colour pattern revealed!", "assetRef": "inline-svg:colour-pattern", "layer": 1 },
+          { "key": "sleeping-worms", "label": "Sleeping worms", "revealMessage": "Sleeping worms revealed!", "assetRef": "inline-svg:sleeping-worms", "layer": 2 },
+          { "key": "waking-garden", "label": "Waking garden", "revealMessage": "Worm garden revealed!", "assetRef": "inline-svg:waking-garden", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000022",
+          "position": 1,
+          "wallElementKey": "colour-pattern",
+          "title": "Draw the worm stripes",
+          "durationMinutes": 3,
+          "setupSteps": ["Tear three narrow tissue strips.", "Draw spaced stripes across each strip with washable markers."],
+          "sayThis": "Which two colours should your first worm wear?",
+          "childChallenge": "Give each strip a different repeating colour pattern.",
+          "tidyUp": "Keep marker caps together beside the plate."
+        },
+        {
+          "id": "64b300000000000000000023",
+          "position": 2,
+          "wallElementKey": "sleeping-worms",
+          "title": "Make the worms sleep",
+          "durationMinutes": 3,
+          "setupSteps": ["An adult rolls each strip around a marker and gently pushes the ends together.", "Slide each compressed roll onto the dry plate."],
+          "sayThis": "Which sleeping worm do you think will stretch the farthest?",
+          "childChallenge": "Choose a prediction and explain what you noticed about that worm.",
+          "tidyUp": "Put the markers away before adding water."
+        },
+        {
+          "id": "64b300000000000000000024",
+          "position": 3,
+          "wallElementKey": "waking-garden",
+          "title": "Wake them with water",
+          "durationMinutes": 4,
+          "setupSteps": ["Spoon a little water around the worms without covering them."],
+          "sayThis": "Watch closely—what changes first?",
+          "childChallenge": "Describe how each worm moves and check whether the prediction was right.",
+          "tidyUp": "Place the damp tissue in the bin and wipe the plate."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000009",
+      "title": "Sock Parcel Toss: Aim, Adjust & Deliver",
+      "description": "Turn rolled socks into parcels, aim for a laundry-basket town, and improve each delivery route.",
+      "goal": "Practise aiming and force control while making simple decisions about distance and difficulty.",
+      "supports": ["Hand-eye coordination", "Force and distance", "Planning and persistence"],
+      "durationMinutes": 10,
+      "themeKey": "vehicles",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["vehicles", "building"],
+        "playStyleKeys": ["move", "pretend"],
+        "energyLevels": ["ready_to_play", "full_energy"],
+        "noiseLevel": "moderate",
+        "messLevel": "none",
+        "spaceLevel": "medium",
+        "independenceLevel": "independent_after_setup"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 9,
+        "setupMinutes": 1,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Movement",
+        "secondaryCategory": "Aim Game",
+        "imageUrl": "/activities/sock-parcel-toss.svg",
+        "imageAlt": "Rolled sock parcels beside a laundry-basket delivery target.",
+        "materials": ["3 pairs of rolled socks", "laundry basket"],
+        "safetyNote": "Use only soft rolled socks, clear the throwing area, and aim away from people and breakable objects."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000009",
+        "key": "parcel-town",
+        "title": "Parcel Town",
+        "background": { "assetRef": "inline-svg:parcel-town", "alt": "A cheerful parcel-delivery Mission Wall" },
+        "elements": [
+          { "key": "parcel-stack", "label": "Parcel stack", "revealMessage": "Parcels revealed!", "assetRef": "inline-svg:parcel-stack", "layer": 1 },
+          { "key": "delivery-basket", "label": "Delivery depot", "revealMessage": "Depot revealed!", "assetRef": "inline-svg:delivery-basket", "layer": 2 },
+          { "key": "town-route", "label": "Town route", "revealMessage": "Delivery route revealed!", "assetRef": "inline-svg:town-route", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000025",
+          "position": 1,
+          "wallElementKey": "parcel-stack",
+          "title": "Prepare the soft parcels",
+          "durationMinutes": 2,
+          "setupSteps": ["Roll three pairs of socks into soft balls.", "Place the basket two big steps away."],
+          "sayThis": "These parcels need careful drivers.",
+          "childChallenge": "Choose a pretend item inside each parcel and name its destination.",
+          "tidyUp": "Keep every parcel at the starting point."
+        },
+        {
+          "id": "64b300000000000000000026",
+          "position": 2,
+          "wallElementKey": "delivery-basket",
+          "title": "Find the best throw",
+          "durationMinutes": 4,
+          "setupSteps": ["Throw underarm from the starting point."],
+          "sayThis": "Was that throw too soft, too strong, or just right?",
+          "childChallenge": "Deliver all three parcels, changing the next throw after every miss.",
+          "tidyUp": "Collect missed parcels only after all three throws."
+        },
+        {
+          "id": "64b300000000000000000027",
+          "position": 3,
+          "wallElementKey": "town-route",
+          "title": "Choose a new delivery route",
+          "durationMinutes": 4,
+          "setupSteps": ["Move the basket one step nearer, farther, or sideways."],
+          "sayThis": "How did the new route change your plan?",
+          "childChallenge": "Complete one final round and explain which position was easiest.",
+          "tidyUp": "Return the socks to the basket together."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000010",
+      "title": "Feed the Colour Creatures: Match, Post & Switch",
+      "description": "Make three hungry paper creatures, feed them matching cards, and switch the rule before the next round.",
+      "goal": "Practise colour and shape matching through a quick posting game with an immediate result after every choice.",
+      "supports": ["Visual matching", "Fine-motor control", "Flexible thinking"],
+      "durationMinutes": 20,
+      "themeKey": "animals",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["animals", "art"],
+        "playStyleKeys": ["create", "discover"],
+        "energyLevels": ["calm", "ready_to_play"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 10,
+        "setupMinutes": 3,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Match & Post",
+        "secondaryCategory": "Make & Play",
+        "imageUrl": "/activities/feed-colour-creatures.svg",
+        "imageAlt": "Three colourful paper creatures being fed matching paper cards.",
+        "materials": ["3 paper cups or bags", "paper scraps", "washable markers"],
+        "safetyNote": "Use large paper cards that cannot be swallowed. An adult prepares any openings that need scissors."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000010",
+        "key": "colour-creature-cafe",
+        "title": "Colour Creature Café",
+        "background": { "assetRef": "inline-svg:colour-creature-cafe", "alt": "A colourful creature café Mission Wall" },
+        "elements": [
+          { "key": "hungry-creatures", "label": "Hungry creatures", "revealMessage": "Hungry creatures revealed!", "assetRef": "inline-svg:hungry-creatures", "layer": 1 },
+          { "key": "colour-feast", "label": "Colour feast", "revealMessage": "Colour feast revealed!", "assetRef": "inline-svg:colour-feast", "layer": 2 },
+          { "key": "rule-switch", "label": "Challenge sign", "revealMessage": "Challenge sign revealed!", "assetRef": "inline-svg:rule-switch", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000028",
+          "position": 1,
+          "wallElementKey": "hungry-creatures",
+          "title": "Make three hungry creatures",
+          "durationMinutes": 6,
+          "setupSteps": ["Give each cup or bag a different coloured face.", "An adult prepares one wide posting opening on each creature."],
+          "sayThis": "These creatures are hungry. Which colours should they eat?",
+          "childChallenge": "Choose each creature's colour and draw its funniest hungry face.",
+          "tidyUp": "Cap the markers before making the food cards."
+        },
+        {
+          "id": "64b300000000000000000029",
+          "position": 2,
+          "wallElementKey": "colour-feast",
+          "title": "Feed the matching colours",
+          "durationMinutes": 7,
+          "setupSteps": ["Draw six large colour cards on paper scraps.", "Mix the cards in one pile."],
+          "sayThis": "Feed every card to the creature with the same colour.",
+          "childChallenge": "Post all six cards, checking each match before letting go.",
+          "tidyUp": "Tip the cards back into one starting pile."
+        },
+        {
+          "id": "64b300000000000000000030",
+          "position": 3,
+          "wallElementKey": "rule-switch",
+          "title": "Switch the feeding rule",
+          "durationMinutes": 7,
+          "setupSteps": ["Add a circle, stripe, or dot to each food card."],
+          "sayThis": "New rule: feed by the mark instead of the colour.",
+          "childChallenge": "Choose the new rule, feed every creature again, then catch one silly parent mistake.",
+          "tidyUp": "Store the cards inside one creature for another round."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000011",
+      "title": "Mystery Touch Detective: Feel, Match & Reveal",
+      "description": "Reach into a mystery bag, describe one hidden object, and match it before the big reveal.",
+      "goal": "Build focused observation and descriptive language by identifying familiar objects without looking.",
+      "supports": ["Sensory discrimination", "Descriptive language", "Working memory"],
+      "durationMinutes": 20,
+      "themeKey": "vehicles",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["nature", "building", "animals"],
+        "playStyleKeys": ["sensory", "discover"],
+        "energyLevels": ["calm", "ready_to_play"],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "parent_guided"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 11,
+        "setupMinutes": 1,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Sensory",
+        "secondaryCategory": "Guessing Game",
+        "imageUrl": "/activities/mystery-touch-detective.svg",
+        "imageAlt": "A child feeling a hidden object inside a colourful mystery bag.",
+        "materials": ["cloth bag or pillowcase", "5 familiar safe objects", "paper and marker"],
+        "safetyNote": "An adult chooses clean, large, unbreakable objects with no sharp edges or choking hazards."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000011",
+        "key": "detective-table",
+        "title": "Mystery Detective Table",
+        "background": { "assetRef": "inline-svg:detective-table", "alt": "A mystery-solving Mission Wall" },
+        "elements": [
+          { "key": "mystery-bag", "label": "Mystery bag", "revealMessage": "Mystery bag revealed!", "assetRef": "inline-svg:mystery-bag", "layer": 1 },
+          { "key": "clue-cards", "label": "Clue cards", "revealMessage": "Clue cards revealed!", "assetRef": "inline-svg:clue-cards", "layer": 2 },
+          { "key": "detective-badge", "label": "Detective badge", "revealMessage": "Detective badge revealed!", "assetRef": "inline-svg:detective-badge", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000031",
+          "position": 1,
+          "wallElementKey": "mystery-bag",
+          "title": "Hide five mystery objects",
+          "durationMinutes": 5,
+          "setupSteps": ["Choose five safe objects with different textures or shapes.", "Place them in the bag without showing the child."],
+          "sayThis": "Your detective hand can look without using eyes.",
+          "childChallenge": "Reach in, choose one object, and keep it hidden while feeling every side.",
+          "tidyUp": "Keep the mystery bag on the floor or a low table."
+        },
+        {
+          "id": "64b300000000000000000032",
+          "position": 2,
+          "wallElementKey": "clue-cards",
+          "title": "Collect three touch clues",
+          "durationMinutes": 8,
+          "setupSteps": ["Draw simple clue marks for hard or soft, smooth or bumpy, and round or straight."],
+          "sayThis": "Tell me three clues before you make your guess.",
+          "childChallenge": "Describe the hidden object, point to matching clue marks, and guess what it is.",
+          "tidyUp": "Return each revealed object beside the bag."
+        },
+        {
+          "id": "64b300000000000000000033",
+          "position": 3,
+          "wallElementKey": "detective-badge",
+          "title": "Become the mystery maker",
+          "durationMinutes": 7,
+          "setupSteps": ["Let the child secretly choose one safe object for the bag."],
+          "sayThis": "Now you give the clues and I will solve your mystery.",
+          "childChallenge": "Guide the grown-up with three touch clues without saying the object's name.",
+          "tidyUp": "Count all five objects back to their usual places."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000012",
+      "title": "Sticker Treasure Route: Design, Follow & Deliver",
+      "description": "Draw a simple room map, build a sticker route, and follow it to complete three real-world deliveries.",
+      "goal": "Turn drawing and stickers into an active navigation challenge with planning, movement, and visible progress.",
+      "supports": ["Spatial planning", "Fine-motor control", "Following and giving directions"],
+      "durationMinutes": 30,
+      "themeKey": "stories",
+      "eligibility": {
+        "ageBands": ["3_4", "4_5", "5_6"],
+        "interestKeys": ["art", "vehicles", "building"],
+        "playStyleKeys": ["create", "move", "discover"],
+        "energyLevels": ["ready_to_play", "full_energy"],
+        "noiseLevel": "quiet",
+        "messLevel": "low",
+        "spaceLevel": "small",
+        "independenceLevel": "parent_guided"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 12,
+        "setupMinutes": 5,
+        "parentEffort": "Low",
+        "messLevel": "Low",
+        "category": "Draw & Move",
+        "secondaryCategory": "Treasure Route",
+        "imageUrl": "/activities/sticker-treasure-route.svg",
+        "imageAlt": "A hand-drawn treasure map with a bright sticker route connecting three room landmarks.",
+        "materials": ["large paper", "washable marker", "stickers or small paper squares"],
+        "safetyNote": "Choose safe, reachable landmarks away from stairs and doors. Keep stickers off floors where they could cause slips."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000012",
+        "key": "treasure-route",
+        "title": "Treasure Route",
+        "background": { "assetRef": "inline-svg:treasure-route", "alt": "A completed treasure-route Mission Wall" },
+        "elements": [
+          { "key": "map-landmarks", "label": "Map landmarks", "revealMessage": "Landmarks revealed!", "assetRef": "inline-svg:map-landmarks", "layer": 1 },
+          { "key": "sticker-road", "label": "Sticker road", "revealMessage": "Sticker road revealed!", "assetRef": "inline-svg:sticker-road", "layer": 2 },
+          { "key": "treasure-delivery", "label": "Treasure delivery", "revealMessage": "Treasure delivered!", "assetRef": "inline-svg:treasure-delivery", "layer": 3 }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000034",
+          "position": 1,
+          "wallElementKey": "map-landmarks",
+          "title": "Draw three room landmarks",
+          "durationMinutes": 8,
+          "setupSteps": ["Place the paper on a table.", "Choose three safe landmarks such as the sofa, table, and toy basket."],
+          "sayThis": "Can you draw a simple mark for each real place?",
+          "childChallenge": "Draw the three landmarks and point from each drawing to its real match in the room.",
+          "tidyUp": "Keep the marker beside the map."
+        },
+        {
+          "id": "64b300000000000000000035",
+          "position": 2,
+          "wallElementKey": "sticker-road",
+          "title": "Build the sticker road",
+          "durationMinutes": 10,
+          "setupSteps": ["Choose which landmark comes first, second, and last.", "Place the first sticker at the starting point."],
+          "sayThis": "Add one sticker at a time until the road reaches every place.",
+          "childChallenge": "Build a continuous route, adding a bend, bridge mark, or stop sign of your choice.",
+          "tidyUp": "Return unused stickers to one sheet or small bowl."
+        },
+        {
+          "id": "64b300000000000000000036",
+          "position": 3,
+          "wallElementKey": "treasure-delivery",
+          "title": "Follow and test the route",
+          "durationMinutes": 12,
+          "setupSteps": ["Choose three soft objects as treasures.", "Place one treasure at the map's starting point."],
+          "sayThis": "Follow your map and deliver one treasure at every stop.",
+          "childChallenge": "Complete the route, repair any confusing part, then guide a grown-up through your improved map.",
+          "tidyUp": "Return the treasures and save or recycle the map."
         }
       ]
     }

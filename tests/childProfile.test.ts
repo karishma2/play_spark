@@ -16,6 +16,7 @@ import type { CatalogRepository } from "../server/catalog.js";
 const catalog: CatalogRepository = {
   async listGuestSamples() { return []; },
   async findGuestSample() { return null; },
+  async findPublishedPlayPath() { return null; },
 };
 
 const profileOptions: ProfileOptions = {
