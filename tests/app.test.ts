@@ -36,6 +36,9 @@ const catalog: CatalogRepository = {
   async findGuestSample(id) {
     return id === sampleId ? guestSample : null;
   },
+  async findPublishedPlayPath(id) {
+    return id === sampleId ? guestSample : null;
+  },
 };
 const app = createApp({ databaseName: "play_spark_test", catalog });
 
@@ -98,6 +101,7 @@ test("returns a safe error when the activity catalogue is unavailable", async ()
   const unavailableCatalog: CatalogRepository = {
     async listGuestSamples() { throw new Error("database details must stay private"); },
     async findGuestSample() { throw new Error("database details must stay private"); },
+    async findPublishedPlayPath() { throw new Error("database details must stay private"); },
   };
   const unavailableApp = createApp({ databaseName: "play_spark_test", catalog: unavailableCatalog });
 

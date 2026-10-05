@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getAuthSession, getGuestSample, getGuestSamples, signOut, type AuthSession } from "./api";
+import { getAuthSession, getGuestSample, getGuestSamples, getPlayPath, signOut, type AuthSession } from "./api";
 import { AuthPage } from "./AuthPage";
 import { ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage } from "./PasswordPage";
 import { EmailVerificationPendingPage, VerifyEmailPage } from "./EmailVerificationPage";
 import { OnboardingPage } from "./OnboardingPage";
 import { ChildProfilePage } from "./ChildProfilePage";
+import { DiscoveryDashboard } from "./DiscoveryDashboard";
 import {
   completeSample,
   readGuestProgress,
@@ -182,6 +183,53 @@ function AccountInvitation({ onClose, onCreate, onSignIn }: { onClose: () => voi
       </section>
     </div>
   );
+}
+
+function AdditionalMissionWallScene({
+  sceneKey,
+  revealed,
+  highlightedMissionIndex,
+}: {
+  sceneKey: string;
+  revealed: boolean[];
+  highlightedMissionIndex?: number;
+}) {
+  const piece = (index: number) => `mission-wall-piece${revealed[index] ? " revealed" : ""}${highlightedMissionIndex === index ? " newly-revealed" : ""}`;
+
+  if (sceneKey === "secret-code-path") return <>
+    <g className={piece(0)} fill="none" stroke="#d96b43" strokeWidth="8"><circle cx="75" cy="108" r="25" /><circle cx="145" cy="83" r="23" /><circle cx="215" cy="108" r="25" /><path d="M55 108h40M145 60v46M197 90l36 36" /></g>
+    <g className={piece(1)} fill="#dda74a"><ellipse cx="270" cy="101" rx="13" ry="24" transform="rotate(-25 270 101)" /><ellipse cx="301" cy="78" rx="13" ry="24" transform="rotate(-25 301 78)" /></g>
+    <g className={piece(2)}><path d="M326 126V38" stroke="#214e34" strokeWidth="7" /><path d="M330 42h27l-9 13 9 13h-27z" fill="#7f63b5" /></g>
+  </>;
+  if (sceneKey === "paper-worm-garden") return <>
+    <g className={piece(0)} strokeWidth="9" strokeLinecap="round"><path d="M35 109h74" stroke="#d96b43" /><path d="M35 88h74" stroke="#79a583" /><path d="M35 67h74" stroke="#7f63b5" /></g>
+    <g className={piece(1)} fill="none" stroke="#dda74a" strokeWidth="18" strokeLinecap="round"><path d="M134 108q28-54 55 0t55 0" /></g>
+    <g className={piece(2)}><path d="M252 130q34-76 67 0" fill="none" stroke="#79a583" strokeWidth="18" strokeLinecap="round" /><circle cx="286" cy="58" r="25" fill="#d96b43" /><circle cx="286" cy="58" r="10" fill="#dda74a" /></g>
+  </>;
+  if (sceneKey === "parcel-town") return <>
+    <g className={piece(0)} fill="#dda74a" stroke="#9d6a15" strokeWidth="4"><rect x="38" y="83" width="38" height="35" rx="4" /><rect x="76" y="65" width="42" height="53" rx="4" /></g>
+    <g className={piece(1)}><path d="M150 69h75l-10 58h-55z" fill="#79a583" stroke="#214e34" strokeWidth="6" /><path d="M158 88h60M155 105h65" stroke="#fff" strokeWidth="4" /></g>
+    <g className={piece(2)}><path d="M238 115q42-78 103-45" fill="none" stroke="#d96b43" strokeWidth="13" strokeLinecap="round" strokeDasharray="13 11" /><path d="m330 55 19 13-21 9" fill="#d96b43" /></g>
+  </>;
+  if (sceneKey === "colour-creature-cafe") return <>
+    <g className={piece(0)} stroke="#214e34" strokeWidth="5">
+      <path d="M30 65q0-24 24-24h57q24 0 24 24v64H30z" fill="#d96b43" /><circle cx="61" cy="70" r="6" fill="#fff" /><circle cx="103" cy="70" r="6" fill="#fff" /><rect x="55" y="91" width="55" height="24" rx="11" fill="#fff" />
+      <path d="M145 65q0-24 24-24h57q24 0 24 24v64H145z" fill="#dda74a" /><circle cx="176" cy="70" r="6" fill="#fff" /><circle cx="218" cy="70" r="6" fill="#fff" /><rect x="170" y="91" width="55" height="24" rx="11" fill="#fff" />
+    </g>
+    <g className={piece(1)} stroke="#214e34" strokeWidth="4"><circle cx="282" cy="104" r="20" fill="#d96b43" /><rect x="314" y="84" width="40" height="40" rx="7" fill="#dda74a" /><path d="m275 104 8 8 14-18M324 104l8 8 14-18" fill="none" /></g>
+    <g className={piece(2)}><path d="M275 35h70v37h-70z" fill="#79a583" stroke="#214e34" strokeWidth="5" /><path d="M289 54h43" stroke="#fff" strokeWidth="5" strokeDasharray="7 5" /><path d="m330 29 8 10 13-3-2 13 10 8-12 6-1 14-11-8-12 7 1-14-11-7 11-7z" fill="#7f63b5" /></g>
+  </>;
+  if (sceneKey === "detective-table") return <>
+    <g className={piece(0)}><path d="M33 53q51-26 102 0l-13 77H47z" fill="#7f63b5" stroke="#214e34" strokeWidth="6" /><path d="M48 55q36 16 73 0" fill="none" stroke="#dda74a" strokeWidth="9" strokeLinecap="round" /><text x="73" y="105" fill="#fff" fontSize="45" fontWeight="800">?</text></g>
+    <g className={piece(1)} stroke="#214e34" strokeWidth="4"><rect x="151" y="48" width="56" height="72" rx="7" fill="#fff" /><path d="M165 70h28M165 83h22M165 96h31" /><rect x="218" y="48" width="56" height="72" rx="7" fill="#fff" /><circle cx="246" cy="82" r="15" fill="#dda74a" /></g>
+    <g className={piece(2)}><path d="m319 42 11 19 22 5-15 17 2 22-20-9-20 9 2-22-15-17 22-5z" fill="#d96b43" stroke="#214e34" strokeWidth="5" /><circle cx="319" cy="73" r="9" fill="#fff" /><path d="M302 107l-8 28 25-12 25 12-8-28" fill="#79a583" stroke="#214e34" strokeWidth="5" /></g>
+  </>;
+  if (sceneKey === "treasure-route") return <>
+    <g className={piece(0)} stroke="#214e34" strokeWidth="5"><path d="M23 92l32-29 32 29v36H23z" fill="#d96b43" /><rect x="104" y="70" width="65" height="55" rx="7" fill="#7ba5b6" /><path d="M190 126V74h70v52" fill="#dda74a" /></g>
+    <g className={piece(1)}><path d="M58 112c46-77 75 26 116-26 31-39 57 30 98-18" fill="none" stroke="#79a583" strokeWidth="9" strokeLinecap="round" strokeDasharray="2 16" /><g fill="#dda74a" stroke="#214e34" strokeWidth="3"><circle cx="58" cy="112" r="10" /><circle cx="174" cy="86" r="10" /><circle cx="272" cy="68" r="10" /></g></g>
+    <g className={piece(2)}><rect x="286" y="85" width="55" height="42" rx="6" fill="#d96b43" stroke="#214e34" strokeWidth="5" /><path d="M314 85v42M286 101h55" stroke="#f4d17c" strokeWidth="5" /><path d="m315 35 8 16 18 2-13 12 4 18-17-9-16 9 3-18-13-12 18-2z" fill="#7f63b5" /></g>
+  </>;
+  return null;
 }
 
 function Landing({
@@ -512,7 +560,13 @@ function MissionWallPreview({
               <circle cx="300" cy="65" r="31" fill="none" stroke="#214e34" strokeWidth="9" /><path d="M322 87l35 35" stroke="#214e34" strokeWidth="11" strokeLinecap="round" /><circle cx="290" cy="55" r="6" fill="#fff" opacity=".8" />
             </g>
           </>
-        ) : null}
+        ) : (
+          <AdditionalMissionWallScene
+            sceneKey={sample.wallSceneKey}
+            revealed={revealed}
+            highlightedMissionIndex={highlightedMissionIndex}
+          />
+        )}
       </svg>
       <strong>{revealedCount} of {sample.missions.length} scene elements revealed</strong>
       <ol className="mission-wall-key">
@@ -570,12 +624,14 @@ function SampleDetail({
   progress,
   onBack,
   backLabel,
+  authenticated,
   onStart,
 }: {
   sample: GuestSample;
   progress: GuestProgress;
   onBack: () => void;
   backLabel: string;
+  authenticated: boolean;
   onStart: () => void;
 }) {
   const completedMissions = progress.completedMissions[sample.id] ?? [];
@@ -584,13 +640,13 @@ function SampleDetail({
     <section className="path-overview-page">
       <div className="path-overview-toolbar">
         <button className="back-button" onClick={onBack}>← Back to {backLabel}</button>
-        <span>Guest preview</span>
+        <span>{authenticated ? "Personalized recommendation" : "Guest preview"}</span>
       </div>
 
       <div className="path-overview-hero">
         <div>
           <div className="path-overview-tags"><span>Ages 3–5</span><span>♡ Step-by-step play</span></div>
-          <p className="eyebrow">Guest Play Path</p>
+          <p className="eyebrow">{authenticated ? "Your Play Path" : "Guest Play Path"}</p>
           <h1>{sample.title}</h1>
           <p className="path-overview-summary">{sample.summary}</p>
           <div className="path-purpose">
@@ -829,7 +885,8 @@ function App() {
     let current = true;
     setLoading(true);
     setError(false);
-    getGuestSample(selectedId)
+    const loadDetail = detailOrigin === "landing" && canBrowseFullCatalogue ? getPlayPath : getGuestSample;
+    loadDetail(selectedId)
       .then((sample) => {
         if (current) setSelectedSample(sample);
       })
@@ -840,7 +897,7 @@ function App() {
         if (current) setLoading(false);
       });
     return () => { current = false; };
-  }, [selectedId, detailRetry]);
+  }, [selectedId, detailRetry, detailOrigin, canBrowseFullCatalogue]);
 
   function goHome() {
     navigate("/");
@@ -1029,7 +1086,8 @@ function App() {
                 sample={selectedSample}
                 progress={progress}
                 onBack={detailOrigin === "guest" ? goGuest : goHome}
-                backLabel={detailOrigin === "guest" ? "guest preview" : "quick sparks"}
+                backLabel={detailOrigin === "guest" ? "guest preview" : canBrowseFullCatalogue ? "recommendations" : "quick sparks"}
+                authenticated={detailOrigin === "landing" && canBrowseFullCatalogue}
                 onStart={startSession}
               />
             ) : screen === "guest" ? (
@@ -1042,6 +1100,8 @@ function App() {
                 onSignUp={() => navigate("/sign-up")}
                 onSignIn={() => navigate("/sign-in")}
               />
+            ) : canBrowseFullCatalogue ? (
+              <DiscoveryDashboard onSelect={(sampleId) => openSample(sampleId, "landing")} />
             ) : (
               <Landing
                 samples={landingSamples}

@@ -3,7 +3,7 @@ import helmet from "helmet";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { createAuthRouter, createMongoAuthRepository, type AuthRepository, type PasswordHasher } from "./auth.js";
+import { createAuthRouter, createMongoAuthRepository, findAuthenticatedUser, type AuthRepository, type PasswordHasher } from "./auth.js";
 import { createMongoCatalogRepository, type CatalogRepository } from "./catalog.js";
 import {
   createChildProfileRouter,
@@ -17,6 +17,11 @@ import {
   type AuthEmailSender,
 } from "./email.js";
 import { apiErrorHandler, apiNotFound, createAuthRateLimiter } from "./middleware.js";
+import {
+  createMongoRecommendationRepository,
+  createRecommendationRouter,
+  type RecommendationRepository,
+} from "./recommendations.js";
 
 export interface CreateAppOptions {
   databaseName: string;
@@ -24,6 +29,7 @@ export interface CreateAppOptions {
   catalog?: CatalogRepository;
   auth?: AuthRepository;
   childProfiles?: ChildProfileRepository;
+  recommendations?: RecommendationRepository;
   passwordHasher?: PasswordHasher;
   passwordResetBaseUrl?: string;
   authEmailSender?: AuthEmailSender;
@@ -43,6 +49,8 @@ export function createApp(options: CreateAppOptions) {
   const catalog = options.catalog ?? createMongoCatalogRepository(mongo, options.databaseName);
   const auth = options.auth ?? createMongoAuthRepository(mongo, options.databaseName);
   const childProfiles = options.childProfiles ?? createMongoChildProfileRepository(mongo, options.databaseName);
+  const recommendations = options.recommendations
+    ?? createMongoRecommendationRepository(mongo, options.databaseName);
   const authEmailSender = options.authEmailSender
     ?? (options.resendApiKey && options.resendFromEmail
       ? createResendAuthEmailSender(options.resendApiKey, options.resendFromEmail)
@@ -75,6 +83,12 @@ export function createApp(options: CreateAppOptions) {
   app.use("/api/v1", createChildProfileRouter({
     repository: childProfiles,
     authRepository: auth,
+    requireEmailVerification,
+  }));
+  app.use("/api/v1", createRecommendationRouter({
+    repository: recommendations,
+    authRepository: auth,
+    childProfiles,
     requireEmailVerification,
   }));
 
@@ -151,6 +165,44 @@ export function createApp(options: CreateAppOptions) {
     }
 
     response.json(json(sample));
+  });
+
+  app.get("/api/v1/play-paths/:playPathId", async (request, response) => {
+    let user;
+    try {
+      user = await findAuthenticatedUser(request, auth);
+    } catch {
+      response.status(503).json({ error: { code: "CATALOG_UNAVAILABLE", message: "This Play Path is temporarily unavailable. Please try again." } });
+      return;
+    }
+    if (!user) {
+      response.status(401).json({ error: { code: "UNAUTHENTICATED", message: "Please sign in." } });
+      return;
+    }
+    if (requireEmailVerification && !user.emailVerified) {
+      response.status(403).json({ error: { code: "EMAIL_VERIFICATION_REQUIRED", message: "Verify your email to view this Play Path." } });
+      return;
+    }
+    const params = z.object({ playPathId: z.string().regex(/^[a-f\d]{24}$/iu) }).safeParse(request.params);
+    if (!params.success) {
+      response.status(404).json({ error: { code: "NOT_FOUND", message: "This Play Path is unavailable." } });
+      return;
+    }
+    try {
+      const profile = await childProfiles.findActiveByUserId(user.id);
+      if (!profile) {
+        response.status(409).json({ error: { code: "CHILD_PROFILE_REQUIRED", message: "Create a child profile before viewing recommendations." } });
+        return;
+      }
+      const playPath = await catalog.findPublishedPlayPath(params.data.playPathId);
+      if (!playPath) {
+        response.status(404).json({ error: { code: "NOT_FOUND", message: "This Play Path is unavailable." } });
+        return;
+      }
+      response.json(json(playPath));
+    } catch {
+      response.status(503).json({ error: { code: "CATALOG_UNAVAILABLE", message: "This Play Path is temporarily unavailable. Please try again." } });
+    }
   });
 
   app.use("/api", apiNotFound);

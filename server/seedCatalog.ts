@@ -6,14 +6,14 @@ import { createMongoClientProvider } from "./db.js";
 
 const objectId = z.string().regex(/^[a-f\d]{24}$/iu);
 const eligibility = z.object({
-  ageBands: z.array(z.string()).min(1),
+  ageBands: z.array(z.enum(["3_4", "4_5", "5_6"])).min(1),
   interestKeys: z.array(z.string()).min(1),
   playStyleKeys: z.array(z.string()).min(1),
-  energyLevels: z.array(z.string()).min(1),
-  noiseLevel: z.string(),
-  messLevel: z.string(),
-  spaceLevel: z.string(),
-  independenceLevel: z.string(),
+  energyLevels: z.array(z.enum(["calm", "ready_to_play", "full_energy"])).min(1),
+  noiseLevel: z.enum(["quiet", "moderate"]),
+  messLevel: z.enum(["none", "low"]),
+  spaceLevel: z.enum(["small", "medium"]),
+  independenceLevel: z.enum(["independent_after_setup", "check_in_occasionally", "parent_guided"]),
 });
 const mission = z.object({
   id: objectId,
@@ -36,6 +36,7 @@ const sample = z.object({
   themeKey: z.string().min(1),
   eligibility,
   guestPreview: z.object({
+    enabled: z.boolean(),
     position: z.number().int().positive(),
     setupMinutes: z.number().int().nonnegative(),
     parentEffort: z.literal("Low"),
@@ -47,7 +48,7 @@ const sample = z.object({
       "Image URL must be absolute or a rooted application path",
     ),
     imageAlt: z.string().min(1),
-    materials: z.array(z.string().min(1)).min(1),
+    materials: z.array(z.string().min(1)).min(1).max(3),
     safetyNote: z.string().min(1),
   }),
   wallScene: z.object({
@@ -76,7 +77,12 @@ const sample = z.object({
     }
   }
 });
-const seedSchema = z.object({ samples: z.array(sample).min(2) });
+const seedSchema = z.object({ samples: z.array(sample).min(2) }).superRefine((value, context) => {
+  const guestSamples = value.samples.filter(({ guestPreview }) => guestPreview.enabled);
+  if (guestSamples.length !== 2) {
+    context.addIssue({ code: "custom", message: "Exactly two Play Paths must be enabled for guest preview" });
+  }
+});
 
 const validators: Record<string, Document> = {
   playPaths: { $jsonSchema: { bsonType: "object", required: ["title", "description", "goal", "supports", "durationMinutes", "themeKey", "wallSceneId", "eligibility", "status", "contentVersion", "createdAt", "updatedAt"], properties: { goal: { bsonType: "string" }, supports: { bsonType: "array", minItems: 2, items: { bsonType: "string" } }, status: { enum: ["draft", "published", "retired"] } } } },
@@ -108,7 +114,7 @@ async function seed() {
   const raw = await readFile(new URL("../content/guest-samples.json", import.meta.url), "utf8");
   const content = seedSchema.parse(JSON.parse(raw));
   if (process.argv.includes("--validate-only")) {
-    console.log(`Validated ${content.samples.length} guest Play Paths.`);
+    console.log(`Validated ${content.samples.length} Play Paths.`);
     return;
   }
 
@@ -148,7 +154,7 @@ async function seed() {
       );
       await db.collection("playPaths").updateOne(
         { _id: pathId },
-        { $set: { title: entry.title, description: entry.description, goal: entry.goal, supports: entry.supports, durationMinutes: entry.durationMinutes, themeKey: entry.themeKey, wallSceneId: sceneId, eligibility: entry.eligibility, status: "published", contentVersion: 1, guestPreview: { enabled: true, ...entry.guestPreview }, updatedAt: now }, $setOnInsert: { createdAt: now } },
+        { $set: { title: entry.title, description: entry.description, goal: entry.goal, supports: entry.supports, durationMinutes: entry.durationMinutes, themeKey: entry.themeKey, wallSceneId: sceneId, eligibility: entry.eligibility, status: "published", contentVersion: 1, guestPreview: entry.guestPreview, updatedAt: now }, $setOnInsert: { createdAt: now } },
         { upsert: true },
       );
 
@@ -170,7 +176,7 @@ async function seed() {
       }
     }
 
-    console.log(`Seeded ${content.samples.length} guest Play Paths in ${databaseName}.`);
+    console.log(`Seeded ${content.samples.length} Play Paths in ${databaseName}.`);
   } finally {
     await client.close();
   }

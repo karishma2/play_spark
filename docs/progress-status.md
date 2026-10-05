@@ -22,12 +22,27 @@
 | 1.1 | MongoDB-backed activity catalogue and seeding | Complete |
 | 2 | Parent accounts and secure authentication | Complete |
 | 3 | Child-profile onboarding and editing | Complete |
-| 4 | Dashboard, filters, and rule-based recommendations | Planned |
+| 4 | Dashboard, filters, and rule-based recommendations | Complete |
 | 5 | Active Play Sessions and mission actions | Planned |
 | 6 | Mission Wall, favourites, history, and feedback | Planned |
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
+## In-progress features
+
+None.
+
 ## Completed features
+
+### Personalized discovery and rule-based recommendations
+
+- **Status:** Complete
+- **Branch:** `feature/personalized-recommendations`
+- **Completed:** 5 October 2026
+- **Scope:** Authenticated recommendations combining the active child profile with available time, current energy, practical constraints, optional interest, and published Play Path eligibility, presented through a responsive parent discovery dashboard.
+- **Delivered:** Deterministic age-suitable ranking with exact matches ahead of fallbacks; named relaxed-preference explanations; safe authenticated and profile-owned API boundaries; automatic filter refresh with loading, retry, and no-result states; authenticated Play Path details with parent-facing labels; two explicitly enabled public guest samples; and 12 purpose-led seeded Play Paths with action-first missions, repository-owned artwork for the additions, and distinct Mission Wall reveals.
+- **Key files or routes:** `server/recommendations.ts`, `src/DiscoveryDashboard.tsx`, `content/guest-samples.json`, `POST /api/v1/recommendations`, `GET /api/v1/play-paths/:playPathId`
+- **Validation:** Manual Phase 4 testing covered signed-in discovery, time and preference changes, authenticated detail loading, Mission Wall progression, guest boundaries, and responsive interaction. Its authenticated guest-label finding was fixed. Code review findings for exact-match ordering, constraint explanations, and guest catalogue exposure were fixed with focused regression coverage. `npm run verify` passes with TypeScript checks, 12 Play Paths and 13 profile options validated, 42 automated tests, the production build, and the progress guard. The repeatable development seed completed with exactly two guest-enabled samples.
+- **Follow-up:** Signed-in session persistence, mission actions, durable Mission Wall progress, favourites, history, and feedback remain Phases 5 and 6. Routine Paths remain a post-MVP extension.
 
 ### Child-profile editing and private-beta access
 
