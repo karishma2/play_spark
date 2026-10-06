@@ -113,6 +113,41 @@ Phase 4 is delivered as two independently reviewable vertical slices.
 - Selecting a recommendation opens the complete age-suitable Play Path detail through an authenticated API route.
 - The discovery dashboard remains keyboard usable and responsive at supported mobile and desktop widths.
 
+## Phase 5 — Active play
+
+Phase 5 is delivered as persistent normal play first, followed by mission adaptation.
+
+### Phase 5.1 — Persistent active Play Sessions
+
+**Branch:** `feature/active-play-sessions`
+
+#### Scope
+
+- Create one parent-owned active Play Session for the active child profile from an authenticated Play Path.
+- Store a frozen Play Path and mission-order snapshot so later catalogue edits do not change a session underway.
+- Resume the current mission after refresh or another authenticated browser session.
+- Persist ordered, retry-safe mission completion and complete the session with its final mission.
+- Let a parent pause without losing progress and explicitly end an unfinished session before choosing another Play Path.
+- Keep guest progress browser-only and preserve the existing guest experience.
+
+#### Acceptance criteria
+
+- Only a signed-in parent allowed by the configured verification policy and owning an active child profile can create or access a Play Session.
+- A child profile has at most one active Play Session; starting the same Play Path resumes it, while starting another requires ending the active session.
+- Session ownership is derived from the secure cookie and server-side profile; browser-supplied ownership identifiers are never accepted.
+- Mission completion follows the frozen order, repeated completion requests are safe, and the final mission marks the session complete.
+- Refreshing the signed-in active experience restores the saved Play Path, completed missions, Mission Wall reveals, and current mission.
+- Pausing keeps the session active; ending it records an abandoned session without deleting its progress.
+- Invalid identifiers, unauthenticated access, missing profiles, ownership failures, stale updates, and storage failures return safe errors.
+- Guest completion remains in browser storage and is never written to the Play Session collection.
+
+### Phase 5.2 — Mission skip and replacement
+
+**Status:** Planned after Phase 5.1.
+
+- Record a fixed-choice skip reason and replace the current mission with a safe published alternative where available.
+- Preserve the original mission and replacement decision for later history and feedback work.
+
 ## Phase 2 — Parent accounts and secure authentication
 
 Phase 2 is delivered as two independently reviewable vertical slices.
