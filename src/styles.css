@@ -527,6 +527,8 @@ nav .nav-active { color: white; background: var(--primary); }
 .path-start-panel { max-width: 620px; margin: 24px auto 0; text-align: center; }
 .path-start-panel .button { width: 100%; min-height: 54px; }
 .path-start-panel p { margin: 10px 0 0; font-size: 11px; }
+.path-start-panel .button-link { border: 0; padding: 8px 4px; color: var(--text-soft); background: transparent; text-decoration: underline; cursor: pointer; }
+.path-start-panel .button-link:disabled { cursor: wait; opacity: 0.65; }
 
 .active-session-page { min-height: 100vh; padding-bottom: 104px; background: #eefdf0; }
 .active-session-header { min-height: 68px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: rgba(255, 255, 255, 0.86); border-bottom: 1px solid #ddecdf; backdrop-filter: blur(14px); }

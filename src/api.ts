@@ -53,6 +53,39 @@ export function getPlayPath(playPathId: string) {
   return requestJson<GuestSample>(`/api/v1/play-paths/${encodeURIComponent(playPathId)}`);
 }
 
+export type PlaySessionStatus = "active" | "completed" | "abandoned";
+
+export interface PlaySession {
+  id: string;
+  childProfileId: string;
+  status: PlaySessionStatus;
+  playPath: GuestSample;
+  completedMissionIds: string[];
+  startedAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  abandonedAt?: string;
+}
+
+export function getActivePlaySession() {
+  return requestJson<PlaySession | null>("/api/v1/play-sessions/active");
+}
+
+export function startPlaySession(playPathId: string) {
+  return postJson<PlaySession>("/api/v1/play-sessions", { playPathId });
+}
+
+export function completePlaySessionMission(sessionId: string, missionId: string) {
+  return postJson<PlaySession>(
+    `/api/v1/play-sessions/${encodeURIComponent(sessionId)}/missions/${encodeURIComponent(missionId)}/complete`,
+    {},
+  );
+}
+
+export function abandonPlaySession(sessionId: string) {
+  return postJson<PlaySession>(`/api/v1/play-sessions/${encodeURIComponent(sessionId)}/abandon`, {});
+}
+
 function submitCredentials(path: string, email: string, password: string) {
   return requestJson<AuthSession>(path, {
     method: "POST",

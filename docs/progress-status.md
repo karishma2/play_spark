@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 30 September 2026
+**Last updated:** 6 October 2026
 
 ## Status meanings
 
@@ -23,7 +23,7 @@
 | 2 | Parent accounts and secure authentication | Complete |
 | 3 | Child-profile onboarding and editing | Complete |
 | 4 | Dashboard, filters, and rule-based recommendations | Complete |
-| 5 | Active Play Sessions and mission actions | Planned |
+| 5 | Active Play Sessions and mission actions | In progress |
 | 6 | Mission Wall, favourites, history, and feedback | Planned |
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
@@ -32,6 +32,18 @@
 None.
 
 ## Completed features
+
+### Persistent active Play Sessions
+
+- **Status:** Complete
+- **Branch:** `feature/active-play-sessions`
+- **Completed:** 6 October 2026
+- **Scope:** Parent-owned session start and resume, ordered mission completion, durable Mission Wall progress, pause, completion, and explicit abandonment for authenticated Play Paths.
+- **Delivered:** One active MongoDB-backed session per child profile; frozen Play Path and mission snapshots; secure parent and active-profile ownership; refresh and cross-browser resumption; sequential, retry-safe mission completion; persistent Mission Wall reveals; completed and abandoned lifecycle states; account-switch state isolation; and unchanged browser-only guest progress.
+- **Key files or routes:** `server/playSessions.ts`, `src/App.tsx`, `src/api.ts`, `POST /api/v1/play-sessions`, `GET /api/v1/play-sessions/active`, `POST /api/v1/play-sessions/:sessionId/missions/:missionId/complete`, `POST /api/v1/play-sessions/:sessionId/abandon`
+- **Validation:** `npm run verify` passed with TypeScript checks, 12 Play Paths and 13 profile options validated, 46 automated tests, the production build, and the progress guard. Focused session coverage verifies start, resume, ordered and repeated completion, final completion, single-active-session enforcement, abandonment, authentication, and safe errors. The repeatable play-session storage setup completed against `play_spark_dev`.
+- **Follow-up:** Phase 5.2 will add fixed-choice mission skipping and safe mission replacement. Manual testing and independent code review remain before commit and PR delivery.
+- **Feature-log note:** Code-review fixes isolate active-session loading by authenticated account, resume the same Play Path after a concurrent duplicate start, and enforce the current child profile in the atomic abandonment operation. Post-review TypeScript checking and six focused session tests pass.
 
 ### Personalized discovery and rule-based recommendations
 

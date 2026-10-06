@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getAuthSession, getGuestSample, getGuestSamples, getPlayPath, signOut, type AuthSession } from "./api";
+import {
+  abandonPlaySession,
+  completePlaySessionMission,
+  getActivePlaySession,
+  getAuthSession,
+  getGuestSample,
+  getGuestSamples,
+  getPlayPath,
+  signOut,
+  startPlaySession,
+  type AuthSession,
+  type PlaySession,
+} from "./api";
 import { AuthPage } from "./AuthPage";
 import { ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage } from "./PasswordPage";
 import { EmailVerificationPendingPage, VerifyEmailPage } from "./EmailVerificationPage";
@@ -626,15 +638,49 @@ function SampleDetail({
   backLabel,
   authenticated,
   onStart,
+  activeSession,
+  onEndSession,
 }: {
   sample: GuestSample;
   progress: GuestProgress;
   onBack: () => void;
   backLabel: string;
   authenticated: boolean;
-  onStart: () => void;
+  onStart: () => void | Promise<void>;
+  activeSession?: boolean;
+  onEndSession?: () => Promise<void>;
 }) {
   const completedMissions = progress.completedMissions[sample.id] ?? [];
+  const [endingSession, setEndingSession] = useState(false);
+  const [endError, setEndError] = useState<string>();
+  const [startingSession, setStartingSession] = useState(false);
+  const [startError, setStartError] = useState<string>();
+
+  async function beginSession() {
+    if (startingSession) return;
+    setStartingSession(true);
+    setStartError(undefined);
+    try {
+      await onStart();
+    } catch (error) {
+      setStartError(error instanceof Error ? error.message : "We couldn't start this Play Path. Please try again.");
+    } finally {
+      setStartingSession(false);
+    }
+  }
+
+  async function endCurrentSession() {
+    if (!onEndSession || endingSession) return;
+    setEndingSession(true);
+    setEndError(undefined);
+    try {
+      await onEndSession();
+    } catch (error) {
+      setEndError(error instanceof Error ? error.message : "We couldn't end this Play Path. Please try again.");
+    } finally {
+      setEndingSession(false);
+    }
+  }
 
   return (
     <section className="path-overview-page">
@@ -698,8 +744,11 @@ function SampleDetail({
       </aside>
 
       <div className="path-start-panel">
-        <button className="button button-primary" onClick={onStart}>Start Play Path <span aria-hidden="true">→</span></button>
+        <button className="button button-primary" onClick={beginSession} disabled={startingSession}>{startingSession ? "Opening…" : activeSession ? "Resume Play Path" : completedMissions.length === sample.missions.length ? "Play again" : "Start Play Path"} <span aria-hidden="true">→</span></button>
         <p>The next screen gives you one mission at a time, so you can put your phone down and play.</p>
+        {startError ? <p className="form-error" role="alert">{startError}</p> : null}
+        {activeSession && onEndSession ? <button className="button-link" onClick={endCurrentSession} disabled={endingSession}>{endingSession ? "Ending…" : "End this Play Path and choose another"}</button> : null}
+        {endError ? <p className="form-error" role="alert">{endError}</p> : null}
       </div>
     </section>
   );
@@ -712,6 +761,7 @@ function ActiveSession({
   onProgress,
   onAdvance,
   onPause,
+  onComplete,
 }: {
   sample: GuestSample;
   missionIndex: number;
@@ -719,14 +769,32 @@ function ActiveSession({
   onProgress: (progress: GuestProgress) => void;
   onAdvance: (progress: GuestProgress) => void;
   onPause: () => void;
+  onComplete?: (missionId: string) => Promise<GuestProgress>;
 }) {
   const [showReveal, setShowReveal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string>();
   const mission = sample.missions[missionIndex];
   const nextMission = sample.missions[missionIndex + 1];
   const completed = progress.completedMissions[sample.id] ?? [];
   const percent = ((missionIndex + 1) / sample.missions.length) * 100;
 
-  function completeMission() {
+  async function completeMission() {
+    if (saving) return;
+    setSaving(true);
+    setSaveError(undefined);
+    if (onComplete) {
+      try {
+        const nextProgress = await onComplete(mission.id);
+        onProgress(nextProgress);
+        setShowReveal(true);
+      } catch (error) {
+        setSaveError(error instanceof Error ? error.message : "We couldn't save this mission. Please try again.");
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     let nextProgress = progress;
     if (!completed.includes(mission.id)) {
       nextProgress = toggleMission(nextProgress, sample.id, mission.id);
@@ -737,6 +805,7 @@ function ActiveSession({
     saveGuestProgress(nextProgress);
     onProgress(nextProgress);
     setShowReveal(true);
+    setSaving(false);
   }
 
   function continueAfterReveal() {
@@ -806,7 +875,8 @@ function ActiveSession({
         <div className="active-session-quiet"><span>● Screen paused · Presence first</span><button onClick={onPause}>Switch mission or pause</button></div>
       </main>
       <div className="active-session-action">
-        <button className="button button-primary" onClick={completeMission}>{nextMission ? `Complete Mission ${missionIndex + 1}` : "Complete Play Path"} →</button>
+        {saveError ? <p className="form-error" role="alert">{saveError}</p> : null}
+        <button className="button button-primary" onClick={completeMission} disabled={saving}>{saving ? "Saving…" : nextMission ? `Complete Mission ${missionIndex + 1}` : "Complete Play Path"} →</button>
         <small>{nextMission ? <>Up next: <strong>{nextMission.title} (Mission {missionIndex + 2})</strong></> : "This is the final mission."}</small>
       </div>
     </div>
@@ -828,13 +898,20 @@ function App() {
   const [progress, setProgress] = useState<GuestProgress>(() => readGuestProgress());
   const [inviteDismissed, setInviteDismissed] = useState(false);
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [playSession, setPlaySession] = useState<PlaySession | null>(null);
   const [sessionReady, setSessionReady] = useState(false);
   const [signOutError, setSignOutError] = useState<string>();
   const sessionRequestVersion = useRef(0);
   const previousPath = useRef(location.pathname);
   const guestSamples = samples.slice(0, guestSampleLimit);
   const canBrowseFullCatalogue = Boolean(session?.emailVerified && session.hasChildProfile);
+  const authenticatedUserId = session?.user.id;
   const landingSamples = canBrowseFullCatalogue ? samples : guestSamples;
+  const signedProgress: GuestProgress = playSession ? {
+    completedMissions: { [playSession.playPath.id]: playSession.completedMissionIds },
+    completedSampleIds: playSession.status === "completed" ? [playSession.playPath.id] : [],
+  } : { completedMissions: {}, completedSampleIds: [] };
+  const visibleProgress = playSession && selectedSample?.id === playSession.playPath.id ? signedProgress : progress;
 
   function loadSamples() {
     setLoading(true);
@@ -862,6 +939,27 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!sessionReady || !canBrowseFullCatalogue || location.pathname !== "/") return;
+    let current = true;
+    getActivePlaySession()
+      .then((active) => {
+        if (!current) return;
+        if (!active) {
+          setPlaySession(null);
+          return;
+        }
+        setPlaySession(active);
+        setDetailOrigin("landing");
+        setSelectedId(active.playPath.id);
+        setSelectedSample(active.playPath);
+        setActiveMissionIndex(active.completedMissionIds.length);
+        setLoading(false);
+      })
+      .catch(() => undefined);
+    return () => { current = false; };
+  }, [sessionReady, canBrowseFullCatalogue, authenticatedUserId, location.pathname]);
+
+  useEffect(() => {
     const pathChanged = previousPath.current !== location.pathname;
     previousPath.current = location.pathname;
     if (!pathChanged) return;
@@ -881,6 +979,11 @@ function App() {
       setSelectedSample(undefined);
       return;
     }
+    if (playSession?.playPath.id === selectedId) {
+      setSelectedSample(playSession.playPath);
+      setLoading(false);
+      return;
+    }
 
     let current = true;
     setLoading(true);
@@ -897,7 +1000,7 @@ function App() {
         if (current) setLoading(false);
       });
     return () => { current = false; };
-  }, [selectedId, detailRetry, detailOrigin, canBrowseFullCatalogue]);
+  }, [selectedId, detailRetry, detailOrigin, canBrowseFullCatalogue, playSession]);
 
   function goHome() {
     navigate("/");
@@ -926,8 +1029,26 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function startSession() {
+  async function startSession() {
     if (!selectedSample) return;
+    if (detailOrigin === "landing" && canBrowseFullCatalogue) {
+      if (playSession?.status === "active" && playSession.playPath.id !== selectedSample.id) {
+        setSelectedId(playSession.playPath.id);
+        setSelectedSample(playSession.playPath);
+        setActiveMissionIndex(playSession.completedMissionIds.length);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      try {
+        const active = await startPlaySession(selectedSample.id);
+        setPlaySession(active);
+        setActiveMissionIndex(active.completedMissionIds.length);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (error) {
+        throw error;
+      }
+      return;
+    }
     const completed = progress.completedMissions[selectedSample.id] ?? [];
     if (completed.length === selectedSample.missions.length) {
       const restartedProgress = restartSample(progress, selectedSample.id);
@@ -954,9 +1075,33 @@ function App() {
 
   const activeSession = selectedSample && activeMissionIndex !== null;
 
+  async function completeSignedMission(missionId: string) {
+    if (!playSession) throw new Error("This play session is unavailable. Please try again.");
+    const updated = await completePlaySessionMission(playSession.id, missionId);
+    setPlaySession(updated);
+    return {
+      completedMissions: { [updated.playPath.id]: updated.completedMissionIds },
+      completedSampleIds: updated.status === "completed" ? [updated.playPath.id] : [],
+    };
+  }
+
+  async function endCurrentPlaySession() {
+    if (!playSession || playSession.status !== "active") return;
+    const ended = await abandonPlaySession(playSession.id);
+    setPlaySession(ended);
+    setActiveMissionIndex(null);
+    setSelectedId(undefined);
+    setSelectedSample(undefined);
+    setScreen("landing");
+  }
+
   function authenticated(nextSession: AuthSession) {
     sessionRequestVersion.current += 1;
     setSignOutError(undefined);
+    setPlaySession(null);
+    setActiveMissionIndex(null);
+    setSelectedId(undefined);
+    setSelectedSample(undefined);
     setSession(nextSession);
     setSessionReady(true);
     navigate(!nextSession.emailVerified ? "/verify-email-pending" : nextSession.hasChildProfile ? "/" : "/onboarding");
@@ -979,6 +1124,7 @@ function App() {
       sessionRequestVersion.current += 1;
       setSignOutError(undefined);
       setSession(null);
+      setPlaySession(null);
       setSessionReady(true);
       navigate("/");
     } catch {
@@ -1055,10 +1201,11 @@ function App() {
         <ActiveSession
           sample={selectedSample}
           missionIndex={activeMissionIndex}
-          progress={progress}
-          onProgress={setProgress}
+          progress={visibleProgress}
+          onProgress={detailOrigin === "landing" && canBrowseFullCatalogue ? () => undefined : setProgress}
           onAdvance={advanceSession}
           onPause={() => setActiveMissionIndex(null)}
+          onComplete={detailOrigin === "landing" && canBrowseFullCatalogue ? completeSignedMission : undefined}
         />
       ) : (
         <>
@@ -1084,11 +1231,13 @@ function App() {
             ) : selectedSample ? (
               <SampleDetail
                 sample={selectedSample}
-                progress={progress}
+                progress={visibleProgress}
                 onBack={detailOrigin === "guest" ? goGuest : goHome}
                 backLabel={detailOrigin === "guest" ? "guest preview" : canBrowseFullCatalogue ? "recommendations" : "quick sparks"}
                 authenticated={detailOrigin === "landing" && canBrowseFullCatalogue}
                 onStart={startSession}
+                activeSession={playSession?.status === "active" && playSession.playPath.id === selectedSample.id}
+                onEndSession={playSession?.status === "active" && playSession.playPath.id === selectedSample.id ? endCurrentPlaySession : undefined}
               />
             ) : screen === "guest" ? (
               <GuestPreview

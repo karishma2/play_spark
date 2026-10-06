@@ -22,6 +22,11 @@ import {
   createRecommendationRouter,
   type RecommendationRepository,
 } from "./recommendations.js";
+import {
+  createMongoPlaySessionRepository,
+  createPlaySessionRouter,
+  type PlaySessionRepository,
+} from "./playSessions.js";
 
 export interface CreateAppOptions {
   databaseName: string;
@@ -30,6 +35,7 @@ export interface CreateAppOptions {
   auth?: AuthRepository;
   childProfiles?: ChildProfileRepository;
   recommendations?: RecommendationRepository;
+  playSessions?: PlaySessionRepository;
   passwordHasher?: PasswordHasher;
   passwordResetBaseUrl?: string;
   authEmailSender?: AuthEmailSender;
@@ -51,6 +57,7 @@ export function createApp(options: CreateAppOptions) {
   const childProfiles = options.childProfiles ?? createMongoChildProfileRepository(mongo, options.databaseName);
   const recommendations = options.recommendations
     ?? createMongoRecommendationRepository(mongo, options.databaseName);
+  const playSessions = options.playSessions ?? createMongoPlaySessionRepository(mongo, options.databaseName);
   const authEmailSender = options.authEmailSender
     ?? (options.resendApiKey && options.resendFromEmail
       ? createResendAuthEmailSender(options.resendApiKey, options.resendFromEmail)
@@ -89,6 +96,13 @@ export function createApp(options: CreateAppOptions) {
     repository: recommendations,
     authRepository: auth,
     childProfiles,
+    requireEmailVerification,
+  }));
+  app.use("/api/v1", createPlaySessionRouter({
+    repository: playSessions,
+    authRepository: auth,
+    childProfiles,
+    catalog,
     requireEmailVerification,
   }));
 

@@ -23,6 +23,7 @@ Prepare the parent-account collections and indexes before testing sign-up:
 
 ```bash
 npm run setup:auth
+npm run setup:play-sessions
 ```
 
 Prepare the child-profile collections and seed the reviewed onboarding choices:
@@ -62,7 +63,7 @@ Configure these Vercel environment variables for Production and Preview as appro
 - `REQUIRE_EMAIL_VERIFICATION` (`false` for the controlled private beta; `true` when production email is ready)
 - `RESEND_API_KEY` and `RESEND_FROM_EMAIL` together when account email is enabled
 
-Do not seed during the Vercel build. Before beta use, run `npm run setup:auth`, `npm run seed:catalog`, and `npm run seed:profiles` once from an authorized environment configured for the beta database. All commands are repeatable.
+Do not seed during the Vercel build. Before beta use, run `npm run setup:auth`, `npm run setup:play-sessions`, `npm run seed:catalog`, and `npm run seed:profiles` once from an authorized environment configured for the beta database. All commands are repeatable.
 
 Generate a local session secret without sharing it:
 
