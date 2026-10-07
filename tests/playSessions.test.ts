@@ -16,6 +16,7 @@ const profileId = "64b200000000000000000001";
 const pathId = "64b100000000000000000001";
 const otherPathId = "64b100000000000000000002";
 const missionIds = ["64b300000000000000000001", "64b300000000000000000002"];
+const replacementMissionIds = ["64b300000000000000000101", "64b300000000000000000102"];
 
 function playPath(id = pathId): GuestSample {
   return {
@@ -44,6 +45,7 @@ function playPath(id = pathId): GuestSample {
       childChallenge: "Make the route.",
       tidyUp: "Put blocks away.",
       wallElement: { key: `part-${index + 1}`, label: `Part ${index + 1}`, revealMessage: "Revealed!" },
+      replacementMissionId: replacementMissionIds[index],
     })),
   };
 }
@@ -86,6 +88,9 @@ function createMemoryState() {
     async listGuestSamples() { return []; },
     async findGuestSample() { return null; },
     async findPublishedPlayPath(id) { return [pathId, otherPathId].includes(id) ? playPath(id) : null; },
+    async findPublishedMission(id) {
+      return { id, title: "A quieter mission", durationMinutes: 5, setupSteps: ["Use one soft object."], sayThis: "Try this instead.", childChallenge: "Make a quiet route.", tidyUp: "Put the object away." };
+    },
   };
   const playSessions: PlaySessionRepository = {
     async findActive(ownerId, childId) {
@@ -107,6 +112,7 @@ function createMemoryState() {
         status: "active" as const,
         playPath: selectedPath,
         completedMissionIds: [],
+        missionReplacements: [],
         startedAt: now,
         updatedAt: now,
       };
@@ -123,6 +129,19 @@ function createMemoryState() {
         completedMissionIds: [...previous, missionId],
         updatedAt: new Date().toISOString(),
         ...(completes ? { completedAt: new Date().toISOString() } : {}),
+      };
+      sessions.set(id, updated);
+      return updated;
+    },
+    async recordMissionReplacement(id, ownerId, childId, previous, originalMissionId, replacementMission, reason) {
+      const current = sessions.get(id);
+      if (!current || current.userId !== ownerId || current.childProfileId !== childId || current.status !== "active") return null;
+      if (current.completedMissionIds.join() !== previous.join()) return null;
+      if (current.missionReplacements.some((item) => item.originalMissionId === originalMissionId)) return null;
+      const updated = {
+        ...current,
+        missionReplacements: [...current.missionReplacements, { originalMissionId, replacementMission, reason, replacedAt: new Date().toISOString() }],
+        updatedAt: new Date().toISOString(),
       };
       sessions.set(id, updated);
       return updated;
@@ -205,6 +224,58 @@ test("completes missions in order and treats a repeated completion as safe", asy
     .expect(200);
   assert.equal(final.body.data.status, "completed");
   assert.deepEqual(final.body.data.completedMissionIds, missionIds);
+});
+
+test("records one curated mission replacement and completes the original mission position", async () => {
+  const application = app();
+  const started = await request(application)
+    .post("/api/v1/play-sessions")
+    .set("Cookie", "play_spark_session=parent-token")
+    .send({ playPathId: pathId })
+    .expect(201);
+  const sessionId = started.body.data.id as string;
+
+  const swapped = await request(application)
+    .post(`/api/v1/play-sessions/${sessionId}/missions/${missionIds[0]}/skip`)
+    .set("Cookie", "play_spark_session=parent-token")
+    .send({ reason: "missing_materials" })
+    .expect(200);
+
+  assert.equal(swapped.body.data.missionReplacements.length, 1);
+  assert.equal(swapped.body.data.missionReplacements[0].originalMissionId, missionIds[0]);
+  assert.equal(swapped.body.data.missionReplacements[0].replacementMission.id, replacementMissionIds[0]);
+  assert.equal(swapped.body.data.missionReplacements[0].replacementMission.wallElement.key, "part-1");
+
+  const repeated = await request(application)
+    .post(`/api/v1/play-sessions/${sessionId}/missions/${missionIds[0]}/skip`)
+    .set("Cookie", "play_spark_session=parent-token")
+    .send({ reason: "child_not_interested" })
+    .expect(200);
+  assert.equal(repeated.body.data.missionReplacements.length, 1);
+  assert.equal(repeated.body.data.missionReplacements[0].reason, "missing_materials");
+
+  const completed = await request(application)
+    .post(`/api/v1/play-sessions/${sessionId}/missions/${missionIds[0]}/complete`)
+    .set("Cookie", "play_spark_session=parent-token")
+    .send({})
+    .expect(200);
+  assert.deepEqual(completed.body.data.completedMissionIds, [missionIds[0]]);
+});
+
+test("rejects invalid skip reasons without changing the active mission", async () => {
+  const application = app();
+  const started = await request(application)
+    .post("/api/v1/play-sessions")
+    .set("Cookie", "play_spark_session=parent-token")
+    .send({ playPathId: pathId });
+
+  const response = await request(application)
+    .post(`/api/v1/play-sessions/${started.body.data.id}/missions/${missionIds[0]}/skip`)
+    .set("Cookie", "play_spark_session=parent-token")
+    .send({ reason: "surprise_me" })
+    .expect(400);
+
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
 });
 
 test("blocks another Play Path until the active session is ended", async () => {

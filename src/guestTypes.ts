@@ -24,11 +24,13 @@ export interface GuestMission {
   sayThis: string;
   childChallenge: string;
   tidyUp: string;
+  materials?: string[];
   wallElement: {
     key: string;
     label: string;
     revealMessage: string;
   };
+  replacementMissionId?: string;
 }
 
 export interface GuestSample extends Omit<GuestSampleSummary, "missionCount"> {

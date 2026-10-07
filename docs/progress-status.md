@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 6 October 2026
+**Last updated:** 7 October 2026
 
 ## Status meanings
 
@@ -23,7 +23,7 @@
 | 2 | Parent accounts and secure authentication | Complete |
 | 3 | Child-profile onboarding and editing | Complete |
 | 4 | Dashboard, filters, and rule-based recommendations | Complete |
-| 5 | Active Play Sessions and mission actions | In progress |
+| 5 | Active Play Sessions and mission actions | Complete |
 | 6 | Mission Wall, favourites, history, and feedback | Planned |
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
@@ -32,6 +32,20 @@
 None.
 
 ## Completed features
+
+### Mission skip and curated replacement
+
+- **Status:** Complete
+- **Branch:** `feature/mission-skip-replacement`
+- **Started:** 6 October 2026
+- **Completed:** 7 October 2026
+- **Scope:** Fixed-choice skip reasons, catalogue-curated mission substitutes, retry-safe session persistence, resume behavior, and stable Mission Wall progress for authenticated active Play Sessions.
+- **Decision:** Catalogue entries explicitly pair reviewed fallback Play Paths; the server never assembles an arbitrary replacement from unrelated content.
+- **Review fix:** Late skip responses are discarded when the authenticated account, active Play Session, current mission, or active-play action changes while the request is in flight.
+- **Delivered:** Fixed-choice skip reasons, published curated replacements, frozen replacement records, retry-safe swaps, restored replacements, and stable original Mission Wall positions. Guest activities retain their existing behavior.
+- **Key files or routes:** `server/playSessions.ts`, `server/catalog.ts`, `server/seedCatalog.ts`, `src/App.tsx`, `POST /api/v1/play-sessions/:sessionId/missions/:missionId/skip`.
+- **Validation:** `npm run verify` passed on the final Phase 5.2 application working tree on 7 October 2026: TypeScript, 12 Play Paths, 13 profile options, 50 automated tests, production build, and progress guard. The user confirmed code review and manual testing passed. Earlier focused coverage included eight Play Session tests; post-review TypeScript checking passed. Only completion documentation changed after the full gate.
+- **Remaining:** Push and PR delivery after the completed feature commit.
 
 ### Persistent active Play Sessions
 
@@ -42,7 +56,7 @@ None.
 - **Delivered:** One active MongoDB-backed session per child profile; frozen Play Path and mission snapshots; secure parent and active-profile ownership; refresh and cross-browser resumption; sequential, retry-safe mission completion; persistent Mission Wall reveals; completed and abandoned lifecycle states; account-switch state isolation; and unchanged browser-only guest progress.
 - **Key files or routes:** `server/playSessions.ts`, `src/App.tsx`, `src/api.ts`, `POST /api/v1/play-sessions`, `GET /api/v1/play-sessions/active`, `POST /api/v1/play-sessions/:sessionId/missions/:missionId/complete`, `POST /api/v1/play-sessions/:sessionId/abandon`
 - **Validation:** `npm run verify` passed with TypeScript checks, 12 Play Paths and 13 profile options validated, 46 automated tests, the production build, and the progress guard. Focused session coverage verifies start, resume, ordered and repeated completion, final completion, single-active-session enforcement, abandonment, authentication, and safe errors. The repeatable play-session storage setup completed against `play_spark_dev`.
-- **Follow-up:** Phase 5.2 will add fixed-choice mission skipping and safe mission replacement. Manual testing and independent code review remain before commit and PR delivery.
+- **Follow-up:** Merged through PR #10; Phase 5.2 adds fixed-choice mission skipping and curated replacement.
 - **Feature-log note:** Code-review fixes isolate active-session loading by authenticated account, resume the same Play Path after a concurrent duplicate start, and enforce the current child profile in the atomic abandonment operation. Post-review TypeScript checking and six focused session tests pass.
 
 ### Personalized discovery and rule-based recommendations

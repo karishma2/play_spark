@@ -8,9 +8,11 @@ import {
   getGuestSample,
   getGuestSamples,
   getPlayPath,
+  skipPlaySessionMission,
   signOut,
   startPlaySession,
   type AuthSession,
+  type MissionSkipReason,
   type PlaySession,
 } from "./api";
 import { AuthPage } from "./AuthPage";
@@ -33,6 +35,14 @@ const heroImage =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAtjRgej7iCWGfqmoHsWwfo6nRSZeuWby6e4xgpEDnJTsXCEM9EgL3l6yqyB6P-aHu6mJpHbAZlQEsBAjZypunyB7Lx6tKyrXQKhth60JnVP4S5YZJ8aiNIpfpMR3pXRPxRJkoIQXIGQP-Zn2rEL-x0o4c9hfFLe27khlofMSwcI9RyYDgo18BAGdYY9kvsy4UtgwcoSe8zzJtXmW-MytqejDRyPG3Q5AH8g8Vo5Pxl6lDDnt1qcHKJqQ";
 
 type DurationFilter = "all" | 10 | 15 | 20;
+
+const skipReasonOptions: Array<{ value: MissionSkipReason; label: string }> = [
+  { value: "missing_materials", label: "We don’t have the materials" },
+  { value: "too_messy_or_noisy", label: "Too messy or noisy right now" },
+  { value: "too_much_parent_help", label: "Needs too much parent help" },
+  { value: "child_not_interested", label: "My child isn’t interested" },
+  { value: "something_else", label: "Something else" },
+];
 type ExploreScreen = "landing" | "guest";
 type DetailOrigin = ExploreScreen;
 const guestSampleLimit = 2;
@@ -762,6 +772,8 @@ function ActiveSession({
   onAdvance,
   onPause,
   onComplete,
+  onSkip,
+  missionWasReplaced = false,
 }: {
   sample: GuestSample;
   missionIndex: number;
@@ -770,14 +782,40 @@ function ActiveSession({
   onAdvance: (progress: GuestProgress) => void;
   onPause: () => void;
   onComplete?: (missionId: string) => Promise<GuestProgress>;
+  onSkip?: (reason: MissionSkipReason) => Promise<void>;
+  missionWasReplaced?: boolean;
 }) {
   const [showReveal, setShowReveal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>();
+  const [showSkipReasons, setShowSkipReasons] = useState(false);
+  const [swapping, setSwapping] = useState(false);
+  const [swapNotice, setSwapNotice] = useState(missionWasReplaced ? "This mission was swapped to better fit today." : undefined);
   const mission = sample.missions[missionIndex];
   const nextMission = sample.missions[missionIndex + 1];
   const completed = progress.completedMissions[sample.id] ?? [];
   const percent = ((missionIndex + 1) / sample.missions.length) * 100;
+
+  useEffect(() => {
+    setShowSkipReasons(false);
+    setSaveError(undefined);
+    setSwapNotice(missionWasReplaced ? "This mission was swapped to better fit today." : undefined);
+  }, [mission.id, missionWasReplaced]);
+
+  async function skipMission(reason: MissionSkipReason) {
+    if (!onSkip || swapping) return;
+    setSwapping(true);
+    setSaveError(undefined);
+    try {
+      await onSkip(reason);
+      setShowSkipReasons(false);
+      setSwapNotice("Mission swapped. Here is a calmer option for the same step.");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "We couldn’t change this mission. Please try again.");
+    } finally {
+      setSwapping(false);
+    }
+  }
 
   async function completeMission() {
     if (saving) return;
@@ -850,6 +888,7 @@ function ActiveSession({
         <article className="active-mission-card">
           <div className="active-mission-eyebrow"><span>Mission {missionIndex + 1}</span><small>Step {missionIndex + 1} of {sample.title}</small></div>
           <h1>{mission.title}</h1>
+          {swapNotice ? <p className="mission-swap-notice" role="status">✓ {swapNotice}</p> : null}
           <p className="active-mission-prompt">{mission.childChallenge}</p>
           <div className="active-guidance">
             <span aria-hidden="true">✦</span>
@@ -857,10 +896,28 @@ function ActiveSession({
           </div>
           <div className="active-materials">
             <span aria-hidden="true">▣</span>
-            <div><small>Using right now</small><strong>{sample.materials.join(", ")}</strong></div>
+            <div><small>Using right now</small><strong>{(mission.materials ?? sample.materials).join(", ")}</strong></div>
             <span>✓ Zero screen required</span>
           </div>
         </article>
+
+        {onSkip && !missionWasReplaced ? (
+          <section className="mission-skip-panel" aria-labelledby="mission-skip-title">
+            {!showSkipReasons ? (
+              <button className="button-link" onClick={() => setShowSkipReasons(true)}>Skip this mission</button>
+            ) : (
+              <>
+                <div><h2 id="mission-skip-title">What isn’t working today?</h2><p>Choose one reason and we’ll offer a reviewed alternative.</p></div>
+                <div className="mission-skip-reasons">
+                  {skipReasonOptions.map((option) => (
+                    <button key={option.value} onClick={() => skipMission(option.value)} disabled={swapping}>{option.label}</button>
+                  ))}
+                </div>
+                <button className="button-link" onClick={() => setShowSkipReasons(false)} disabled={swapping}>Keep this mission</button>
+              </>
+            )}
+          </section>
+        ) : null}
 
         <aside className="phone-down-card">
           <span aria-hidden="true">▱</span>
@@ -872,7 +929,7 @@ function ActiveSession({
           <div className="spark-prompt-list"><p>“{mission.sayThis}”</p><p>{mission.tidyUp}</p></div>
         </details>
 
-        <div className="active-session-quiet"><span>● Screen paused · Presence first</span><button onClick={onPause}>Switch mission or pause</button></div>
+        <div className="active-session-quiet"><span>● Screen paused · Presence first</span><button onClick={onPause}>Pause this Play Path</button></div>
       </main>
       <div className="active-session-action">
         {saveError ? <p className="form-error" role="alert">{saveError}</p> : null}
@@ -902,6 +959,9 @@ function App() {
   const [sessionReady, setSessionReady] = useState(false);
   const [signOutError, setSignOutError] = useState<string>();
   const sessionRequestVersion = useRef(0);
+  const playActionRequestVersion = useRef(0);
+  const authenticatedUserRef = useRef<string>();
+  const playSessionRef = useRef<PlaySession | null>(null);
   const previousPath = useRef(location.pathname);
   const guestSamples = samples.slice(0, guestSampleLimit);
   const canBrowseFullCatalogue = Boolean(session?.emailVerified && session.hasChildProfile);
@@ -912,6 +972,17 @@ function App() {
     completedSampleIds: playSession.status === "completed" ? [playSession.playPath.id] : [],
   } : { completedMissions: {}, completedSampleIds: [] };
   const visibleProgress = playSession && selectedSample?.id === playSession.playPath.id ? signedProgress : progress;
+  const activeSample = useMemo(() => {
+    if (!selectedSample || !playSession || selectedSample.id !== playSession.playPath.id) return selectedSample;
+    const replacements = new Map(playSession.missionReplacements.map((replacement) => [replacement.originalMissionId, replacement.replacementMission]));
+    return {
+      ...playSession.playPath,
+      missions: playSession.playPath.missions.map((mission) => {
+        const replacement = replacements.get(mission.id);
+        return replacement ? { ...replacement, id: mission.id, wallElement: mission.wallElement } : mission;
+      }),
+    };
+  }, [playSession, selectedSample]);
 
   function loadSamples() {
     setLoading(true);
@@ -923,6 +994,14 @@ function App() {
   }
 
   useEffect(loadSamples, []);
+
+  useEffect(() => {
+    authenticatedUserRef.current = authenticatedUserId;
+  }, [authenticatedUserId]);
+
+  useEffect(() => {
+    playSessionRef.current = playSession;
+  }, [playSession]);
 
   useEffect(() => {
     const requestVersion = sessionRequestVersion.current;
@@ -1040,6 +1119,7 @@ function App() {
         return;
       }
       try {
+        playActionRequestVersion.current += 1;
         const active = await startPlaySession(selectedSample.id);
         setPlaySession(active);
         setActiveMissionIndex(active.completedMissionIds.length);
@@ -1077,7 +1157,9 @@ function App() {
 
   async function completeSignedMission(missionId: string) {
     if (!playSession) throw new Error("This play session is unavailable. Please try again.");
+    playActionRequestVersion.current += 1;
     const updated = await completePlaySessionMission(playSession.id, missionId);
+    playSessionRef.current = updated;
     setPlaySession(updated);
     return {
       completedMissions: { [updated.playPath.id]: updated.completedMissionIds },
@@ -1085,9 +1167,35 @@ function App() {
     };
   }
 
+  async function skipSignedMission(reason: MissionSkipReason) {
+    if (!playSession) throw new Error("This play session is unavailable. Please try again.");
+    const originalMission = playSession.playPath.missions[playSession.completedMissionIds.length];
+    if (!originalMission) throw new Error("This mission is unavailable. Please refresh and try again.");
+    const requestUserId = authenticatedUserId;
+    const requestVersion = sessionRequestVersion.current;
+    const requestActionVersion = playActionRequestVersion.current;
+    const requestSessionId = playSession.id;
+    const requestMissionId = originalMission.id;
+    const updated = await skipPlaySessionMission(requestSessionId, requestMissionId, reason);
+    const currentSession = playSessionRef.current;
+    const currentMission = currentSession?.playPath.missions[currentSession.completedMissionIds.length];
+    if (
+      !requestUserId
+      || sessionRequestVersion.current !== requestVersion
+      || playActionRequestVersion.current !== requestActionVersion
+      || authenticatedUserRef.current !== requestUserId
+      || currentSession?.id !== requestSessionId
+      || currentMission?.id !== requestMissionId
+    ) return;
+    playSessionRef.current = updated;
+    setPlaySession(updated);
+  }
+
   async function endCurrentPlaySession() {
     if (!playSession || playSession.status !== "active") return;
+    playActionRequestVersion.current += 1;
     const ended = await abandonPlaySession(playSession.id);
+    playSessionRef.current = ended;
     setPlaySession(ended);
     setActiveMissionIndex(null);
     setSelectedId(undefined);
@@ -1097,6 +1205,9 @@ function App() {
 
   function authenticated(nextSession: AuthSession) {
     sessionRequestVersion.current += 1;
+    playActionRequestVersion.current += 1;
+    authenticatedUserRef.current = nextSession.user.id;
+    playSessionRef.current = null;
     setSignOutError(undefined);
     setPlaySession(null);
     setActiveMissionIndex(null);
@@ -1122,6 +1233,9 @@ function App() {
     try {
       await signOut();
       sessionRequestVersion.current += 1;
+      playActionRequestVersion.current += 1;
+      authenticatedUserRef.current = undefined;
+      playSessionRef.current = null;
       setSignOutError(undefined);
       setSession(null);
       setPlaySession(null);
@@ -1199,13 +1313,18 @@ function App() {
     <>
       {activeSession ? (
         <ActiveSession
-          sample={selectedSample}
+          sample={activeSample ?? selectedSample}
           missionIndex={activeMissionIndex}
           progress={visibleProgress}
           onProgress={detailOrigin === "landing" && canBrowseFullCatalogue ? () => undefined : setProgress}
           onAdvance={advanceSession}
-          onPause={() => setActiveMissionIndex(null)}
+          onPause={() => {
+            playActionRequestVersion.current += 1;
+            setActiveMissionIndex(null);
+          }}
           onComplete={detailOrigin === "landing" && canBrowseFullCatalogue ? completeSignedMission : undefined}
+          onSkip={detailOrigin === "landing" && canBrowseFullCatalogue ? skipSignedMission : undefined}
+          missionWasReplaced={Boolean(playSession?.missionReplacements.some(({ originalMissionId }) => originalMissionId === playSession.playPath.missions[activeMissionIndex]?.id))}
         />
       ) : (
         <>

@@ -143,10 +143,26 @@ Phase 5 is delivered as persistent normal play first, followed by mission adapta
 
 ### Phase 5.2 — Mission skip and replacement
 
-**Status:** Planned after Phase 5.1.
+**Status:** Complete on `feature/mission-skip-replacement` — 7 October 2026.
 
-- Record a fixed-choice skip reason and replace the current mission with a safe published alternative where available.
-- Preserve the original mission and replacement decision for later history and feedback work.
+#### Scope
+
+- Let a signed-in parent request a different current mission using a fixed, parent-friendly reason.
+- Use an explicitly curated replacement Play Path link in the catalogue and substitute the mission at the same position.
+- Preserve the frozen original mission, selected reason, replacement snapshot, and replacement timestamp.
+- Restore the same replacement after refresh or another authenticated browser session.
+- Keep the original Mission Wall position and reveal meaning when the substitute is completed.
+
+#### Acceptance criteria
+
+- Only the current mission in an authenticated, parent-owned active session can be replaced.
+- Skip reasons are restricted to missing materials, too much mess or noise, too much parent help, child disinterest, or another reason.
+- Every seeded Play Path points to a reviewed fallback Play Path with the same number of missions; arbitrary cross-catalogue selection is not allowed.
+- The replacement must still be published when requested; otherwise the original mission remains unchanged and a safe unavailable message is returned.
+- A repeated or concurrent request does not create more than one replacement for the same original mission.
+- Completing a substitute records completion against the original mission position so ordered progress and Mission Wall reveals remain stable.
+- Session resume returns the saved replacement while retaining the original frozen Play Path for later history.
+- Guest Play Paths remain unchanged and do not write skip or replacement data.
 
 ## Phase 2 — Parent accounts and secure authentication
 
