@@ -27,12 +27,16 @@ export interface GuestMission {
   sayThis: string;
   childChallenge: string;
   tidyUp: string;
+  materials?: string[];
   wallElement: {
     key: string;
     label: string;
     revealMessage: string;
   };
+  replacementMissionId?: string;
 }
+
+export type PublishedMission = Omit<GuestMission, "wallElement" | "replacementMissionId">;
 
 export interface GuestSample extends Omit<GuestSampleSummary, "missionCount"> {
   safetyNote: string;
@@ -44,6 +48,7 @@ export interface CatalogRepository {
   listGuestSamples(): Promise<GuestSampleSummary[]>;
   findGuestSample(sampleId: string): Promise<GuestSample | null>;
   findPublishedPlayPath(playPathId: string): Promise<GuestSample | null>;
+  findPublishedMission?(missionId: string): Promise<PublishedMission | null>;
 }
 
 interface GuestPreviewDocument {
@@ -80,6 +85,7 @@ interface MissionDocument {
   sayThis: string;
   childChallenge: string;
   tidyUp: string | null;
+  materials: Array<{ name: string }>;
   status: "draft" | "published" | "retired";
 }
 
@@ -88,6 +94,7 @@ interface PlayPathMissionDocument {
   missionId: ObjectId;
   position: number;
   wallElementKey: string;
+  replacementMissionId?: ObjectId;
 }
 
 interface MissionWallSceneDocument {
@@ -179,11 +186,13 @@ export function createMongoCatalogRepository(
         sayThis: mission.sayThis,
         childChallenge: mission.childChallenge,
         tidyUp: mission.tidyUp ?? "",
+        materials: mission.materials.map(({ name }) => name),
         wallElement: {
           key: wallElement.key,
           label: wallElement.label,
           revealMessage: wallElement.revealMessage,
         },
+        ...(link.replacementMissionId ? { replacementMissionId: link.replacementMissionId.toHexString() } : {}),
       };
     });
 
@@ -221,6 +230,25 @@ export function createMongoCatalogRepository(
 
     async findPublishedPlayPath(playPathId) {
       return findPlayPath(playPathId, false);
+    },
+
+    async findPublishedMission(missionId) {
+      if (!ObjectId.isValid(missionId)) return null;
+      const mission = await (await database()).collection<MissionDocument>("missions").findOne({
+        _id: new ObjectId(missionId),
+        status: "published",
+      });
+      if (!mission) return null;
+      return {
+        id: mission._id.toHexString(),
+        title: mission.title,
+        durationMinutes: mission.durationMinutes,
+        setupSteps: mission.setupSteps,
+        sayThis: mission.sayThis,
+        childChallenge: mission.childChallenge,
+        tidyUp: mission.tidyUp ?? "",
+        materials: mission.materials.map(({ name }) => name),
+      };
     },
   };
 }

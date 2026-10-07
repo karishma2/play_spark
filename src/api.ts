@@ -54,6 +54,14 @@ export function getPlayPath(playPathId: string) {
 }
 
 export type PlaySessionStatus = "active" | "completed" | "abandoned";
+export type MissionSkipReason = "missing_materials" | "too_messy_or_noisy" | "too_much_parent_help" | "child_not_interested" | "something_else";
+
+export interface MissionReplacement {
+  originalMissionId: string;
+  replacementMission: GuestSample["missions"][number];
+  reason: MissionSkipReason;
+  replacedAt: string;
+}
 
 export interface PlaySession {
   id: string;
@@ -61,6 +69,7 @@ export interface PlaySession {
   status: PlaySessionStatus;
   playPath: GuestSample;
   completedMissionIds: string[];
+  missionReplacements: MissionReplacement[];
   startedAt: string;
   updatedAt: string;
   completedAt?: string;
@@ -79,6 +88,13 @@ export function completePlaySessionMission(sessionId: string, missionId: string)
   return postJson<PlaySession>(
     `/api/v1/play-sessions/${encodeURIComponent(sessionId)}/missions/${encodeURIComponent(missionId)}/complete`,
     {},
+  );
+}
+
+export function skipPlaySessionMission(sessionId: string, missionId: string, reason: MissionSkipReason) {
+  return postJson<PlaySession>(
+    `/api/v1/play-sessions/${encodeURIComponent(sessionId)}/missions/${encodeURIComponent(missionId)}/skip`,
+    { reason },
   );
 }
 

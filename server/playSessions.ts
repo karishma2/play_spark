@@ -2,11 +2,20 @@ import { MongoServerError, ObjectId, type Db, type Document } from "mongodb";
 import { Router, type Response } from "express";
 import { z } from "zod";
 import { findAuthenticatedUser, type AuthRepository } from "./auth.js";
-import type { GuestSample, CatalogRepository } from "./catalog.js";
+import type { GuestMission, GuestSample, CatalogRepository } from "./catalog.js";
 import type { ChildProfileRepository } from "./childProfile.js";
 import type { MongoClientProvider } from "./db.js";
 
 export type PlaySessionStatus = "active" | "completed" | "abandoned";
+export const missionSkipReasons = ["missing_materials", "too_messy_or_noisy", "too_much_parent_help", "child_not_interested", "something_else"] as const;
+export type MissionSkipReason = typeof missionSkipReasons[number];
+
+export interface MissionReplacement {
+  originalMissionId: string;
+  replacementMission: GuestMission;
+  reason: MissionSkipReason;
+  replacedAt: string;
+}
 
 export interface PlaySession {
   id: string;
@@ -14,6 +23,7 @@ export interface PlaySession {
   status: PlaySessionStatus;
   playPath: GuestSample;
   completedMissionIds: string[];
+  missionReplacements: MissionReplacement[];
   startedAt: string;
   updatedAt: string;
   completedAt?: string;
@@ -31,6 +41,15 @@ export interface PlaySessionRepository {
     missionId: string,
     completesSession: boolean,
   ): Promise<PlaySession | null>;
+  recordMissionReplacement(
+    sessionId: string,
+    userId: string,
+    childProfileId: string,
+    previousMissionIds: string[],
+    originalMissionId: string,
+    replacementMission: GuestMission,
+    reason: MissionSkipReason,
+  ): Promise<PlaySession | null>;
   abandon(sessionId: string, userId: string, childProfileId: string): Promise<PlaySession | null>;
 }
 
@@ -43,6 +62,7 @@ interface PlaySessionDocument extends Document {
   status: PlaySessionStatus;
   playPath: GuestSample;
   completedMissionIds: string[];
+  missionReplacements: Array<Omit<MissionReplacement, "replacedAt"> & { replacedAt: Date }>;
   startedAt: Date;
   updatedAt: Date;
   completedAt?: Date;
@@ -51,13 +71,26 @@ interface PlaySessionDocument extends Document {
 
 const playSessionDocument = {
   bsonType: "object",
-  required: ["userId", "childProfileId", "status", "playPath", "completedMissionIds", "startedAt", "updatedAt"],
+  required: ["userId", "childProfileId", "status", "playPath", "completedMissionIds", "missionReplacements", "startedAt", "updatedAt"],
   properties: {
     userId: { bsonType: "objectId" },
     childProfileId: { bsonType: "objectId" },
     status: { enum: ["active", "completed", "abandoned"] },
     playPath: { bsonType: "object" },
     completedMissionIds: { bsonType: "array", uniqueItems: true, items: { bsonType: "string" } },
+    missionReplacements: {
+      bsonType: "array",
+      items: {
+        bsonType: "object",
+        required: ["originalMissionId", "replacementMission", "reason", "replacedAt"],
+        properties: {
+          originalMissionId: { bsonType: "string" },
+          replacementMission: { bsonType: "object" },
+          reason: { enum: missionSkipReasons },
+          replacedAt: { bsonType: "date" },
+        },
+      },
+    },
     startedAt: { bsonType: "date" },
     updatedAt: { bsonType: "date" },
     completedAt: { bsonType: "date" },
@@ -68,6 +101,10 @@ const playSessionDocument = {
 export async function ensurePlaySessionCollections(db: Db) {
   const existing = new Set((await db.listCollections({}, { nameOnly: true }).toArray()).map(({ name }) => name));
   if (existing.has("playSessions")) {
+    await db.collection("playSessions").updateMany(
+      { missionReplacements: { $exists: false } },
+      { $set: { missionReplacements: [] } },
+    );
     await db.command({ collMod: "playSessions", validator: { $jsonSchema: playSessionDocument }, validationLevel: "strict", validationAction: "error" });
   } else {
     await db.createCollection("playSessions", { validator: { $jsonSchema: playSessionDocument }, validationLevel: "strict", validationAction: "error" });
@@ -89,6 +126,10 @@ function toPlaySession(document: PlaySessionDocument): PlaySession {
     status: document.status,
     playPath: document.playPath,
     completedMissionIds: document.completedMissionIds,
+    missionReplacements: document.missionReplacements.map((replacement) => ({
+      ...replacement,
+      replacedAt: replacement.replacedAt.toISOString(),
+    })),
     startedAt: document.startedAt.toISOString(),
     updatedAt: document.updatedAt.toISOString(),
     ...(document.completedAt ? { completedAt: document.completedAt.toISOString() } : {}),
@@ -128,6 +169,7 @@ export function createMongoPlaySessionRepository(
           status: "active",
           playPath,
           completedMissionIds: [],
+          missionReplacements: [],
           startedAt: now,
           updatedAt: now,
         });
@@ -137,6 +179,7 @@ export function createMongoPlaySessionRepository(
           status: "active",
           playPath,
           completedMissionIds: [],
+          missionReplacements: [],
           startedAt: now.toISOString(),
           updatedAt: now.toISOString(),
         };
@@ -167,6 +210,30 @@ export function createMongoPlaySessionRepository(
       );
       return document ? toPlaySession(document) : null;
     },
+    async recordMissionReplacement(sessionId, userId, childProfileId, previousMissionIds, originalMissionId, replacementMission, reason) {
+      if (!ObjectId.isValid(sessionId) || !ObjectId.isValid(userId) || !ObjectId.isValid(childProfileId)) return null;
+      const now = new Date();
+      const document = await (await collection()).findOneAndUpdate(
+        {
+          _id: new ObjectId(sessionId),
+          userId: new ObjectId(userId),
+          childProfileId: new ObjectId(childProfileId),
+          status: "active",
+          completedMissionIds: previousMissionIds,
+          missionReplacements: { $not: { $elemMatch: { originalMissionId } } },
+        },
+        [{
+          $set: {
+            missionReplacements: {
+              $concatArrays: ["$missionReplacements", [{ originalMissionId, replacementMission, reason, replacedAt: now }]],
+            },
+            updatedAt: now,
+          },
+        }],
+        { returnDocument: "after" },
+      );
+      return document ? toPlaySession(document) : null;
+    },
     async abandon(sessionId, userId, childProfileId) {
       if (!ObjectId.isValid(sessionId) || !ObjectId.isValid(userId) || !ObjectId.isValid(childProfileId)) return null;
       const now = new Date();
@@ -187,6 +254,7 @@ export function createMongoPlaySessionRepository(
 
 const objectId = z.string().regex(/^[a-f\d]{24}$/iu);
 const startSchema = z.object({ playPathId: objectId }).strict();
+const skipSchema = z.object({ reason: z.enum(missionSkipReasons) }).strict();
 
 function safeError(response: Response) {
   response.status(503).json({ error: { code: "PLAY_SESSION_UNAVAILABLE", message: "Your play session is temporarily unavailable. Please try again." } });
@@ -307,6 +375,69 @@ export function createPlaySessionRouter(options: {
           return;
         }
         response.status(409).json({ error: { code: "SESSION_CHANGED", message: "Your progress changed in another window. Refresh and try again." } });
+        return;
+      }
+      response.json({ data: updated });
+    } catch {
+      safeError(response);
+    }
+  });
+
+  router.post("/play-sessions/:sessionId/missions/:missionId/skip", async (request, response) => {
+    const params = z.object({ sessionId: objectId, missionId: objectId }).safeParse(request.params);
+    const input = skipSchema.safeParse(request.body);
+    if (!params.success || !input.success) {
+      response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Choose a valid reason for changing this mission." } });
+      return;
+    }
+    try {
+      const owner = await context(request, response);
+      if (!owner) return;
+      const session = await options.repository.findOwned(params.data.sessionId, owner.user.id);
+      if (!session || session.childProfileId !== owner.profile.id) {
+        response.status(404).json({ error: { code: "NOT_FOUND", message: "This play session is unavailable." } });
+        return;
+      }
+      if (session.status !== "active") {
+        response.status(409).json({ error: { code: "SESSION_NOT_ACTIVE", message: "This Play Path is no longer active." } });
+        return;
+      }
+      const currentMission = session.playPath.missions[session.completedMissionIds.length];
+      if (!currentMission || currentMission.id !== params.data.missionId) {
+        response.status(409).json({ error: { code: "MISSION_OUT_OF_ORDER", message: "Only the current mission can be changed." } });
+        return;
+      }
+      const existing = session.missionReplacements.find(({ originalMissionId }) => originalMissionId === currentMission.id);
+      if (existing) {
+        response.json({ data: session });
+        return;
+      }
+      if (!currentMission.replacementMissionId || !options.catalog.findPublishedMission) {
+        response.status(409).json({ error: { code: "NO_REPLACEMENT_AVAILABLE", message: "There is no suitable mission swap available right now." } });
+        return;
+      }
+      const published = await options.catalog.findPublishedMission(currentMission.replacementMissionId);
+      if (!published) {
+        response.status(409).json({ error: { code: "NO_REPLACEMENT_AVAILABLE", message: "There is no suitable mission swap available right now." } });
+        return;
+      }
+      const replacementMission: GuestMission = { ...published, wallElement: currentMission.wallElement };
+      const updated = await options.repository.recordMissionReplacement(
+        session.id,
+        owner.user.id,
+        owner.profile.id,
+        session.completedMissionIds,
+        currentMission.id,
+        replacementMission,
+        input.data.reason,
+      );
+      if (!updated) {
+        const latest = await options.repository.findOwned(session.id, owner.user.id);
+        if (latest?.childProfileId === owner.profile.id && latest.missionReplacements.some(({ originalMissionId }) => originalMissionId === currentMission.id)) {
+          response.json({ data: latest });
+          return;
+        }
+        response.status(409).json({ error: { code: "SESSION_CHANGED", message: "Your play session changed in another window. Refresh and try again." } });
         return;
       }
       response.json({ data: updated });

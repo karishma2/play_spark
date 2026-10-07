@@ -34,6 +34,7 @@ const sample = z.object({
   supports: z.array(z.string().min(1)).min(2).max(3),
   durationMinutes: z.number().int().positive(),
   themeKey: z.string().min(1),
+  replacementPathId: objectId,
   eligibility,
   guestPreview: z.object({
     enabled: z.boolean(),
@@ -82,12 +83,23 @@ const seedSchema = z.object({ samples: z.array(sample).min(2) }).superRefine((va
   if (guestSamples.length !== 2) {
     context.addIssue({ code: "custom", message: "Exactly two Play Paths must be enabled for guest preview" });
   }
+  const samplesById = new Map(value.samples.map((entry) => [entry.id, entry]));
+  for (const entry of value.samples) {
+    const replacement = samplesById.get(entry.replacementPathId);
+    if (!replacement || replacement.id === entry.id) {
+      context.addIssue({ code: "custom", message: `Play Path ${entry.id} must reference another seeded replacement path` });
+      continue;
+    }
+    if (replacement.missions.length !== entry.missions.length) {
+      context.addIssue({ code: "custom", message: `Replacement path ${replacement.id} must have the same mission count as ${entry.id}` });
+    }
+  }
 });
 
 const validators: Record<string, Document> = {
   playPaths: { $jsonSchema: { bsonType: "object", required: ["title", "description", "goal", "supports", "durationMinutes", "themeKey", "wallSceneId", "eligibility", "status", "contentVersion", "createdAt", "updatedAt"], properties: { goal: { bsonType: "string" }, supports: { bsonType: "array", minItems: 2, items: { bsonType: "string" } }, status: { enum: ["draft", "published", "retired"] } } } },
   missions: { $jsonSchema: { bsonType: "object", required: ["title", "durationMinutes", "parentEffort", "materials", "setupSteps", "childChallenge", "eligibility", "tagKeys", "status", "contentVersion", "createdAt", "updatedAt"], properties: { status: { enum: ["draft", "published", "retired"] } } } },
-  playPathMissions: { $jsonSchema: { bsonType: "object", required: ["playPathId", "missionId", "position", "wallElementKey"] } },
+  playPathMissions: { $jsonSchema: { bsonType: "object", required: ["playPathId", "missionId", "position", "wallElementKey"], properties: { replacementMissionId: { bsonType: "objectId" } } } },
   missionWallScenes: { $jsonSchema: { bsonType: "object", required: ["key", "title", "background", "elements", "status", "createdAt", "updatedAt"], properties: { status: { enum: ["draft", "published", "retired"] } } } },
 };
 
@@ -159,6 +171,8 @@ async function seed() {
       );
 
       await db.collection("playPathMissions").deleteMany({ playPathId: pathId });
+      const replacementPath = content.samples.find(({ id }) => id === entry.replacementPathId);
+      if (!replacementPath) throw new Error(`Replacement path ${entry.replacementPathId} is missing`);
       for (const item of entry.missions) {
         const missionId = new ObjectId(item.id);
         await db.collection("missions").updateOne(
@@ -171,6 +185,7 @@ async function seed() {
           missionId,
           position: item.position,
           wallElementKey: item.wallElementKey,
+          replacementMissionId: new ObjectId(replacementPath.missions[item.position - 1].id),
           pathOverrides: null,
         });
       }

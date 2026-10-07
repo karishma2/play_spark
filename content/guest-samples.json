@@ -8,6 +8,7 @@
       "supports": ["Planning and problem-solving", "Spatial language", "Pretend storytelling"],
       "durationMinutes": 20,
       "themeKey": "vehicles",
+      "replacementPathId": "64b100000000000000000004",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["vehicles", "building"],
@@ -86,6 +87,7 @@
       "supports": ["Cause and effect", "Observation and vocabulary", "Story sequencing"],
       "durationMinutes": 15,
       "themeKey": "animals",
+      "replacementPathId": "64b100000000000000000011",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["animals", "stories"],
@@ -164,6 +166,7 @@
       "supports": ["Listening and working memory", "Balance and motor planning", "Giving clear directions"],
       "durationMinutes": 15,
       "themeKey": "art",
+      "replacementPathId": "64b100000000000000000007",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["art", "nature"],
@@ -242,6 +245,7 @@
       "supports": ["Gross-motor control", "Empathy and caring play", "Story sequencing"],
       "durationMinutes": 20,
       "themeKey": "animals",
+      "replacementPathId": "64b100000000000000000001",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["animals", "stories"],
@@ -320,6 +324,7 @@
       "supports": ["Listening and memory", "Pattern recognition", "Rhythm and self-regulation"],
       "durationMinutes": 10,
       "themeKey": "music",
+      "replacementPathId": "64b100000000000000000009",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["music", "stories"],
@@ -398,6 +403,7 @@
       "supports": ["Observation and comparison", "Flexible thinking", "Reasoning and descriptive language"],
       "durationMinutes": 15,
       "themeKey": "nature",
+      "replacementPathId": "64b100000000000000000008",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["nature", "building"],
@@ -476,6 +482,7 @@
       "supports": ["Visual attention", "Balance and coordination", "Working memory"],
       "durationMinutes": 10,
       "themeKey": "art",
+      "replacementPathId": "64b100000000000000000003",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["art", "building"],
@@ -554,6 +561,7 @@
       "supports": ["Fine-motor control", "Prediction and cause-and-effect", "Colour patterning"],
       "durationMinutes": 10,
       "themeKey": "nature",
+      "replacementPathId": "64b100000000000000000006",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["nature", "art"],
@@ -632,6 +640,7 @@
       "supports": ["Hand-eye coordination", "Force and distance", "Planning and persistence"],
       "durationMinutes": 10,
       "themeKey": "vehicles",
+      "replacementPathId": "64b100000000000000000005",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["vehicles", "building"],
@@ -710,6 +719,7 @@
       "supports": ["Visual matching", "Fine-motor control", "Flexible thinking"],
       "durationMinutes": 20,
       "themeKey": "animals",
+      "replacementPathId": "64b100000000000000000012",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["animals", "art"],
@@ -788,6 +798,7 @@
       "supports": ["Sensory discrimination", "Descriptive language", "Working memory"],
       "durationMinutes": 20,
       "themeKey": "vehicles",
+      "replacementPathId": "64b100000000000000000002",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["nature", "building", "animals"],
@@ -866,6 +877,7 @@
       "supports": ["Spatial planning", "Fine-motor control", "Following and giving directions"],
       "durationMinutes": 30,
       "themeKey": "stories",
+      "replacementPathId": "64b100000000000000000010",
       "eligibility": {
         "ageBands": ["3_4", "4_5", "5_6"],
         "interestKeys": ["art", "vehicles", "building"],
