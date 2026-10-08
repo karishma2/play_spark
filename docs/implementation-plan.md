@@ -164,6 +164,38 @@ Phase 5 is delivered as persistent normal play first, followed by mission adapta
 - Session resume returns the saved replacement while retaining the original frozen Play Path for later history.
 - Guest Play Paths remain unchanged and do not write skip or replacement data.
 
+## Phase 6 — Progress and retention
+
+Deliver Phase 6 in three independently reviewable slices: 6.1 Play history and completed Mission Walls, 6.2 favourite Play Paths, and 6.3 optional fixed-choice Play Path feedback. Routine Paths remain outside this MVP scope.
+
+### Phase 6.1 — Play history and completed Mission Walls
+
+**Status:** Complete on `feature/play-history` — 8 October 2026; user reported testing passed and approved commit/push/PR delivery. Merge remains subject to approval.
+**Branch:** `feature/play-history`
+
+#### Scope
+
+- Add a signed-in history screen for the active child profile, with completed activities presented first and ended unfinished sessions clearly distinguished.
+- Read existing MongoDB Play Session records through the approved `GET /api/v1/play-sessions/history` route, with bounded cursor pagination and newest-first ordering.
+- Show the saved Play Path title, completion or end date, and session status; open a read-only saved-session view with its Mission Wall.
+- Reconstruct the wall and mission details from frozen session snapshots, including curated replacements, rather than current catalogue content.
+- Offer “Play again” for an eligible published Play Path through the existing start flow. Preserve the previous session and respect the one-active-session rule.
+- Use the active child's completed-session history to prefer unplayed recommendations within each match group. Keep exact matches ahead of fallbacks, retain repeats when needed, and label completed activities “Played before.”
+- Keep paused sessions in the existing resume flow and guest progress browser-only. Do not add favourites, feedback, new analytics, or routine activities in this slice.
+
+#### Acceptance criteria
+
+- Only a signed-in parent allowed by the configured verification policy can list or view history belonging to their active child profile; ownership is derived server-side.
+- History contains completed and abandoned sessions in reverse chronological order, with clear status labels and bounded pagination; active sessions stay in the resume flow.
+- Completed-session details show the full saved Mission Wall; abandoned-session details show only elements actually earned, without implying completion.
+- Catalogue changes or unpublished content do not alter saved history, original mission positions, or replacement records.
+- “Play again” creates a fresh session from current eligible published content without changing the historic record; an existing active session follows the established resume/end behavior.
+- Empty history, loading, retry, unavailable replay, invalid identifiers, ownership failures, and storage errors have safe, understandable states.
+- Switching accounts or active profiles invalidates pending history responses and clears previously displayed private session data.
+- Completion-aware ranking preserves age/time eligibility and exact-before-fallback priority. Within each match group, unplayed paths rank before completed paths, followed by existing duration/score ordering. Active or abandoned sessions do not count as completed; history from another parent or child cannot affect ranking. A fully played catalogue still returns suitable recommendations.
+- The history and saved-wall views are responsive and keyboard usable. Guests retain their existing experience and cannot access private history.
+- Focused coverage proves ownership, pagination/order, saved snapshot fidelity, and replay preservation; finalization runs or reuses the required feature gate.
+
 ## Phase 2 — Parent accounts and secure authentication
 
 Phase 2 is delivered as two independently reviewable vertical slices.

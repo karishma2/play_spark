@@ -62,6 +62,35 @@ const selection = {
   themeKey: "vehicles",
 };
 
+test("prefers unplayed paths within a match group while retaining repeats and exact priority", () => {
+  const repeat = candidate();
+  const fresh = candidate({ id: "64b100000000000000000002", durationMinutes: 15 });
+  const fallback = candidate({ id: "64b100000000000000000003", themeKey: "animals" });
+  const choices = { ...selection, constraints: [] };
+  const result = rankRecommendations([repeat, fresh, fallback], profile, choices, new Date("2026-10-01"), new Set([repeat.id]));
+  assert.deepEqual(result.map(({ playPathId }) => playPathId), [fresh.id, repeat.id, fallback.id]);
+  assert.deepEqual(result.map(({ playedBefore }) => playedBefore), [false, true, false]);
+  const allPlayed = rankRecommendations([repeat, fresh], profile, choices, new Date("2026-10-01"), new Set([repeat.id, fresh.id]));
+  assert.equal(allPlayed.length, 2);
+  assert.ok(allPlayed.every(({ playedBefore }) => playedBefore));
+});
+
+test("recommendations use server-owned completion history and hide lookup failures", async () => {
+  const state = createState();
+  state.recommendations.findCompletedPlayPathIds = async (ownerId, childId, candidates) => {
+    assert.equal(ownerId, "parent-one");
+    assert.equal(childId, profile.id);
+    assert.deepEqual(candidates, [candidate().id]);
+    return [candidate().id];
+  };
+  const application = recommendationApp(state);
+  const result = await signedIn(request(application).post("/api/v1/recommendations")).send(selection).expect(200);
+  assert.equal(result.body.data.recommendations[0].playedBefore, true);
+  state.recommendations.findCompletedPlayPathIds = async () => { throw new Error("private storage detail"); };
+  const failure = await signedIn(request(application).post("/api/v1/recommendations")).send(selection).expect(503);
+  assert.ok(!JSON.stringify(failure.body).includes("private storage detail"));
+});
+
 test("ranks exact personalized matches first with deterministic ties", () => {
   const differentStyle = candidate({
     id: "64b100000000000000000002",
@@ -225,6 +254,7 @@ function createState(options: { profile?: ChildProfile | null; emailVerified?: b
   };
   const recommendations: RecommendationRepository = {
     async listPublished() { return [candidate()]; },
+    async findCompletedPlayPathIds() { return []; },
   };
   return { auth, childProfiles, recommendations };
 }

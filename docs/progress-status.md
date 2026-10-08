@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 7 October 2026
+**Last updated:** 8 October 2026
 
 ## Status meanings
 
@@ -24,14 +24,38 @@
 | 3 | Child-profile onboarding and editing | Complete |
 | 4 | Dashboard, filters, and rule-based recommendations | Complete |
 | 5 | Active Play Sessions and mission actions | Complete |
-| 6 | Mission Wall, favourites, history, and feedback | Planned |
+| 6 | Mission Wall, favourites, history, and feedback | In progress |
 | 7 | Private-beta hardening, analytics, and deployment | Planned |
 
-## In-progress features
-
-None.
-
 ## Completed features
+
+### Phase 6.1 — Play history and completed Mission Walls
+
+- **Status:** Complete on `feature/play-history`; user approved commit/push/PR delivery.
+- **Completed:** 8 October 2026.
+- **Started:** 8 October 2026.
+- **Scope:** Active-profile-owned history, saved Mission Walls, frozen replacement details, and replay through the existing start flow.
+- **Key routes:** `/play-history`, `GET /api/v1/play-sessions/history`, `GET /api/v1/play-sessions/history/:sessionId`.
+- **Delivered:** Bounded newest-first history and saved-detail APIs, completed/ended labels, saved Mission Walls and replacement summaries, empty/loading/retry states, and replay using current published content. The screen discards pending responses on unmount or account changes.
+- **Approved addition:** Recommendations prefer unplayed paths within each match group, preserve exact-before-fallback ordering, and label repeats “Played before.” Only completed sessions owned by the parent and active child influence this preference; repeat activities remain available.
+- **Validation:** TypeScript checking and ten focused Play Session tests passed on 8 October 2026, including history ownership, equal-time pagination, invalid queries, frozen replacement snapshots, replay preservation, and unavailable catalogue content.
+- **Final verification:** `npm run verify` passed on the uncommitted Phase 6.1 application working tree based on `6a5b4d8`, on 8 October 2026: TypeScript, 12 catalogue paths, 13 profile options, 54 tests, production build, and progress guard. Earlier focused results were ten Play Session tests and eleven recommendation tests. After that full pass, only saved-wall pending-element wording changed; the post-fix TypeScript/production build and browser check passed separately.
+- **Developer UI checks:** Synthetic-data browser checks covered list/detail, completed and partial walls, saved replacement labels, pagination, empty history, failed-load retry, unavailable replay, replay opening Mission 1 with fresh progress, and the “Played before” discovery label. Checked desktop, 390px mobile and 768px tablet layouts, plus keyboard activation. Existing shared cards/wall styling was reused; the Stitch project has no dedicated history screen, so exact history-design comparison is not evidenced.
+- **Bounded review fix:** New-session creation (including history replay) checks the current published catalogue's age band against the active child's current age using the same calculation as recommendations. Ineligible paths return safe not-found without creating a session or altering history; existing active-session resumption remains unchanged. Eleven focused Play Session tests passed after this fix, including rejected age-ineligible replay and successful age-eligible replay. The earlier full gate remains prior evidence, not a fresh pass on this fix.
+- **Review/testing sign-off:** User supplied the replay age-eligibility review finding; it was fixed and validated with focused checks. The user subsequently reported testing passed and approved delivery. No independent reviewers/testers were launched by the Developer; detailed live-database and cross-account browser results were not supplied separately.
+- **Follow-up:** Run `npm run setup:play-sessions` in deployment environments to add the repeatable history index; no content reseed or document migration is required for history. PR merge remains subject to user approval.
+
+## Planned next feature
+
+### Phase 6 delivery sequence
+
+- **Status:** Phase 6.1 complete; Phases 6.2 and 6.3 planned.
+- **Branch:** `feature/play-history`
+- **Scope:** Parent-owned history for the active child profile, completed Mission Wall viewing, and replay through the existing session-start flow. Completed activities are the primary view; ended unfinished sessions remain clearly labelled in history.
+- **Dependencies:** Phase 5.1 and Phase 5.2 are merged. Reuse stored session snapshots and ownership checks.
+- **Acceptance criteria:** Recorded in `docs/implementation-plan.md`. Favourites and fixed-choice feedback follow as Phases 6.2 and 6.3; Routine Paths remain a later extension.
+
+## Earlier completed features
 
 ### Mission skip and curated replacement
 
@@ -45,7 +69,7 @@ None.
 - **Delivered:** Fixed-choice skip reasons, published curated replacements, frozen replacement records, retry-safe swaps, restored replacements, and stable original Mission Wall positions. Guest activities retain their existing behavior.
 - **Key files or routes:** `server/playSessions.ts`, `server/catalog.ts`, `server/seedCatalog.ts`, `src/App.tsx`, `POST /api/v1/play-sessions/:sessionId/missions/:missionId/skip`.
 - **Validation:** `npm run verify` passed on the final Phase 5.2 application working tree on 7 October 2026: TypeScript, 12 Play Paths, 13 profile options, 50 automated tests, production build, and progress guard. The user confirmed code review and manual testing passed. Earlier focused coverage included eight Play Session tests; post-review TypeScript checking passed. Only completion documentation changed after the full gate.
-- **Remaining:** Push and PR delivery after the completed feature commit.
+- **Delivery:** PR #11 merged into `main`; local `main` updated on 8 October 2026. No remaining Phase 5.2 implementation work.
 
 ### Persistent active Play Sessions
 

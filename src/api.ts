@@ -80,6 +80,19 @@ export function getActivePlaySession() {
   return requestJson<PlaySession | null>("/api/v1/play-sessions/active");
 }
 
+export interface HistoryCursor { updatedAt: string; id: string }
+export interface PlayHistoryPage { sessions: PlaySession[]; nextCursor: HistoryCursor | null }
+
+export function getPlayHistory(cursor?: HistoryCursor) {
+  const query = new URLSearchParams({ limit: "10" });
+  if (cursor) { query.set("before", cursor.updatedAt); query.set("beforeId", cursor.id); }
+  return requestJson<PlayHistoryPage>(`/api/v1/play-sessions/history?${query}`);
+}
+
+export function getSavedPlaySession(sessionId: string) {
+  return requestJson<PlaySession>(`/api/v1/play-sessions/history/${encodeURIComponent(sessionId)}`);
+}
+
 export function startPlaySession(playPathId: string) {
   return postJson<PlaySession>("/api/v1/play-sessions", { playPathId });
 }
@@ -171,6 +184,7 @@ export interface RecommendationCard {
   imageAlt: string;
   materials: string[];
   matchType: "exact" | "best_available";
+  playedBefore: boolean;
   explanation: string;
 }
 
