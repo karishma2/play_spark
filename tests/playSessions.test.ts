@@ -93,6 +93,12 @@ function createMemoryState() {
     },
   };
   const playSessions: PlaySessionRepository = {
+    async listHistory(ownerId, childId, limit, before) {
+      return [...sessions.values()]
+        .filter((item) => item.userId === ownerId && item.childProfileId === childId && item.status !== "active")
+        .filter((item) => !before || item.updatedAt < before.updatedAt || (item.updatedAt === before.updatedAt && item.id < before.id))
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt) || b.id.localeCompare(a.id)).slice(0, limit);
+    },
     async findActive(ownerId, childId) {
       return [...sessions.values()].find((item) => item.userId === ownerId && item.childProfileId === childId && item.status === "active") ?? null;
     },
@@ -157,12 +163,92 @@ function createMemoryState() {
 
   users.set(userId, { id: userId, email: "parent@example.com", passwordHash: "unused", hasChildProfile: true, emailVerified: true });
   sessionUsers.set(hashSessionToken("parent-token"), userId);
-  return { auth, childProfiles, catalog, playSessions };
+  return { auth, childProfiles, catalog, playSessions, sessions };
 }
+
+test("history is bounded, ordered, profile-owned and excludes active sessions", async () => {
+  const state = createMemoryState();
+  const saved = (id: string, overrides: Partial<PlaySession & { userId: string }> = {}) => ({
+    id, userId, childProfileId: profileId, status: "completed" as const, playPath: playPath(),
+    completedMissionIds: missionIds, missionReplacements: [], startedAt: "2026-10-01T00:00:00.000Z",
+    updatedAt: "2026-10-02T00:00:00.000Z", completedAt: "2026-10-02T00:00:00.000Z", ...overrides,
+  });
+  const ids = [1, 2, 3, 4, 5].map((value) => `64b40000000000000000000${value}`);
+  state.sessions.set(ids[0], saved(ids[0]));
+  state.sessions.set(ids[1], saved(ids[1], { status: "abandoned" }));
+  state.sessions.set(ids[2], saved(ids[2], { status: "active" }));
+  state.sessions.set(ids[3], saved(ids[3], { childProfileId: "64b200000000000000000002" }));
+  state.sessions.set(ids[4], saved(ids[4], { userId: "64b000000000000000000002" }));
+  const application = app(state);
+  const first = await request(application).get("/api/v1/play-sessions/history?limit=1").set("Cookie", "play_spark_session=parent-token").expect(200);
+  assert.deepEqual(first.body.data.sessions.map((item: PlaySession) => item.id), [ids[1]]);
+  const cursor = first.body.data.nextCursor;
+  const second = await request(application).get(`/api/v1/play-sessions/history?limit=1&before=${cursor.updatedAt}&beforeId=${cursor.id}`).set("Cookie", "play_spark_session=parent-token").expect(200);
+  assert.equal(second.body.data.sessions[0].id, ids[0]);
+  assert.equal(second.body.data.nextCursor, null);
+  for (const id of ids.slice(2)) await request(application).get(`/api/v1/play-sessions/history/${id}`).set("Cookie", "play_spark_session=parent-token").expect(404);
+  await request(application).get("/api/v1/play-sessions/history").expect(401);
+  for (const query of ["limit=21", "limit=0", "beforeId=invalid", "before=2026-10-02T00:00:00.000Z", "userId=other"]) {
+    await request(application).get(`/api/v1/play-sessions/history?${query}`).set("Cookie", "play_spark_session=parent-token").expect(400);
+  }
+});
+
+test("saved history preserves replacements and walls when replay uses changed catalogue content", async () => {
+  const state = createMemoryState();
+  const saved = await state.playSessions.create(userId, profileId, playPath());
+  await state.playSessions.recordMissionReplacement(saved.id, userId, profileId, [], missionIds[0], {
+    ...saved.playPath.missions[0], id: replacementMissionIds[0], title: "Saved substitute",
+  }, "missing_materials");
+  await state.playSessions.recordMissionCompletion(saved.id, userId, [], missionIds[0], false);
+  await state.playSessions.recordMissionCompletion(saved.id, userId, [missionIds[0]], missionIds[1], true);
+  state.catalog.findPublishedPlayPath = async () => ({ ...playPath(), title: "Updated catalogue title" });
+  const application = app(state);
+  const history = await request(application).get(`/api/v1/play-sessions/history/${saved.id}`).set("Cookie", "play_spark_session=parent-token").expect(200);
+  assert.equal(history.body.data.playPath.title, "Build a route");
+  assert.equal(history.body.data.missionReplacements[0].replacementMission.title, "Saved substitute");
+  assert.deepEqual(history.body.data.completedMissionIds, missionIds);
+  const replay = await request(application).post("/api/v1/play-sessions").set("Cookie", "play_spark_session=parent-token").send({ playPathId: pathId }).expect(201);
+  assert.notEqual(replay.body.data.id, saved.id);
+  assert.equal(replay.body.data.playPath.title, "Updated catalogue title");
+  assert.deepEqual(replay.body.data.completedMissionIds, []);
+  assert.deepEqual(state.sessions.get(saved.id)?.completedMissionIds, missionIds);
+  state.catalog.findPublishedPlayPath = async () => null;
+  await state.playSessions.abandon(replay.body.data.id, userId, profileId);
+  await request(application).post("/api/v1/play-sessions").set("Cookie", "play_spark_session=parent-token").send({ playPathId: pathId }).expect(404);
+  await request(application).get(`/api/v1/play-sessions/history/${saved.id}`).set("Cookie", "play_spark_session=parent-token").expect(200);
+});
 
 function app(state = createMemoryState()) {
   return createApp({ databaseName: "test", ...state });
 }
+
+test("replay rejects a historic path outside the child's current catalogue age band", async () => {
+  const state = createMemoryState();
+  const historic = await state.playSessions.create(userId, profileId, playPath());
+  await state.playSessions.recordMissionCompletion(historic.id, userId, [], missionIds[0], false);
+  await state.playSessions.recordMissionCompletion(historic.id, userId, [missionIds[0]], missionIds[1], true);
+  const now = new Date();
+  const profile = await state.childProfiles.findActiveByUserId(userId);
+  assert.ok(profile);
+  profile.birthYear = now.getUTCFullYear() - 5;
+  profile.birthMonth = now.getUTCMonth() + 1;
+  state.catalog.findPublishedPlayPath = async (id, band) => {
+    assert.equal(band, "5_6");
+    return ["3_4"].includes(band ?? "") ? playPath(id) : null;
+  };
+  const application = app(state);
+  const replay = await request(application).post("/api/v1/play-sessions")
+    .set("Cookie", "play_spark_session=parent-token").send({ playPathId: pathId }).expect(404);
+  assert.equal(replay.body.error.code, "NOT_FOUND");
+  assert.equal(state.sessions.size, 1);
+  assert.equal(await state.playSessions.findActive(userId, profileId), null);
+  const saved = await request(application).get(`/api/v1/play-sessions/history/${historic.id}`)
+    .set("Cookie", "play_spark_session=parent-token").expect(200);
+  assert.deepEqual(saved.body.data.completedMissionIds, missionIds);
+  state.catalog.findPublishedPlayPath = async (id, band) => band === "5_6" ? playPath(id) : null;
+  await request(application).post("/api/v1/play-sessions")
+    .set("Cookie", "play_spark_session=parent-token").send({ playPathId: pathId }).expect(201);
+});
 
 test("starts and resumes one parent-owned active Play Path", async () => {
   const application = app();

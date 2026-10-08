@@ -21,6 +21,7 @@ import { EmailVerificationPendingPage, VerifyEmailPage } from "./EmailVerificati
 import { OnboardingPage } from "./OnboardingPage";
 import { ChildProfilePage } from "./ChildProfilePage";
 import { DiscoveryDashboard } from "./DiscoveryDashboard";
+import { PlayHistoryPage } from "./PlayHistoryPage";
 import {
   completeSample,
   readGuestProgress,
@@ -70,6 +71,7 @@ function Header({
   onSignOut,
   onManageAccount,
   onManageProfile,
+  onHistory,
   onVerifyEmail,
   signOutError,
 }: {
@@ -83,6 +85,7 @@ function Header({
   onSignOut: () => void;
   onManageAccount: () => void;
   onManageProfile: () => void;
+  onHistory: () => void;
   onVerifyEmail: () => void;
   signOutError?: string;
 }) {
@@ -99,6 +102,7 @@ function Header({
             <span className="account-email">{session.user.email}</span>
             {!session.emailVerified && <button onClick={onVerifyEmail}>Verify email</button>}
             {session.emailVerified && session.hasChildProfile && <button onClick={onManageProfile}>Child profile</button>}
+            {session.emailVerified && session.hasChildProfile && <button onClick={onHistory}>Play history</button>}
             <button onClick={onManageAccount}>Password</button>
             <button onClick={onSignOut}>Sign out</button>
             <span className="guest-avatar" aria-hidden="true">●</span>
@@ -484,10 +488,12 @@ function MissionWallPreview({
   sample,
   completedMissions,
   highlightedMissionIndex,
+  readOnly = false,
 }: {
   sample: GuestSample;
   completedMissions: string[];
   highlightedMissionIndex?: number;
+  readOnly?: boolean;
 }) {
   const revealed = sample.missions.map((mission) => completedMissions.includes(mission.id));
   const revealedCount = revealed.filter(Boolean).length;
@@ -595,7 +601,7 @@ function MissionWallPreview({
         {sceneLabels.map((label, index) => (
           <li className={`${revealed[index] ? "revealed" : ""}${highlightedMissionIndex === index ? " newly-revealed" : ""}`} key={label}>
             <span>{revealed[index] ? "✓" : index + 1}</span>
-            <div><b>{label}</b><small>{revealed[index] ? "Revealed" : `Complete mission ${index + 1}`}</small></div>
+            <div><b>{label}</b><small>{revealed[index] ? "Revealed" : readOnly ? "Not revealed" : `Complete mission ${index + 1}`}</small></div>
           </li>
         ))}
       </ol>
@@ -1297,6 +1303,13 @@ function App() {
     }
     return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
   }
+  if (location.pathname === "/play-history") {
+    if (!sessionReady) return <LoadingState label="Opening play history…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    if (!session.emailVerified) return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
+    if (!session.hasChildProfile) return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
+    return <PlayHistoryPage key={session.user.id} onHome={goHome} onReplay={() => navigate("/")} renderWall={(sample, completed) => <MissionWallPreview sample={sample} completedMissions={completed} readOnly />} />;
+  }
   if (location.pathname === "/child-profile") {
     if (!sessionReady) return <LoadingState label="Opening the child profile…" />;
     if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
@@ -1339,6 +1352,7 @@ function App() {
             onSignOut={endSession}
             onManageAccount={() => navigate("/change-password")}
             onManageProfile={() => navigate("/child-profile")}
+            onHistory={() => navigate("/play-history")}
             onVerifyEmail={() => navigate("/verify-email-pending")}
             signOutError={signOutError}
           />

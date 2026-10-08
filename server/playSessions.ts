@@ -5,6 +5,7 @@ import { findAuthenticatedUser, type AuthRepository } from "./auth.js";
 import type { GuestMission, GuestSample, CatalogRepository } from "./catalog.js";
 import type { ChildProfileRepository } from "./childProfile.js";
 import type { MongoClientProvider } from "./db.js";
+import { ageBand } from "./recommendations.js";
 
 export type PlaySessionStatus = "active" | "completed" | "abandoned";
 export const missionSkipReasons = ["missing_materials", "too_messy_or_noisy", "too_much_parent_help", "child_not_interested", "something_else"] as const;
@@ -31,6 +32,7 @@ export interface PlaySession {
 }
 
 export interface PlaySessionRepository {
+  listHistory(userId: string, childProfileId: string, limit: number, before?: { updatedAt: string; id: string }): Promise<PlaySession[]>;
   findActive(userId: string, childProfileId: string): Promise<PlaySession | null>;
   findOwned(sessionId: string, userId: string): Promise<PlaySession | null>;
   create(userId: string, childProfileId: string, playPath: GuestSample): Promise<PlaySession>;
@@ -115,6 +117,7 @@ export async function ensurePlaySessionCollections(db: Db) {
       { unique: true, partialFilterExpression: { status: "active" } },
     ),
     db.collection("playSessions").createIndex({ userId: 1, updatedAt: -1 }),
+    db.collection("playSessions").createIndex({ userId: 1, childProfileId: 1, updatedAt: -1, _id: -1 }),
   ]);
 }
 
@@ -146,6 +149,18 @@ export function createMongoPlaySessionRepository(
   }
 
   return {
+    async listHistory(userId, childProfileId, limit, before) {
+      if (!ObjectId.isValid(userId) || !ObjectId.isValid(childProfileId)) return [];
+      const documents = await (await collection()).find({
+        userId: new ObjectId(userId), childProfileId: new ObjectId(childProfileId),
+        status: { $in: ["completed", "abandoned"] },
+        ...(before ? { $or: [
+          { updatedAt: { $lt: new Date(before.updatedAt) } },
+          { updatedAt: new Date(before.updatedAt), _id: { $lt: new ObjectId(before.id) } },
+        ] } : {}),
+      }).sort({ updatedAt: -1, _id: -1 }).limit(limit).toArray();
+      return documents.map(toPlaySession);
+    },
     async findActive(userId, childProfileId) {
       if (!ObjectId.isValid(userId) || !ObjectId.isValid(childProfileId)) return null;
       const document = await (await collection()).findOne({
@@ -297,6 +312,46 @@ export function createPlaySessionRouter(options: {
     }
   });
 
+  router.get("/play-sessions/history", async (request, response) => {
+    const query = z.object({
+      limit: z.coerce.number().int().min(1).max(20).default(10),
+      before: z.string().datetime().optional(),
+      beforeId: objectId.optional(),
+    }).strict().refine((value) => Boolean(value.before) === Boolean(value.beforeId)).safeParse(request.query);
+    if (!query.success) {
+      response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Choose a valid history page." } });
+      return;
+    }
+    try {
+      const owner = await context(request, response);
+      if (!owner) return;
+      const { limit, before, beforeId } = query.data;
+      const rows = await options.repository.listHistory(owner.user.id, owner.profile.id, limit + 1,
+        before && beforeId ? { updatedAt: before, id: beforeId } : undefined);
+      const sessions = rows.slice(0, limit);
+      const last = sessions.at(-1);
+      response.json({ data: { sessions, nextCursor: rows.length > limit && last ? { updatedAt: last.updatedAt, id: last.id } : null } });
+    } catch { safeError(response); }
+  });
+
+  router.get("/play-sessions/history/:sessionId", async (request, response) => {
+    const params = z.object({ sessionId: objectId }).safeParse(request.params);
+    if (!params.success) {
+      response.status(404).json({ error: { code: "NOT_FOUND", message: "This saved Play Path is unavailable." } });
+      return;
+    }
+    try {
+      const owner = await context(request, response);
+      if (!owner) return;
+      const saved = await options.repository.findOwned(params.data.sessionId, owner.user.id);
+      if (!saved || saved.childProfileId !== owner.profile.id || saved.status === "active") {
+        response.status(404).json({ error: { code: "NOT_FOUND", message: "This saved Play Path is unavailable." } });
+        return;
+      }
+      response.json({ data: saved });
+    } catch { safeError(response); }
+  });
+
   router.post("/play-sessions", async (request, response) => {
     const input = startSchema.safeParse(request.body);
     if (!input.success) {
@@ -312,7 +367,7 @@ export function createPlaySessionRouter(options: {
         else response.status(409).json({ error: { code: "ACTIVE_SESSION_EXISTS", message: "Finish or end the current Play Path before starting another." } });
         return;
       }
-      const playPath = await options.catalog.findPublishedPlayPath(input.data.playPathId);
+      const playPath = await options.catalog.findPublishedPlayPath(input.data.playPathId, ageBand(owner.profile, new Date()));
       if (!playPath) {
         response.status(404).json({ error: { code: "NOT_FOUND", message: "This Play Path is unavailable." } });
         return;

@@ -47,7 +47,7 @@ export interface GuestSample extends Omit<GuestSampleSummary, "missionCount"> {
 export interface CatalogRepository {
   listGuestSamples(): Promise<GuestSampleSummary[]>;
   findGuestSample(sampleId: string): Promise<GuestSample | null>;
-  findPublishedPlayPath(playPathId: string): Promise<GuestSample | null>;
+  findPublishedPlayPath(playPathId: string, ageBand?: string): Promise<GuestSample | null>;
   findPublishedMission?(missionId: string): Promise<PublishedMission | null>;
 }
 
@@ -143,13 +143,14 @@ export function createMongoCatalogRepository(
     return (await mongo.getClient()).db(databaseName);
   }
 
-  async function findPlayPath(playPathId: string, guestOnly: boolean): Promise<GuestSample | null> {
+  async function findPlayPath(playPathId: string, guestOnly: boolean, ageBand?: string): Promise<GuestSample | null> {
     if (!ObjectId.isValid(playPathId)) return null;
 
     const db = await database();
     const path = await playPaths(db).findOne({
       _id: new ObjectId(playPathId),
       status: "published",
+      ...(ageBand ? { "eligibility.ageBands": ageBand } : {}),
       ...(guestOnly ? { "guestPreview.enabled": true } : {}),
     });
     if (!path?.guestPreview) return null;
@@ -228,8 +229,8 @@ export function createMongoCatalogRepository(
       return findPlayPath(sampleId, true);
     },
 
-    async findPublishedPlayPath(playPathId) {
-      return findPlayPath(playPathId, false);
+    async findPublishedPlayPath(playPathId, ageBand) {
+      return findPlayPath(playPathId, false, ageBand);
     },
 
     async findPublishedMission(missionId) {

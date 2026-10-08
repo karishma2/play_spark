@@ -52,6 +52,7 @@ function RecommendationResult({ card, onSelect }: { card: RecommendationCard; on
       </div>
       <div className="recommendation-card-body">
         <div className="recommendation-meta">
+          {card.playedBefore && <span className="played-before-badge">Played before</span>}
           <span>◷ {card.durationMinutes} min</span>
           <span>Prep {card.setupMinutes} min</span>
           <span>{effortLabel(card.parentEffort)}</span>

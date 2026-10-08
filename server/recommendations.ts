@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import type { Collection, Db } from "mongodb";
+import { ObjectId, type Collection, type Db } from "mongodb";
 import { z } from "zod";
 import { findAuthenticatedUser, type AuthRepository } from "./auth.js";
 import type { ChildProfile, ChildProfileRepository } from "./childProfile.js";
@@ -62,11 +62,13 @@ export interface RecommendationCard {
   imageAlt: string;
   materials: string[];
   matchType: "exact" | "best_available";
+  playedBefore: boolean;
   explanation: string;
 }
 
 export interface RecommendationRepository {
   listPublished(): Promise<RecommendationCandidate[]>;
+  findCompletedPlayPathIds(userId: string, childProfileId: string, candidateIds: string[]): Promise<string[]>;
 }
 
 interface RecommendationDocument {
@@ -91,6 +93,14 @@ export function createMongoRecommendationRepository(
   databaseName: string,
 ): RecommendationRepository {
   return {
+    async findCompletedPlayPathIds(userId, childProfileId, candidateIds) {
+      if (!ObjectId.isValid(userId) || !ObjectId.isValid(childProfileId) || !candidateIds.length) return [];
+      const db = (await mongo.getClient()).db(databaseName);
+      return db.collection("playSessions").distinct<string>("playPath.id", {
+        userId: new ObjectId(userId), childProfileId: new ObjectId(childProfileId),
+        status: "completed", "playPath.id": { $in: candidateIds },
+      });
+    },
     async listPublished() {
       const db = (await mongo.getClient()).db(databaseName);
       const documents = await playPaths(db)
@@ -131,7 +141,7 @@ const selectionSchema = z.object({
   themeKey: z.string().trim().min(1).max(40).regex(/^[a-z][a-z0-9_-]*$/u).optional(),
 }).strict();
 
-function ageBand(profile: ChildProfile, now: Date) {
+export function ageBand(profile: ChildProfile, now: Date) {
   const age = now.getUTCFullYear() - profile.birthYear
     - (now.getUTCMonth() + 1 < profile.birthMonth ? 1 : 0);
   return `${age}_${age + 1}`;
@@ -202,6 +212,7 @@ export function rankRecommendations(
   profile: ChildProfile,
   selection: RecommendationSelection,
   now = new Date(),
+  completedPlayPathIds: ReadonlySet<string> = new Set(),
 ): RecommendationCard[] {
   const band = ageBand(profile, now);
   const ageSuitable = candidates.filter((candidate) => candidate.eligibility.ageBands.includes(band));
@@ -213,6 +224,7 @@ export function rankRecommendations(
     .map((candidate) => scoreCandidate(candidate, profile, selection))
     .sort((left, right) => (
       Number(right.exact) - Number(left.exact)
+      || Number(completedPlayPathIds.has(left.candidate.id)) - Number(completedPlayPathIds.has(right.candidate.id))
       || Math.abs(selection.availableMinutes - left.candidate.durationMinutes)
       - Math.abs(selection.availableMinutes - right.candidate.durationMinutes)
     )
@@ -241,6 +253,7 @@ export function rankRecommendations(
       imageAlt: candidate.preview.imageAlt,
       materials: candidate.preview.materials,
       matchType: exact ? "exact" : "best_available",
+      playedBefore: completedPlayPathIds.has(candidate.id),
       explanation,
     };
   });
@@ -293,9 +306,9 @@ export function createRecommendationRouter(options: {
         });
         return;
       }
-      const recommendations = rankRecommendations(
-        await options.repository.listPublished(), profile, parsed.data, now(),
-      );
+      const candidates = await options.repository.listPublished();
+      const completed = await options.repository.findCompletedPlayPathIds(user.id, profile.id, candidates.map(({ id }) => id));
+      const recommendations = rankRecommendations(candidates, profile, parsed.data, now(), new Set(completed));
       response.json({ data: { recommendations } });
     } catch {
       response.status(503).json({

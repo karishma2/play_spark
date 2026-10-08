@@ -367,6 +367,12 @@ Returns the parent’s resumable session if it is still within 24 hours. A sched
 
 Returns the parent’s own completed and abandoned history in reverse chronological order, with cursor pagination if needed. The response uses the preserved session snapshots rather than current content instructions.
 
+Phase 6.1 scopes history to the authenticated parent's currently active child profile. Query parameters are `limit` (1–20, default 10) and an optional paired cursor `before` (ISO timestamp) plus `beforeId` (session ID). The response is `{ data: { sessions, nextCursor } }`; the cursor is `{ updatedAt, id }` or `null`. Ordering is descending `updatedAt`, then session ID, so equal timestamps do not skip records. Active sessions stay in the resume flow.
+
+`GET /play-sessions/history/:sessionId` returns one owned, inactive session snapshot for the current child profile, or a safe not-found response. Replay uses the existing `POST /play-sessions` start flow and current published content; it never modifies the historic session.
+
+Phase 6.1 also adds `playedBefore` to recommendation cards. The server derives it from completed sessions for the authenticated parent and active child. Exact matches retain priority over fallback matches; within either group, unplayed paths rank first before the existing duration and score ordering. Completed paths remain eligible, including when all suitable paths have been played.
+
 ### `POST /play-sessions/:playSessionId/feedback`
 
 Feedback is optional and applies to the completed overall Play Path—not to individual missions.
