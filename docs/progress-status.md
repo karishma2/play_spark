@@ -48,6 +48,14 @@
 
 ## Planned next feature
 
+### Bounded production follow-up — favourites/history query validation
+
+- **Status:** Local fix complete on `feature/vercel-query-validation`, 9 October 2026; user approved commit. Production confirmation remains pending.
+- **Finding:** Deployed favourites screenshot still shows `400` for `?limit=10` after PR #13. The earlier adapter cleanup does not protect routes if a hosting runtime query property is reintroduced; the actual rejected production field has not been observed.
+- **Fix:** Favourites/history pagination now reads the restored public URL directly instead of runtime `request.query`. Strict Zod validation retains rejection of unknown fields, invalid bounds and repeated pagination fields.
+- **Validation:** Both synthetic rewrite-query regressions reproduced `400` before the fix; all 18 favourites/Play Session tests passed afterward. TypeScript passed. Existing full-gate evidence predates this bounded fix; no full lifecycle rerun.
+- **Remaining:** Push/PR/deployment and confirmation against the deployed authenticated favourites/history routes. User authorized the fix commit; no production database changes made.
+
 ### Phase 6 delivery sequence
 
 - **Status:** Phase 6.1 complete and merged; Phase 6.2 complete on its feature branch; Phase 6.3 planned.

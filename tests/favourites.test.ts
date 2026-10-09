@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import request from "supertest";
 import express from "express";
+import { createServer } from "node:http";
+import { restoreVercelRequestUrl } from "../server/vercelRequest.js";
 import { createFavouriteRouter, createMongoFavouriteRepository, type FavouriteRecord, type FavouriteRepository } from "../server/favourites.js";
 import { MongoServerError, ObjectId, type MongoClient } from "mongodb";
 import { hashSessionToken, type AuthRepository, type AuthUser } from "../server/auth.js";
@@ -46,6 +48,23 @@ function fixture(requireEmailVerification = true) {
 }
 const cookie = (owner = "parent") => `play_spark_session=${owner}`;
 const endpoint = (id = pathId) => `/api/v1/favourites/play-paths/${id}`;
+
+test("favourites validate the public URL even when the runtime reinstalls rewrite query metadata", async () => {
+  const state = fixture();
+  const deployed = createServer((incoming, response) => {
+    const url = new URL(incoming.url ?? "/", "https://play-spark.invalid");
+    url.searchParams.set("__path", "v1/favourites");
+    incoming.url = `/api/index?${url.searchParams}`;
+    restoreVercelRequestUrl(incoming);
+    Object.defineProperty(incoming, "query", { value: Object.fromEntries(url.searchParams), configurable: true });
+    state.app(incoming, response);
+  });
+  const page = await request(deployed).get("/api/v1/favourites?limit=10").set("Cookie", cookie()).expect(200);
+  assert.deepEqual(page.body.data, { playPaths: [], nextCursor: null });
+  await request(deployed).get("/api/v1/favourites?limit=21").set("Cookie", cookie()).expect(400);
+  await request(deployed).get("/api/v1/favourites?limit=10&userId=other").set("Cookie", cookie()).expect(400);
+  await request(deployed).get("/api/v1/favourites?limit=10&limit=1").set("Cookie", cookie()).expect(400);
+});
 
 test("MongoDB concurrent-save recovery only accepts the exact owner's existing bookmark", async () => {
   const duplicate = new MongoServerError({ code: 11000, message: "Duplicate bookmark" });

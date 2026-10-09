@@ -6,6 +6,7 @@ import type { GuestMission, GuestSample, CatalogRepository } from "./catalog.js"
 import type { ChildProfileRepository } from "./childProfile.js";
 import type { MongoClientProvider } from "./db.js";
 import { ageBand } from "./recommendations.js";
+import { publicRequestQuery } from "./requestQuery.js";
 
 export type PlaySessionStatus = "active" | "completed" | "abandoned";
 export const missionSkipReasons = ["missing_materials", "too_messy_or_noisy", "too_much_parent_help", "child_not_interested", "something_else"] as const;
@@ -317,7 +318,7 @@ export function createPlaySessionRouter(options: {
       limit: z.coerce.number().int().min(1).max(20).default(10),
       before: z.string().datetime().optional(),
       beforeId: objectId.optional(),
-    }).strict().refine((value) => Boolean(value.before) === Boolean(value.beforeId)).safeParse(request.query);
+    }).strict().refine((value) => Boolean(value.before) === Boolean(value.beforeId)).safeParse(publicRequestQuery(request));
     if (!query.success) {
       response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Choose a valid history page." } });
       return;
