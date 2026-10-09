@@ -177,6 +177,8 @@ test("Vercel rewrite query does not leak into strict history pagination validati
     if (publicUrl.searchParams.get("limit") !== "1") incoming.url = `/api/index?${publicUrl.searchParams}`;
     Object.defineProperty(incoming, "query", { value: Object.fromEntries(publicUrl.searchParams), configurable: true });
     restoreVercelRequestUrl(incoming);
+    // A runtime query accessor may be installed again after adapter normalization.
+    Object.defineProperty(incoming, "query", { value: Object.fromEntries(publicUrl.searchParams), configurable: true });
     application(incoming, response);
   });
   const page = await request(deployed).get("/api/v1/play-sessions/history?limit=10")

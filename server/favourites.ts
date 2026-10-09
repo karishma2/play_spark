@@ -4,6 +4,7 @@ import { z } from "zod";
 import { findAuthenticatedUser, type AuthRepository } from "./auth.js";
 import type { CatalogRepository } from "./catalog.js";
 import type { MongoClientProvider } from "./db.js";
+import { publicRequestQuery } from "./requestQuery.js";
 
 export interface FavouriteRecord { id: string; playPathId: string; createdAt: string }
 export interface FavouriteRepository {
@@ -71,7 +72,7 @@ export function createFavouriteRouter(options: { repository: FavouriteRepository
     return user;
   }
   router.get("/favourites", async (request, response) => {
-    const query = z.object({ limit: z.coerce.number().int().min(1).max(20).default(10), before: id.optional() }).strict().safeParse(request.query);
+    const query = z.object({ limit: z.coerce.number().int().min(1).max(20).default(10), before: id.optional() }).strict().safeParse(publicRequestQuery(request));
     if (!query.success) { response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Choose a valid favourites page." } }); return; }
     try {
       const user = await owner(request, response); if (!user) return;
