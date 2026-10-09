@@ -173,8 +173,11 @@ test("Vercel rewrite query does not leak into strict history pagination validati
   const deployed = createServer((incoming, response) => {
     const publicUrl = new URL(incoming.url ?? "/", "https://play-spark.invalid");
     publicUrl.searchParams.set("__path", "v1/play-sessions/history");
+    publicUrl.searchParams.set("path", "v1/play-sessions/history");
     // Cover both forwarded-function URLs and Vercel's preserved public URL.
-    if (publicUrl.searchParams.get("limit") !== "1") incoming.url = `/api/index?${publicUrl.searchParams}`;
+    incoming.url = publicUrl.searchParams.get("limit") === "1"
+      ? `/api/v1/play-sessions/history?${publicUrl.searchParams}`
+      : `/api/index?${publicUrl.searchParams}`;
     Object.assign(incoming, { originalUrl: incoming.url });
     Object.defineProperty(incoming, "query", { value: Object.fromEntries(publicUrl.searchParams), configurable: true });
     restoreVercelRequestUrl(incoming);
