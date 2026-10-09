@@ -54,6 +54,7 @@ test("favourites validate the public URL even when the runtime reinstalls rewrit
   const deployed = createServer((incoming, response) => {
     const url = new URL(incoming.url ?? "/", "https://play-spark.invalid");
     url.searchParams.set("__path", "v1/favourites");
+    url.searchParams.set("path", "v1/favourites");
     incoming.url = `/api/index?${url.searchParams}`;
     Object.assign(incoming, { originalUrl: incoming.url });
     restoreVercelRequestUrl(incoming);

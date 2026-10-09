@@ -50,12 +50,15 @@
 
 ### Bounded production follow-up — favourites/history query validation
 
-- **Status:** PR #14 merged; production still returns `400`. Bounded follow-up implemented on `feature/vercel-original-url`, 9 October 2026; user authorized commit, preview validation, merge and deployment on this one branch.
+- **Status:** Bounded production fix on `feature/vercel-original-url`, 9 October 2026; user authorized commit, merge and deployment on this one branch. PR #15 deployed but did not resolve the production failure.
 - **Finding:** Deployed favourites screenshot still shows `400` for `?limit=10` after PR #13. The earlier adapter cleanup does not protect routes if a hosting runtime query property is reintroduced; the actual rejected production field has not been observed.
 - **Fix:** Favourites/history pagination now reads the restored public URL directly instead of runtime `request.query`. Strict Zod validation retains rejection of unknown fields, invalid bounds and repeated pagination fields.
 - **Validation:** Both synthetic rewrite-query regressions reproduced `400` before the fix; all 18 favourites/Play Session tests passed afterward. TypeScript passed. Existing full-gate evidence predates this bounded fix; no full lifecycle rerun.
 - **Follow-up evidence:** Vercel production is Ready at merged commit `c230d01`; a public unauthenticated favourites request returns the app's `VALIDATION_ERROR`. Tests now prepopulate `originalUrl` before adapter normalization, reproducing both failures on PR #14 code. The adapter now synchronizes `originalUrl` with restored `url` because Express preserves a pre-existing value. All 18 affected tests and TypeScript passed afterward. These synthetic tests prove the adapter defect; actual production request fields remain unobserved.
-- **Remaining:** Preview validation before squash merge, deployment and confirmation against deployed favourites/history. No production database changes made. Reuse the passing 18 affected tests and TypeScript; required CI remains enabled.
+- **Confirmed production cause:** A temporary field-category-only response diagnostic observed `limit` and the internal wildcard `path` in the deployed query. No query values, credentials or user data were exposed. Normalizing `originalUrl` alone was insufficient because this additional field survived restoration.
+- **Correction:** The Vercel adapter removes a single `path` only when it exactly matches the restored API route. Other unknown fields and duplicate parameters remain subject to strict validation. Temporary diagnostics removed. Nineteen focused API/adapter tests passed with localhost access; the sandbox initially blocked their local connections. TypeScript passed.
+- **Production confirmation:** Corrected branch deployment `edefc0f` is serving production on 9 October. Public requests to both list endpoints with `limit=10` now reach authentication (`401 UNAUTHENTICATED`) instead of failing pagination; an out-of-range favourites limit and an unknown history field still return `400 VALIDATION_ERROR`. Temporary diagnostic headers are absent. PR #16 consolidates this correction for squash merge. No production database changes made.
+- **Remaining:** Required PR checks and squash merge; authenticated browser confirmation with the parent's account remains unrecorded. API regression coverage verifies signed-in list responses using synthetic repositories.
 
 ### Phase 6 delivery sequence
 
