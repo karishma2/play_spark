@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 8 October 2026
+**Last updated:** 9 October 2026
 
 ## Status meanings
 
@@ -31,7 +31,7 @@
 
 ### Phase 6.1 — Play history and completed Mission Walls
 
-- **Status:** Complete on `feature/play-history`; user approved commit/push/PR delivery.
+- **Status:** Complete; merged through PR #12 into `main` (`8b4c320`).
 - **Completed:** 8 October 2026.
 - **Started:** 8 October 2026.
 - **Scope:** Active-profile-owned history, saved Mission Walls, frozen replacement details, and replay through the existing start flow.
@@ -43,16 +43,27 @@
 - **Developer UI checks:** Synthetic-data browser checks covered list/detail, completed and partial walls, saved replacement labels, pagination, empty history, failed-load retry, unavailable replay, replay opening Mission 1 with fresh progress, and the “Played before” discovery label. Checked desktop, 390px mobile and 768px tablet layouts, plus keyboard activation. Existing shared cards/wall styling was reused; the Stitch project has no dedicated history screen, so exact history-design comparison is not evidenced.
 - **Bounded review fix:** New-session creation (including history replay) checks the current published catalogue's age band against the active child's current age using the same calculation as recommendations. Ineligible paths return safe not-found without creating a session or altering history; existing active-session resumption remains unchanged. Eleven focused Play Session tests passed after this fix, including rejected age-ineligible replay and successful age-eligible replay. The earlier full gate remains prior evidence, not a fresh pass on this fix.
 - **Review/testing sign-off:** User supplied the replay age-eligibility review finding; it was fixed and validated with focused checks. The user subsequently reported testing passed and approved delivery. No independent reviewers/testers were launched by the Developer; detailed live-database and cross-account browser results were not supplied separately.
-- **Follow-up:** Run `npm run setup:play-sessions` in deployment environments to add the repeatable history index; no content reseed or document migration is required for history. PR merge remains subject to user approval.
+- **Follow-up:** Run `npm run setup:play-sessions` in deployment environments to add the repeatable history index; no content reseed or document migration is required for history.
+- **Production follow-up (8 October):** Screenshot shows history `400`, not `404`. The Vercel adapter now removes the runtime's own query property so internal rewrite fields cannot shadow Express's public-URL query parser. A synthetic Vercel-shaped regression checks public and forwarded URLs, valid pages, invalid limits, and unknown-field rejection. Twelve focused Play Session tests and TypeScript passed. Fix remains uncommitted on the Phase 6.2 branch; production redeployment and confirmation remain pending.
 
 ## Planned next feature
 
 ### Phase 6 delivery sequence
 
-- **Status:** Phase 6.1 complete; Phases 6.2 and 6.3 planned.
-- **Branch:** `feature/play-history`
-- **Scope:** Parent-owned history for the active child profile, completed Mission Wall viewing, and replay through the existing session-start flow. Completed activities are the primary view; ended unfinished sessions remain clearly labelled in history.
-- **Dependencies:** Phase 5.1 and Phase 5.2 are merged. Reuse stored session snapshots and ownership checks.
+- **Status:** Phase 6.1 complete and merged; Phase 6.2 complete on its feature branch; Phase 6.3 planned.
+- **Completed:** 9 October 2026. User reported review done and authorized the Phase 6.2 commit; detailed reviewer/tester results were not supplied in this chat.
+- **Branch:** `feature/play-path-favourites`, based on latest `main` (`8b4c320`).
+- **Scope:** Parent-owned saved Play Paths, save/remove controls on recommendations and authenticated details, and a paginated Favourites page. Individual mission favourites and recommendation weighting are deferred.
+- **Dependencies:** Phase 6.1 is merged. Reuse authenticated ownership, current catalogue details, and the age-eligible session-start flow.
+- **Storage:** Approved `favoritePlayPaths` collection; `npm run setup:favourites` installs its validator and indexes. Save operations establish the unique owner/path index before upserts. No catalogue reseed required.
+- **Delivered so far:** Save/remove controls on recommendation cards and authenticated details; `/favourites` lists current published cards with bounded pagination and removable unavailable bookmarks. Duplicate actions are blocked and pending UI results are invalidated on unmount/account changes. Existing history and session-start eligibility remain unchanged.
+- **Validation:** TypeScript and production build passed; four focused favourites API tests and eleven existing Play Session tests passed on 8 October 2026. Coverage includes parent isolation, repeated save/remove, validation, paging, verification/beta policy, withdrawn content, safe storage errors, and existing age-eligible replay rules. Loopback test requests required sandbox escalation; the supported rerun passed all 15 tests. Synthetic browser smoke covered saving from recommendations, saved button state, Favourites listing, opening/back from saved details, removal, and empty state.
+- **Finalization (8 October 2026):** `npm run verify` passed on the Phase 6.2 application working tree based on `8b4c320`, including the Vercel history fix and navigation refinement: TypeScript, 12 Play Paths, 13 profile options, 61 automated tests, production build, and progress guard. Only finalization documentation changed afterward. Developer verification is complete; no independent review/testing was launched.
+- **Remaining:** Vercel redeployment/history confirmation and target-database setup with `npm run setup:favourites`. Live MongoDB persistence/account-switch manual evidence remains unrecorded here. Commit authorized; push and merge are not part of this request.
+- **Bundled follow-up:** Include the Phase 6.1 Vercel history-query adapter fix in the eventual single Phase 6.2 commit, as requested. Saved detail views use “Saved Play Path”; concurrent first saves recover a unique-index race only after confirming the same parent's bookmark.
+- **Latest focused checks:** Five favourites tests passed after concurrent-save recovery, including a mocked MongoDB unique-index race and rejection when the matching bookmark is absent. Twelve Play Session tests cover the Vercel adapter and existing session behavior; these are included in the final full gate.
+- **Approved design refinement:** Applied refined Stitch favourites empty/populated layouts, inline bookmark/heart illustration, Explore CTA, uncropped activity imagery, and parent-owned wording. Shared signed-in navigation replaces the flat header actions on dashboard, favourites, history, profile and password pages; mobile uses a bottom navigation bar and desktop uses primary pills. Account disclosure retains profile/password/sign-out, supports keyboard Escape/focus return and outside dismissal, and preserves account visibility after sign-out failure. Removed the redundant history header. Guests and active-mission screens retain their existing navigation.
+- **Design validation:** Prior Developer synthetic-browser checks compared the refined Stitch layout at desktop, 390px mobile and 768px tablet: empty/populated favourites, recommendation save, removal returning to empty state, Explore/history navigation, password-page navigation, account disclosure, Escape returning focus to the trigger, and simulated sign-out failure retaining the session/error. Final history check confirmed the duplicate header is removed. This browser evidence was reused at finalization; it does not establish live database persistence or cross-account browser behavior. Screenshots are local untracked artifacts.
 - **Acceptance criteria:** Recorded in `docs/implementation-plan.md`. Favourites and fixed-choice feedback follow as Phases 6.2 and 6.3; Routine Paths remain a later extension.
 
 ## Earlier completed features

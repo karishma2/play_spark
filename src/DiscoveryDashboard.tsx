@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FavouriteButton } from "./FavouriteButton";
 import {
   getRecommendations,
   type RecommendationCard,
@@ -72,6 +73,7 @@ function RecommendationResult({ card, onSelect }: { card: RecommendationCard; on
         </div>
         <p className="recommendation-materials"><strong>You’ll need:</strong> {card.materials.join(", ")}</p>
         <button className="button button-primary" onClick={onSelect}>View Play Path <span aria-hidden="true">→</span></button>
+        <FavouriteButton playPathId={card.playPathId} />
       </div>
     </article>
   );

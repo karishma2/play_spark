@@ -170,7 +170,7 @@ Deliver Phase 6 in three independently reviewable slices: 6.1 Play history and c
 
 ### Phase 6.1 — Play history and completed Mission Walls
 
-**Status:** Complete on `feature/play-history` — 8 October 2026; user reported testing passed and approved commit/push/PR delivery. Merge remains subject to approval.
+**Status:** Complete; merged through PR #12 into `main` (`8b4c320`) on 8 October 2026.
 **Branch:** `feature/play-history`
 
 #### Scope
@@ -195,6 +195,22 @@ Deliver Phase 6 in three independently reviewable slices: 6.1 Play history and c
 - Completion-aware ranking preserves age/time eligibility and exact-before-fallback priority. Within each match group, unplayed paths rank before completed paths, followed by existing duration/score ordering. Active or abandoned sessions do not count as completed; history from another parent or child cannot affect ranking. A fully played catalogue still returns suitable recommendations.
 - The history and saved-wall views are responsive and keyboard usable. Guests retain their existing experience and cannot access private history.
 - Focused coverage proves ownership, pagination/order, saved snapshot fidelity, and replay preservation; finalization runs or reuses the required feature gate.
+
+### Phase 6.2 — Favourite Play Paths
+
+**Status:** Complete on `feature/play-path-favourites` — 9 October 2026. Developer finalization passed on 8 October; user authorized the feature commit on 9 October. Deployment confirmation remains pending.
+
+#### Scope and acceptance criteria
+
+- A signed-in parent can save/remove whole published Play Paths from recommendation cards and authenticated details, and revisit them through `/favourites`.
+- Reuse the approved parent-owned `favoritePlayPaths` collection and unique `{ userId, playPathId }` index. Repeated saves/removals are idempotent; ownership comes from the server session, never client-supplied owner fields.
+- Apply the configured email-verification policy, including beta access. Guests cannot store or read favourites.
+- List saved paths in bounded newest-first pages using current published card metadata. Withdrawn paths appear as unavailable and remain removable without exposing retired content.
+- Opening a favourite uses current catalogue details; starting it reuses the existing age-eligibility and one-active-session rules, without modifying saved history.
+- Loading, empty, retry, unavailable, duplicate-action, and account-change states remain safe; UI uses shared responsive styles and keyboard-accessible buttons.
+- Apply the refined Stitch empty/populated Favourites designs with the existing cream/forest-green palette. Shared signed-in navigation covers Explore, Favourites, history, child profile and password: desktop primary navigation with an account disclosure; mobile bottom navigation with the same account actions. Preserve guest navigation and the quiet active-mission screen. Account disclosure supports Escape, focus restoration, outside-click dismissal and visible sign-out failure.
+- Individual mission favourites, ranking changes, feedback, and routines remain outside this slice. No dependencies or content reseed are needed.
+- Focused checks cover ownership, idempotency, paging, input validation, verification policy, and unavailable content. Run the full feature gate at finalization.
 
 ## Phase 2 — Parent accounts and secure authentication
 

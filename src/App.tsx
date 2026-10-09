@@ -22,6 +22,9 @@ import { OnboardingPage } from "./OnboardingPage";
 import { ChildProfilePage } from "./ChildProfilePage";
 import { DiscoveryDashboard } from "./DiscoveryDashboard";
 import { PlayHistoryPage } from "./PlayHistoryPage";
+import { FavouriteButton } from "./FavouriteButton";
+import { FavouritesPage } from "./FavouritesPage";
+import { ParentNavigation } from "./ParentNavigation";
 import {
   completeSample,
   readGuestProgress,
@@ -72,6 +75,7 @@ function Header({
   onManageAccount,
   onManageProfile,
   onHistory,
+  onFavourites,
   onVerifyEmail,
   signOutError,
 }: {
@@ -86,11 +90,12 @@ function Header({
   onManageAccount: () => void;
   onManageProfile: () => void;
   onHistory: () => void;
+  onFavourites: () => void;
   onVerifyEmail: () => void;
   signOutError?: string;
 }) {
   return (
-    <header className="site-header">
+    <header className={session ? "site-header signed-in-header" : "site-header"}>
       <div className="header-inner">
         <Brand onNavigate={onHome} />
         {!sessionReady ? (
@@ -98,16 +103,9 @@ function Header({
             <span className="account-email">Checking account…</span>
           </div>
         ) : session ? (
-          <div className="guest-auth-actions" aria-label="Parent account">
-            <span className="account-email">{session.user.email}</span>
-            {!session.emailVerified && <button onClick={onVerifyEmail}>Verify email</button>}
-            {session.emailVerified && session.hasChildProfile && <button onClick={onManageProfile}>Child profile</button>}
-            {session.emailVerified && session.hasChildProfile && <button onClick={onHistory}>Play history</button>}
-            <button onClick={onManageAccount}>Password</button>
-            <button onClick={onSignOut}>Sign out</button>
-            <span className="guest-avatar" aria-hidden="true">●</span>
-            {signOutError && <span className="account-action-error" role="alert">{signOutError}</span>}
-          </div>
+          <ParentNavigation key={session.user.id} eligible={session.emailVerified && session.hasChildProfile} needsVerification={!session.emailVerified}
+            onHome={onHome} onFavourites={onFavourites} onHistory={onHistory} onProfile={onManageProfile}
+            onPassword={onManageAccount} onSignOut={onSignOut} onVerify={onVerifyEmail} signOutError={signOutError} />
         ) : screen === "guest" ? (
           <div className="guest-auth-actions" aria-label="Parent account options">
             <button onClick={onSignIn}>Sign in</button>
@@ -702,7 +700,7 @@ function SampleDetail({
     <section className="path-overview-page">
       <div className="path-overview-toolbar">
         <button className="back-button" onClick={onBack}>← Back to {backLabel}</button>
-        <span>{authenticated ? "Personalized recommendation" : "Guest preview"}</span>
+        <span>{authenticated ? backLabel === "favourites" ? "Saved Play Path" : "Personalized recommendation" : "Guest preview"}</span>
       </div>
 
       <div className="path-overview-hero">
@@ -710,6 +708,7 @@ function SampleDetail({
           <div className="path-overview-tags"><span>Ages 3–5</span><span>♡ Step-by-step play</span></div>
           <p className="eyebrow">{authenticated ? "Your Play Path" : "Guest Play Path"}</p>
           <h1>{sample.title}</h1>
+          {authenticated && <FavouriteButton playPathId={sample.id} />}
           <p className="path-overview-summary">{sample.summary}</p>
           <div className="path-purpose">
             <p className="path-purpose-label">What this Play Path helps build</p>
@@ -1252,6 +1251,17 @@ function App() {
     }
   }
 
+  const sharedHeader = <Header
+    screen={selectedSample ? detailOrigin : screen} onHome={goHome} onGuest={goGuest}
+    session={session} sessionReady={sessionReady}
+    onSignIn={() => navigate("/sign-in")} onSignUp={() => navigate("/sign-up")}
+    onSignOut={endSession} onManageAccount={() => navigate("/change-password")}
+    onManageProfile={() => navigate("/child-profile")}
+    onHistory={() => { setSelectedId(undefined); setSelectedSample(undefined); setActiveMissionIndex(null); navigate("/play-history"); window.scrollTo({ top: 0 }); }}
+    onFavourites={() => { setSelectedId(undefined); setSelectedSample(undefined); setActiveMissionIndex(null); navigate("/favourites"); window.scrollTo({ top: 0 }); }}
+    onVerifyEmail={() => navigate("/verify-email-pending")} signOutError={signOutError}
+  />;
+
   if (location.pathname === "/sign-in") {
     return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
   }
@@ -1276,7 +1286,7 @@ function App() {
   if (location.pathname === "/change-password") {
     if (!sessionReady) return <LoadingState label="Opening account security…" />;
     if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
-    return <ChangePasswordPage onBack={() => navigate("/")} />;
+    return <div className="signed-parent-page">{sharedHeader}<ChangePasswordPage onBack={goHome} /></div>;
   }
   if (location.pathname === "/verify-email") {
     return (
@@ -1303,12 +1313,25 @@ function App() {
     }
     return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
   }
+  if (location.pathname === "/favourites" && !activeSession) {
+    if (!sessionReady) return <LoadingState label="Opening favourites…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    if (!session.emailVerified) return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
+    if (!session.hasChildProfile) return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
+    if (selectedId) return <div className="signed-parent-page">{sharedHeader}<main className="app-shell">{loading ? <LoadingState label="Opening this Play Path…" /> : error ?
+      <><ErrorState onRetry={() => setDetailRetry((value) => value + 1)} /><button className="back-button" onClick={() => { setSelectedId(undefined); setSelectedSample(undefined); setError(false); }}>← Back to favourites</button></> : selectedSample ?
+      <SampleDetail key={`${session.user.id}:${selectedSample.id}`} sample={selectedSample} progress={visibleProgress} authenticated backLabel="favourites"
+        onBack={() => { setSelectedId(undefined); setSelectedSample(undefined); }} onStart={startSession}
+        activeSession={playSession?.status === "active" && playSession.playPath.id === selectedSample.id}
+        onEndSession={playSession?.status === "active" && playSession.playPath.id === selectedSample.id ? endCurrentPlaySession : undefined} /> : null}</main></div>;
+    return <div className="signed-parent-page">{sharedHeader}<FavouritesPage key={session.user.id} onHome={goHome} onSelect={(id) => openSample(id, "landing")} /></div>;
+  }
   if (location.pathname === "/play-history") {
     if (!sessionReady) return <LoadingState label="Opening play history…" />;
     if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
     if (!session.emailVerified) return <EmailVerificationPendingPage session={session} onSignOut={endSession} signOutError={signOutError} />;
     if (!session.hasChildProfile) return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
-    return <PlayHistoryPage key={session.user.id} onHome={goHome} onReplay={() => navigate("/")} renderWall={(sample, completed) => <MissionWallPreview sample={sample} completedMissions={completed} readOnly />} />;
+    return <div className="signed-parent-page">{sharedHeader}<PlayHistoryPage key={session.user.id} onHome={goHome} onReplay={() => navigate("/")} renderWall={(sample, completed) => <MissionWallPreview sample={sample} completedMissions={completed} readOnly />} /></div>;
   }
   if (location.pathname === "/child-profile") {
     if (!sessionReady) return <LoadingState label="Opening the child profile…" />;
@@ -1319,7 +1342,7 @@ function App() {
     if (!session.hasChildProfile) {
       return <OnboardingPage session={session} onCompleted={setSession} onSignOut={endSession} signOutError={signOutError} />;
     }
-    return <ChildProfilePage />;
+    return <div className="signed-parent-page">{sharedHeader}<ChildProfilePage key={session.user.id} /></div>;
   }
 
   return (
@@ -1341,21 +1364,7 @@ function App() {
         />
       ) : (
         <>
-          <Header
-            screen={selectedSample ? detailOrigin : screen}
-            onHome={goHome}
-            onGuest={goGuest}
-            session={session}
-            sessionReady={sessionReady}
-            onSignIn={() => navigate("/sign-in")}
-            onSignUp={() => navigate("/sign-up")}
-            onSignOut={endSession}
-            onManageAccount={() => navigate("/change-password")}
-            onManageProfile={() => navigate("/child-profile")}
-            onHistory={() => navigate("/play-history")}
-            onVerifyEmail={() => navigate("/verify-email-pending")}
-            signOutError={signOutError}
-          />
+          {sharedHeader}
           <main className="app-shell">
             {loading ? (
               <LoadingState label={selectedId ? "Opening this Play Path…" : "Gathering tonight's sparks…"} />
@@ -1363,6 +1372,7 @@ function App() {
               <ErrorState onRetry={selectedId ? () => setDetailRetry((value) => value + 1) : loadSamples} />
             ) : selectedSample ? (
               <SampleDetail
+                key={`${session?.user.id ?? "guest"}:${selectedSample.id}`}
                 sample={selectedSample}
                 progress={visibleProgress}
                 onBack={detailOrigin === "guest" ? goGuest : goHome}
@@ -1383,7 +1393,7 @@ function App() {
                 onSignIn={() => navigate("/sign-in")}
               />
             ) : canBrowseFullCatalogue ? (
-              <DiscoveryDashboard onSelect={(sampleId) => openSample(sampleId, "landing")} />
+              <DiscoveryDashboard key={session?.user.id} onSelect={(sampleId) => openSample(sampleId, "landing")} />
             ) : (
               <Landing
                 samples={landingSamples}

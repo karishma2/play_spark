@@ -11,6 +11,7 @@ import {
   type ChildProfileRepository,
 } from "./childProfile.js";
 import { createMongoClientProvider } from "./db.js";
+import { createFavouriteRouter, createMongoFavouriteRepository, type FavouriteRepository } from "./favourites.js";
 import {
   createResendAuthEmailSender,
   unavailableAuthEmailSender,
@@ -36,6 +37,7 @@ export interface CreateAppOptions {
   childProfiles?: ChildProfileRepository;
   recommendations?: RecommendationRepository;
   playSessions?: PlaySessionRepository;
+  favourites?: FavouriteRepository;
   passwordHasher?: PasswordHasher;
   passwordResetBaseUrl?: string;
   authEmailSender?: AuthEmailSender;
@@ -67,6 +69,10 @@ export function createApp(options: CreateAppOptions) {
   app.disable("x-powered-by");
   app.use(helmet());
   app.use(express.json({ limit: "100kb" }));
+  app.use("/api/v1", createFavouriteRouter({
+    repository: options.favourites ?? createMongoFavouriteRepository(mongo, options.databaseName),
+    authRepository: auth, catalog, requireEmailVerification,
+  }));
   const rateLimitedAuthPaths = [
     "/api/v1/auth/sign-up",
     "/api/v1/auth/sign-in",
