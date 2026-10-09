@@ -765,3 +765,67 @@ footer p { max-width: 540px; margin: 0; text-align: right; font-size: 11px; }
 .history-actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.5rem; }
 .history-missions { display: grid; gap: 1rem; margin-block: 1.5rem; }
 .history-missions article { padding: 1.5rem; border: 1px solid var(--border); border-radius: 20px; }
+.favourite-action { margin-block: 0.75rem; }
+.favourite-action p { font-size: 0.875rem; }
+.signed-in-header { background: var(--canvas); backdrop-filter: none; }
+.parent-desktop-nav { display: flex; gap: 4px; padding: 5px; border-radius: 100px; background: var(--sand); }
+.parent-desktop-nav button, .parent-mobile-nav button { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; min-height: 44px; cursor: pointer; background: transparent; border-radius: 100px; color: var(--text-soft); }
+.parent-desktop-nav button[aria-current="page"] { color: white; background: var(--primary); }
+.parent-account { position: relative; }
+.parent-account-trigger { display: flex; align-items: center; gap: 8px; padding: 7px 12px; min-height: 44px; background: var(--sand); border: 1px solid var(--border); border-radius: 100px; color: var(--primary); cursor: pointer; font-size: 0.875rem; }
+.parent-account-icon { display: grid; place-items: center; width: 28px; height: 28px; background: var(--primary-soft); border-radius: 50%; }
+.parent-account-panel { position: absolute; right: 0; top: calc(100% + 12px); width: 270px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-raised); }
+.parent-account-heading { display: flex; align-items: center; justify-content: space-between; padding-left: 10px; color: var(--primary); }
+.parent-account-panel button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 48px; padding: 12px; background: transparent; text-align: left; color: var(--text); border-radius: 10px; cursor: pointer; }
+.parent-account-panel button:hover { background: var(--primary-soft); }
+.parent-account-heading button { width: 44px; justify-content: center; }
+.parent-account-panel .parent-sign-out { margin-top: 8px; border-top: 1px solid var(--border); border-radius: 0; color: var(--secondary-deep); }
+.parent-account-panel .account-action-error { position: static; max-width: none; margin: 8px 0 0; font-size: 0.8rem; box-shadow: none; }
+.parent-account > .account-action-error { right: 0; width: min(300px, calc(100vw - 40px)); font-size: 0.8rem; }
+.parent-mobile-nav { display: none; }
+.favourites-page { min-height: calc(100vh - 76px); padding-block: 44px 60px; }
+.favourites-intro h1 { font-size: clamp(1.8rem, 3.5vw, 2.7rem); line-height: 1.2; margin-bottom: 10px; }
+.favourites-intro .eyebrow { color: var(--secondary-deep); }
+.favourites-empty { max-width: 580px; margin: 40px auto; padding: 36px 32px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); }
+.favourites-empty-illustration { width: 88px; height: 88px; margin: 0 auto 24px; border-radius: 50%; background: var(--primary-soft); display: grid; place-items: center; color: var(--primary); }
+.favourites-empty-illustration svg { width: 64px; height: 64px; }
+.favourites-empty h2 { font-size: 1.4rem; }
+.favourites-empty > p { max-width: 380px; margin-inline: auto; }
+.favourites-empty .button { margin: 12px auto 22px; }
+.favourites-empty .favourites-hint { padding: 10px 14px; border-radius: 12px; background: var(--sand); font-size: 0.8rem; margin-bottom: 0; }
+.favourites-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-block: 30px; }
+.favourite-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+.favourite-card-image { position: relative; padding: 12px; background: var(--sand); }
+.favourite-card-image img { width: 100%; height: 190px; object-fit: contain; border-radius: 12px; }
+.favourite-card-image > span { position: absolute; left: 20px; bottom: 20px; padding: 5px 10px; background: var(--surface); border-radius: 100px; font-size: 0.8rem; color: var(--primary); }
+.favourite-card-body { display: flex; flex-direction: column; flex: 1; padding: 20px 20px 0; }
+.favourite-card-body h2 { font-size: 1.2rem; line-height: 1.4; }
+.favourite-card-body p { font-size: 0.9rem; }
+.favourite-card-body .button { width: 100%; margin-top: auto; }
+.favourite-remove { padding: 12px 16px; min-height: 48px; margin: 8px; background: transparent; color: var(--text-soft); cursor: pointer; font-size: 0.8rem; border-radius: 12px; }
+.favourite-remove:hover { background: var(--sand); color: var(--primary); }
+@media (max-width: 900px) {
+  .signed-in-header .header-inner { gap: 12px; }
+  .signed-in-header .brand small { display: none; }
+  .parent-desktop-nav button { padding-inline: 12px; font-size: 0.875rem; }
+  .favourites-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .signed-in-header .header-inner { min-height: 68px; flex-wrap: nowrap; }
+  .signed-in-header .brand strong { font-size: 1rem; }
+  .signed-in-header .brand-mark { width: 30px; height: 30px; }
+  .parent-desktop-nav { display: none; }
+  .parent-account-trigger { font-size: 0.75rem; padding-inline: 9px; gap: 5px; }
+  .parent-account-icon { display: none; }
+  .parent-mobile-nav { position: fixed; z-index: 30; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; border-top: 1px solid var(--border); background: var(--canvas); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
+  .parent-mobile-nav button { flex: 1; flex-direction: column; gap: 3px; border-radius: 12px; padding: 6px 8px; font-size: 0.75rem; }
+  .parent-mobile-nav button > span:first-child { font-size: 1.3rem; }
+  .parent-mobile-nav button[aria-current="page"] { color: var(--primary); background: var(--primary-soft); font-weight: 700; }
+  .signed-parent-page { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .signed-in-header ~ .app-shell { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .parent-account-panel { max-width: calc(100vw - 40px); }
+  .favourites-page { min-height: calc(100vh - 148px); padding-block: 30px; }
+  .favourites-grid { grid-template-columns: 1fr; gap: 20px; }
+  .favourites-empty { margin-block: 24px; padding: 28px 20px; }
+  .favourites-empty .button { width: 100%; }
+}

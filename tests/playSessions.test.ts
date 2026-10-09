@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import request from "supertest";
+import { createServer } from "node:http";
+import { restoreVercelRequestUrl } from "../server/vercelRequest.js";
 import { createApp } from "../server/app.js";
 import { hashSessionToken, type AuthRepository, type AuthUser } from "../server/auth.js";
 import type { CatalogRepository, GuestSample } from "../server/catalog.js";
@@ -165,6 +167,28 @@ function createMemoryState() {
   sessionUsers.set(hashSessionToken("parent-token"), userId);
   return { auth, childProfiles, catalog, playSessions, sessions };
 }
+
+test("Vercel rewrite query does not leak into strict history pagination validation", async () => {
+  const application = app();
+  const deployed = createServer((incoming, response) => {
+    const publicUrl = new URL(incoming.url ?? "/", "https://play-spark.invalid");
+    publicUrl.searchParams.set("__path", "v1/play-sessions/history");
+    // Cover both forwarded-function URLs and Vercel's preserved public URL.
+    if (publicUrl.searchParams.get("limit") !== "1") incoming.url = `/api/index?${publicUrl.searchParams}`;
+    Object.defineProperty(incoming, "query", { value: Object.fromEntries(publicUrl.searchParams), configurable: true });
+    restoreVercelRequestUrl(incoming);
+    application(incoming, response);
+  });
+  const page = await request(deployed).get("/api/v1/play-sessions/history?limit=10")
+    .set("Cookie", "play_spark_session=parent-token").expect(200);
+  assert.deepEqual(page.body.data, { sessions: [], nextCursor: null });
+  await request(deployed).get("/api/v1/play-sessions/history?limit=1")
+    .set("Cookie", "play_spark_session=parent-token").expect(200);
+  await request(deployed).get("/api/v1/play-sessions/history?limit=21")
+    .set("Cookie", "play_spark_session=parent-token").expect(400);
+  await request(deployed).get("/api/v1/play-sessions/history?limit=10&userId=other")
+    .set("Cookie", "play_spark_session=parent-token").expect(400);
+});
 
 test("history is bounded, ordered, profile-owned and excludes active sessions", async () => {
   const state = createMemoryState();

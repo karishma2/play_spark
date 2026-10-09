@@ -53,6 +53,24 @@ export function getPlayPath(playPathId: string) {
   return requestJson<GuestSample>(`/api/v1/play-paths/${encodeURIComponent(playPathId)}`);
 }
 
+export interface FavouritePlayPath {
+  id: string;
+  playPathId: string;
+  createdAt: string;
+  activity: Pick<GuestSampleSummary, "id" | "title" | "summary" | "durationMinutes" | "imageUrl" | "imageAlt"> | null;
+}
+export function getFavourites(before?: string) {
+  const query = new URLSearchParams({ limit: "10" });
+  if (before) query.set("before", before);
+  return requestJson<{ playPaths: FavouritePlayPath[]; nextCursor: string | null }>(`/api/v1/favourites?${query}`);
+}
+export function getFavourite(playPathId: string) {
+  return requestJson<{ saved: boolean }>(`/api/v1/favourites/play-paths/${encodeURIComponent(playPathId)}`);
+}
+export function setFavourite(playPathId: string, saved: boolean) {
+  return requestJson<{ saved: boolean }>(`/api/v1/favourites/play-paths/${encodeURIComponent(playPathId)}`, { method: saved ? "PUT" : "DELETE" });
+}
+
 export type PlaySessionStatus = "active" | "completed" | "abandoned";
 export type MissionSkipReason = "missing_materials" | "too_messy_or_noisy" | "too_much_parent_help" | "child_not_interested" | "something_else";
 

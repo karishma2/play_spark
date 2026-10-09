@@ -76,7 +76,6 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
   }
 
   return <>
-    <header className="site-header"><div className="header-inner"><button className="button button-soft" onClick={onHome}>Play Spark · Explore activities</button></div></header>
     <main className="app-shell play-history">
       <p className="eyebrow">Your child’s play</p>
       <h1>{selected ? selected.playPath.title : "Play history"}</h1>

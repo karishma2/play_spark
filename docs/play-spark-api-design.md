@@ -398,6 +398,8 @@ Parents can save both whole activity plans and individual missions.
 | `PUT` | `/favourites/missions/:missionId` | Save a mission |
 | `DELETE` | `/favourites/missions/:missionId` | Remove a saved mission |
 
+Phase 6.2 implements the Play Path section only: `GET /favourites?limit=10&before=<bookmark-id>` returns `{ playPaths, nextCursor }` with a maximum page size of 20. Each bookmark contains `id`, `playPathId`, `createdAt`, and current published card metadata in `activity` (or `null` when unavailable). `GET /favourites/play-paths/:playPathId` returns `{ saved }` for authenticated button state. PUT/DELETE return `{ saved }`; PUT accepts no additional fields. Ownership comes from the signed-in parent and the configured verification policy applies. Session start continues to enforce the active child's current age eligibility. Individual mission routes remain planned.
+
 `PUT` is intentionally idempotent: tapping Save more than once does not create duplicate favourite records. `DELETE` is likewise safe to repeat.
 
 ## 9. Recommendation rules and API boundaries
