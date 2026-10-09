@@ -50,11 +50,12 @@
 
 ### Bounded production follow-up — favourites/history query validation
 
-- **Status:** Local fix complete on `feature/vercel-query-validation`, 9 October 2026; user approved commit. Production confirmation remains pending.
+- **Status:** PR #14 merged; production still returns `400`. Bounded follow-up implemented on `feature/vercel-original-url`, 9 October 2026; user authorized commit, preview validation, merge and deployment on this one branch.
 - **Finding:** Deployed favourites screenshot still shows `400` for `?limit=10` after PR #13. The earlier adapter cleanup does not protect routes if a hosting runtime query property is reintroduced; the actual rejected production field has not been observed.
 - **Fix:** Favourites/history pagination now reads the restored public URL directly instead of runtime `request.query`. Strict Zod validation retains rejection of unknown fields, invalid bounds and repeated pagination fields.
 - **Validation:** Both synthetic rewrite-query regressions reproduced `400` before the fix; all 18 favourites/Play Session tests passed afterward. TypeScript passed. Existing full-gate evidence predates this bounded fix; no full lifecycle rerun.
-- **Remaining:** Push/PR/deployment and confirmation against the deployed authenticated favourites/history routes. User authorized the fix commit; no production database changes made.
+- **Follow-up evidence:** Vercel production is Ready at merged commit `c230d01`; a public unauthenticated favourites request returns the app's `VALIDATION_ERROR`. Tests now prepopulate `originalUrl` before adapter normalization, reproducing both failures on PR #14 code. The adapter now synchronizes `originalUrl` with restored `url` because Express preserves a pre-existing value. All 18 affected tests and TypeScript passed afterward. These synthetic tests prove the adapter defect; actual production request fields remain unobserved.
+- **Remaining:** Preview validation before squash merge, deployment and confirmation against deployed favourites/history. No production database changes made. Reuse the passing 18 affected tests and TypeScript; required CI remains enabled.
 
 ### Phase 6 delivery sequence
 
