@@ -72,7 +72,7 @@ function RecommendationResult({ card, onSelect }: { card: RecommendationCard; on
           <ul>{card.supports.map((support) => <li key={support}>{support}</li>)}</ul>
         </div>
         <p className="recommendation-materials"><strong>You’ll need:</strong> {card.materials.join(", ")}</p>
-        <button className="button button-primary" onClick={onSelect}>View Play Path <span aria-hidden="true">→</span></button>
+        <button className="button button-primary" aria-label={`View Play Path: ${card.title}`} onClick={onSelect}>View Play Path <span aria-hidden="true">→</span></button>
         <FavouriteButton playPathId={card.playPathId} />
       </div>
     </article>
@@ -192,15 +192,16 @@ export function DiscoveryDashboard({ onSelect }: { onSelect: (playPathId: string
           </label>
 
           <p className="filter-note">Suggestions refresh automatically. We use the saved child profile and these choices only to rank the available Play Paths.</p>
+          <button className="button-link filter-reset" type="button" onClick={() => setSelection({ ...initialSelection, constraints: [] })}>Reset choices</button>
         </aside>
 
-        <div className="recommendation-results" aria-live="polite">
+        <div className="recommendation-results" aria-busy={loading}>
           <div className="recommendation-heading">
             <div>
               <p className="eyebrow">Picked for this moment</p>
               <h2>Your recommended Play Paths</h2>
             </div>
-            {!loading && !error && <span>{recommendations.length} ideas</span>}
+            <span className="recommendation-count" role="status">{loading ? "Updating ideas…" : error ? "Ideas unavailable" : `${recommendations.length} ${recommendations.length === 1 ? "idea" : "ideas"} · ${selection.availableMinutes} min available`}</span>
           </div>
 
           {loading ? (
