@@ -1,10 +1,11 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-export function ParentNavigation({ eligible, needsVerification, onHome, onFavourites, onHistory, onProfile, onPassword, onSignOut, onVerify, signOutError }: {
+export function ParentNavigation({ eligible, needsVerification, onHome, onFavourites, onHistory, onProfile, onPassword, onDeleteAccount, onSignOut, onVerify, signOutError }: {
   eligible: boolean; needsVerification: boolean;
   onHome: () => void; onFavourites: () => void; onHistory: () => void;
   onProfile: () => void; onPassword: () => void; onSignOut: () => void; onVerify: () => void;
+  onDeleteAccount: () => void;
   signOutError?: string;
 }) {
   const { pathname } = useLocation();
@@ -53,6 +54,7 @@ export function ParentNavigation({ eligible, needsVerification, onHome, onFavour
         {needsVerification && <button onClick={() => visit(onVerify)}>Verify email <span aria-hidden="true">→</span></button>}
         {eligible && <button onClick={() => visit(onProfile)}>Child profile <span aria-hidden="true">→</span></button>}
         <button onClick={() => visit(onPassword)}>Change password <span aria-hidden="true">→</span></button>
+        <button className="account-delete-link" onClick={() => visit(onDeleteAccount)}>Delete account <span aria-hidden="true">→</span></button>
         <button className="parent-sign-out" onClick={onSignOut}>Sign out <span aria-hidden="true">↪</span></button>
         {signOutError && <p className="account-action-error" role="alert">{signOutError}</p>}
       </div>}

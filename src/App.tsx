@@ -26,6 +26,7 @@ import { PlayFeedbackCard } from "./PlayFeedbackCard";
 import { FavouriteButton } from "./FavouriteButton";
 import { FavouritesPage } from "./FavouritesPage";
 import { ParentNavigation } from "./ParentNavigation";
+import { DeleteAccountPage } from "./DeleteAccountPage";
 import {
   completeSample,
   readGuestProgress,
@@ -74,6 +75,7 @@ function Header({
   onSignUp,
   onSignOut,
   onManageAccount,
+  onDeleteAccount,
   onManageProfile,
   onHistory,
   onFavourites,
@@ -89,6 +91,7 @@ function Header({
   onSignUp: () => void;
   onSignOut: () => void;
   onManageAccount: () => void;
+  onDeleteAccount: () => void;
   onManageProfile: () => void;
   onHistory: () => void;
   onFavourites: () => void;
@@ -106,7 +109,7 @@ function Header({
         ) : session ? (
           <ParentNavigation key={session.user.id} eligible={session.emailVerified && session.hasChildProfile} needsVerification={!session.emailVerified}
             onHome={onHome} onFavourites={onFavourites} onHistory={onHistory} onProfile={onManageProfile}
-            onPassword={onManageAccount} onSignOut={onSignOut} onVerify={onVerifyEmail} signOutError={signOutError} />
+            onPassword={onManageAccount} onDeleteAccount={onDeleteAccount} onSignOut={onSignOut} onVerify={onVerifyEmail} signOutError={signOutError} />
         ) : screen === "guest" ? (
           <div className="guest-auth-actions" aria-label="Parent account options">
             <button onClick={onSignIn}>Sign in</button>
@@ -1260,6 +1263,7 @@ function App() {
     session={session} sessionReady={sessionReady}
     onSignIn={() => navigate("/sign-in")} onSignUp={() => navigate("/sign-up")}
     onSignOut={endSession} onManageAccount={() => navigate("/change-password")}
+    onDeleteAccount={() => navigate("/delete-account")}
     onManageProfile={() => navigate("/child-profile")}
     onHistory={() => { setSelectedId(undefined); setSelectedSample(undefined); setActiveMissionIndex(null); navigate("/play-history"); window.scrollTo({ top: 0 }); }}
     onFavourites={() => { setSelectedId(undefined); setSelectedSample(undefined); setActiveMissionIndex(null); navigate("/favourites"); window.scrollTo({ top: 0 }); }}
@@ -1286,6 +1290,23 @@ function App() {
         }}
       />
     );
+  }
+  if (location.pathname === "/delete-account") {
+    if (!sessionReady) return <LoadingState label="Opening account settings…" />;
+    if (!session) return <AuthPage mode="sign-in" onAuthenticated={authenticated} />;
+    return <DeleteAccountPage key={session.user.id} email={session.user.email} onCancel={goHome} onDeleted={() => {
+      if (authenticatedUserRef.current !== session.user.id) return;
+      sessionRequestVersion.current += 1;
+      playActionRequestVersion.current += 1;
+      authenticatedUserRef.current = undefined;
+      playSessionRef.current = null;
+      setSession(null); setSessionReady(true); setPlaySession(null); setSignOutError(undefined);
+      setSelectedId(undefined); setSelectedSample(undefined); setActiveMissionIndex(null); setScreen("landing");
+      navigate("/account-deleted", { replace: true });
+    }} />;
+  }
+  if (location.pathname === "/account-deleted") {
+    return <main className="auth-page"><section className="auth-panel"><h1>Your account has been deleted</h1><p>Your account and saved play data have been removed.</p><button className="button button-primary" onClick={goHome}>Back to Play Spark</button></section></main>;
   }
   if (location.pathname === "/change-password") {
     if (!sessionReady) return <LoadingState label="Opening account security…" />;

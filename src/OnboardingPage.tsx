@@ -160,6 +160,7 @@ export function OnboardingPage({
           <Link className="button button-primary" to="/">Explore activities</Link>
           {signOutError && <div className="auth-error" role="alert">{signOutError}</div>}
           <button className="text-button" onClick={onSignOut}>Sign out</button>
+          <Link className="text-button" to="/delete-account">Delete account</Link>
         </section>
       </main>
     );
