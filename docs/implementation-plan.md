@@ -25,6 +25,16 @@ This document describes delivery order and acceptance criteria. Approved archite
 | 6 — Progress and retention | Mission Wall, favourites, history, and fixed-choice feedback | Phase 5 |
 | 7 — Private-beta readiness | Account deletion, analytics, accessibility review, deployment, backup, and operational checks | Phases 2–6 |
 
+## Phase 7.1 — Parent account deletion
+
+**Status:** In progress on `feature/account-deletion` — 13 October 2026.
+
+- Provide an authenticated `/delete-account` page from Parent account, including for parents without a child profile or verified email. Explain permanent loss, require the exact account email and provide cancellation before submission.
+- `DELETE /api/v1/account` accepts only `confirmationEmail`; derive ownership from the secure session, reject mismatches and unknown input, and apply an independent rate limit.
+- Delete the parent and all owned child profiles, Play Sessions, legacy session-mission snapshots, favourites, feedback, auth sessions, reset and verification tokens in one MongoDB transaction. Preserve other parents and curated content; a failure rolls back all deletion.
+- Clear the browser session cookie and authenticated UI state only after success, then show confirmation. Ignore stale responses after unmount/account changes; prevent duplicate form submissions.
+- Cover ownership, exact confirmation, beta access, safe errors, transaction rollback and session invalidation with focused checks. No live user deletion during Developer testing; final verification and manual sign-off precede commit.
+
 ## Phase 3 — Child-profile onboarding and editing
 
 Phase 3 is delivered as two independently reviewable vertical slices.

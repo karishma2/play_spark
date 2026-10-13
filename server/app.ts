@@ -1,4 +1,5 @@
 import express from "express";
+import { createAccountRouter, createMongoAccountRepository, type AccountRepository } from "./account.js";
 import helmet from "helmet";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -40,6 +41,7 @@ export interface CreateAppOptions {
   playSessions?: PlaySessionRepository;
   favourites?: FavouriteRepository;
   feedback?: FeedbackRepository;
+  account?: AccountRepository;
   passwordHasher?: PasswordHasher;
   passwordResetBaseUrl?: string;
   authEmailSender?: AuthEmailSender;
@@ -71,6 +73,11 @@ export function createApp(options: CreateAppOptions) {
   app.disable("x-powered-by");
   app.use(helmet());
   app.use(express.json({ limit: "100kb" }));
+  app.use("/api/v1/account", createAuthRateLimiter());
+  app.use("/api/v1", createAccountRouter({
+    repository: options.account ?? createMongoAccountRepository(mongo, options.databaseName),
+    auth, cookieSecure: options.authCookieSecure ?? process.env.NODE_ENV === "production",
+  }));
   app.use("/api/v1", createFeedbackRouter({
     repository: options.feedback ?? createMongoFeedbackRepository(mongo, options.databaseName),
     auth, profiles: childProfiles, sessions: playSessions, requireEmailVerification,

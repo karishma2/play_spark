@@ -45,6 +45,12 @@ export function getGuestSamples() {
   return requestJson<GuestSampleSummary[]>("/api/v1/guest/samples");
 }
 
+export function deleteAccount(confirmationEmail: string) {
+  return requestJson<{ deleted: boolean }>("/api/v1/account", {
+    method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmationEmail }),
+  });
+}
+
 export function getGuestSample(sampleId: string) {
   return requestJson<GuestSample>(`/api/v1/guest/samples/${encodeURIComponent(sampleId)}`);
 }

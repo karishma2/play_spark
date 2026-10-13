@@ -25,7 +25,7 @@
 | 4 | Dashboard, filters, and rule-based recommendations | Complete |
 | 5 | Active Play Sessions and mission actions | Complete |
 | 6 | Mission Wall, favourites, history, and feedback | In progress |
-| 7 | Private-beta hardening, analytics, and deployment | Planned |
+| 7 | Private-beta hardening, analytics, and deployment | In progress |
 
 ## Completed features
 
@@ -47,6 +47,19 @@
 - **Production follow-up (8 October):** Screenshot shows history `400`, not `404`. The Vercel adapter now removes the runtime's own query property so internal rewrite fields cannot shadow Express's public-URL query parser. A synthetic Vercel-shaped regression checks public and forwarded URLs, valid pages, invalid limits, and unknown-field rejection. Twelve focused Play Session tests and TypeScript passed. Fix remains uncommitted on the Phase 6.2 branch; production redeployment and confirmation remain pending.
 
 ## Planned next feature
+
+### Phase 7.1 — Parent account deletion
+
+- **Status:** In progress (implementation delivered; verification gaps remain) on `feature/account-deletion`, based on merged Phase 6.3 `c745989`, 13 October 2026; commit authorized by the user. Push is not part of this request.
+- **Scope:** Exact-email confirmation, permanent transactional removal of the parent and owned records, retained curated content, safe failure handling, cookie/session cleanup and a cancellation option. No new dependencies or live account deletion.
+- **Routes:** `/delete-account`, `/account-deleted`, `DELETE /api/v1/account`.
+- **Implemented:** Parent-account, onboarding and verification entry links; exact-email confirmation with cancellation, duplicate-submit protection, safe retries and post-success authentication/play-state cleanup. Transactional repository deletes all owned records, including legacy snapshots and verification tokens, while retaining curated content and other families.
+- **Validation:** Two focused synthetic tests passed covering exact confirmation, authentication/beta access, owner-derived deletion, safe failures, cookie clearing, subsequent session rejection, transaction rollback and retained other-owner/catalogue records. TypeScript and progress guard passed. Only a test fixture type annotation changed after the focused test run; no runtime behavior changed.
+- **Review/testing:** User reported the feature working, then supplied the whitespace manual-test finding and navigation-during-deletion review finding. Both were fixed; explicit post-fix browser retest results were not supplied before commit authorization.
+- **Remaining:** Whitespace and delayed-response browser retests, live-database transaction confirmation and post-fix review confirmation. No real account deletion, push or deployment performed by the Developer.
+- **Bounded manual-test fix:** Confirmation now uses a text input with an email keyboard hint, preserving surrounding whitespace for the existing exact comparison instead of browser email-input sanitization. TypeScript passed after the fix; browser retest of spaced versus exact email remains pending. Server-side exact validation is unchanged.
+- **Bounded review fix:** Successful deletion invokes App-owned cleanup even if browser navigation unmounted the form; mounted checks now protect only local form updates. Cleanup checks the initiating account against the current authenticated account so a late response cannot clear another account. TypeScript passed after the fix; delayed-response browser retest and live MongoDB transaction confirmation remain pending. No full lifecycle rerun.
+- **Commit verification (13 October):** `npm run verify` passed on the Phase 7.1 application working tree based on `c745989`, including both fixes: TypeScript, 12 catalogue paths, 13 profile options, 69 automated tests, production build and progress guard. Local HTTP access was permitted for synthetic API tests. Only this delivery record changed afterward.
 
 ### Phase 6.3 — Optional Play Path feedback
 

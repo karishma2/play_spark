@@ -74,6 +74,7 @@ export function EmailVerificationPendingPage({
         <Link className="button button-secondary" to="/guest-preview">Browse sample activities</Link>
       </div>
       <button className="text-button auth-back" onClick={onSignOut}>Sign out</button>
+      <Link className="text-button auth-back" to="/delete-account">Delete account</Link>
     </VerificationShell>
   );
 }
