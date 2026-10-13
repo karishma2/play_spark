@@ -111,6 +111,15 @@ export function getSavedPlaySession(sessionId: string) {
   return requestJson<PlaySession>(`/api/v1/play-sessions/history/${encodeURIComponent(sessionId)}`);
 }
 
+export type FeedbackReason = "too_easy" | "too_difficult" | "too_messy" | "lost_interest" | "not_suitable";
+export interface PlayFeedback { overallRating: "loved_it" | "okay" | null; reasonKeys: FeedbackReason[] }
+export function getPlayFeedback(sessionId: string) {
+  return requestJson<PlayFeedback | null>(`/api/v1/play-sessions/${encodeURIComponent(sessionId)}/feedback`);
+}
+export function savePlayFeedback(sessionId: string, feedback: PlayFeedback) {
+  return postJson<PlayFeedback>(`/api/v1/play-sessions/${encodeURIComponent(sessionId)}/feedback`, feedback);
+}
+
 export function startPlaySession(playPathId: string) {
   return postJson<PlaySession>("/api/v1/play-sessions", { playPathId });
 }

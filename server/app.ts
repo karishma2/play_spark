@@ -12,6 +12,7 @@ import {
 } from "./childProfile.js";
 import { createMongoClientProvider } from "./db.js";
 import { createFavouriteRouter, createMongoFavouriteRepository, type FavouriteRepository } from "./favourites.js";
+import { createFeedbackRouter, createMongoFeedbackRepository, type FeedbackRepository } from "./feedback.js";
 import {
   createResendAuthEmailSender,
   unavailableAuthEmailSender,
@@ -38,6 +39,7 @@ export interface CreateAppOptions {
   recommendations?: RecommendationRepository;
   playSessions?: PlaySessionRepository;
   favourites?: FavouriteRepository;
+  feedback?: FeedbackRepository;
   passwordHasher?: PasswordHasher;
   passwordResetBaseUrl?: string;
   authEmailSender?: AuthEmailSender;
@@ -69,6 +71,10 @@ export function createApp(options: CreateAppOptions) {
   app.disable("x-powered-by");
   app.use(helmet());
   app.use(express.json({ limit: "100kb" }));
+  app.use("/api/v1", createFeedbackRouter({
+    repository: options.feedback ?? createMongoFeedbackRepository(mongo, options.databaseName),
+    auth, profiles: childProfiles, sessions: playSessions, requireEmailVerification,
+  }));
   app.use("/api/v1", createFavouriteRouter({
     repository: options.favourites ?? createMongoFavouriteRepository(mongo, options.databaseName),
     authRepository: auth, catalog, requireEmailVerification,

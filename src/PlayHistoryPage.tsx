@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ApiError, getPlayHistory, getSavedPlaySession, startPlaySession, type HistoryCursor, type PlaySession } from "./api";
 import type { GuestSample } from "./guestTypes";
+import { PlayFeedbackCard } from "./PlayFeedbackCard";
 
 function savedDate(session: PlaySession) {
   return new Date(session.completedAt ?? session.abandonedAt ?? session.updatedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -84,6 +85,7 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
       {selected ? <>
         <p>{selected.status === "completed" ? "Completed" : "Ended unfinished"} · {savedDate(selected)} · {selected.completedMissionIds.length} of {selected.playPath.missions.length} missions completed</p>
         <section aria-label="Saved Mission Wall"><h2>{selected.status === "completed" ? "Your completed Mission Wall" : "Your Mission Wall so far"}</h2>{renderWall(selected.playPath, selected.completedMissionIds)}</section>
+        {selected.status === "completed" && <PlayFeedbackCard key={selected.id} sessionId={selected.id} />}
         <section className="history-missions" aria-label="Saved missions">
           {selected.playPath.missions.map((mission) => {
             const replacement = selected.missionReplacements.find(({ originalMissionId }) => originalMissionId === mission.id);

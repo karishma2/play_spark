@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 9 October 2026
+**Last updated:** 13 October 2026
 
 ## Status meanings
 
@@ -47,6 +47,17 @@
 - **Production follow-up (8 October):** Screenshot shows history `400`, not `404`. The Vercel adapter now removes the runtime's own query property so internal rewrite fields cannot shadow Express's public-URL query parser. A synthetic Vercel-shaped regression checks public and forwarded URLs, valid pages, invalid limits, and unknown-field rejection. Twelve focused Play Session tests and TypeScript passed. Fix remains uncommitted on the Phase 6.2 branch; production redeployment and confirmation remain pending.
 
 ## Planned next feature
+
+### Phase 6.3 — Optional Play Path feedback
+
+- **Status:** Complete on `feature/play-path-feedback`, 13 October 2026; user authorized commit. Push and deployment remain pending.
+- **Scope:** Optional fixed-choice feedback on completed authenticated Mission Walls and history details; parents can revise the response. Existing `feedback` collection and one-record-per-session ownership boundary; no free text, analytics or recommendation changes.
+- **Implemented:** Optional feedback card after the final authenticated reveal and on completed history details; save/edit/skip/retry states. Protected GET/POST `/api/v1/play-sessions/:sessionId/feedback`, parent/active-child/completion checks, strict fixed-choice validation, unique-session upserts and concurrent-first-save recovery. `npm run setup:feedback` prepares the approved collection validator and index; live database setup has not been run.
+- **Validation:** Four focused feedback tests passed: persistence/revision, authentication/active-child/completed ownership, beta verification, invalid/free-text input, safe storage failures and mocked concurrent MongoDB writes. Phase 6.2 production favourites/history confirmed working by the user after PR #16. Finalization remains pending.
+- **Additional validation:** TypeScript checking passed on the uncommitted Phase 6.3 working tree; focused feedback tests passed all four scenarios. The progress guard passed.
+- **Commit gate (13 October):** All verification components passed on the Phase 6.3 application working tree based on `0bfdeb7`: TypeScript, 12 catalogue paths, 13 profile options, 67 automated tests, production build and progress guard. The initial sandbox test run could not connect to localhost; the permitted rerun passed. Only delivery documentation changed afterward.
+- **Sign-off:** User reported manual testing passed without findings and code/security review passed, then authorized commit on 13 October 2026. Detailed test scenarios and live-database evidence were not supplied separately.
+- **Remaining:** Push, PR and deployment; target-database validator setup has not been run by the Developer.
 
 ### Bounded production follow-up — favourites/history query validation
 
