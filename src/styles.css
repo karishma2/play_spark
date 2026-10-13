@@ -829,3 +829,11 @@ footer p { max-width: 540px; margin: 0; text-align: right; font-size: 11px; }
   .favourites-empty { margin-block: 24px; padding: 28px 20px; }
   .favourites-empty .button { width: 100%; }
 }
+.play-feedback { margin-block: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 24px; background: var(--canvas); }
+.play-feedback h2 { margin-top: 0; }
+.play-feedback fieldset { border: 0; padding: 0; margin: 20px 0; min-width: 0; }
+.play-feedback legend { font-weight: 700; margin-bottom: 12px; }
+.feedback-choices, .feedback-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.feedback-choices label { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 14px; cursor: pointer; }
+.feedback-choices label:has(input:checked) { background: var(--primary-soft); border-color: var(--primary); }
+.feedback-choices input { width: 18px; height: 18px; accent-color: var(--primary); }

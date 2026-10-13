@@ -212,6 +212,17 @@ Deliver Phase 6 in three independently reviewable slices: 6.1 Play history and c
 - Individual mission favourites, ranking changes, feedback, and routines remain outside this slice. No dependencies or content reseed are needed.
 - Focused checks cover ownership, idempotency, paging, input validation, verification policy, and unavailable content. Run the full feature gate at finalization.
 
+### Phase 6.3 — Optional fixed-choice Play Path feedback
+
+**Status:** Complete on `feature/play-path-feedback` — 13 October 2026; manual testing and code/security review passed as reported by the user.
+
+- Signed-in parents can optionally submit or change feedback after completing a Play Path, or from its completed history detail. Guests and unfinished sessions cannot submit feedback.
+- Use the approved `feedback` collection, unique `playSessionId`, nullable `loved_it`/`okay` rating, and fixed reason keys. Require a rating or at least one reason; reject unknown fields, duplicate/unknown reasons and free text.
+- Derive parent and Play Path ownership server-side; require the session to belong to the active child. Apply the existing beta email-verification policy.
+- Repeated submissions update one record. Feedback never changes completion timestamps, history ordering, Mission Walls, or recommendations in this slice.
+- Reuse quiet responsive form controls. Saving, saved/edit, skipped, loading/retry, unmount/account changes and duplicate submissions are handled; feedback never blocks leaving or replaying.
+- Provide repeatable storage setup and focused validation/ownership/persistence tests. Finalization uses the required feature gate; no new dependencies or analytics.
+
 ## Phase 2 — Parent accounts and secure authentication
 
 Phase 2 is delivered as two independently reviewable vertical slices.

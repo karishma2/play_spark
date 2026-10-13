@@ -22,6 +22,7 @@ import { OnboardingPage } from "./OnboardingPage";
 import { ChildProfilePage } from "./ChildProfilePage";
 import { DiscoveryDashboard } from "./DiscoveryDashboard";
 import { PlayHistoryPage } from "./PlayHistoryPage";
+import { PlayFeedbackCard } from "./PlayFeedbackCard";
 import { FavouriteButton } from "./FavouriteButton";
 import { FavouritesPage } from "./FavouritesPage";
 import { ParentNavigation } from "./ParentNavigation";
@@ -654,6 +655,7 @@ function SampleDetail({
   onStart,
   activeSession,
   onEndSession,
+  completedSessionId,
 }: {
   sample: GuestSample;
   progress: GuestProgress;
@@ -663,6 +665,7 @@ function SampleDetail({
   onStart: () => void | Promise<void>;
   activeSession?: boolean;
   onEndSession?: () => Promise<void>;
+  completedSessionId?: string;
 }) {
   const completedMissions = progress.completedMissions[sample.id] ?? [];
   const [endingSession, setEndingSession] = useState(false);
@@ -765,6 +768,7 @@ function SampleDetail({
         {activeSession && onEndSession ? <button className="button-link" onClick={endCurrentSession} disabled={endingSession}>{endingSession ? "Ending…" : "End this Play Path and choose another"}</button> : null}
         {endError ? <p className="form-error" role="alert">{endError}</p> : null}
       </div>
+      {authenticated && completedSessionId && <PlayFeedbackCard key={completedSessionId} sessionId={completedSessionId} />}
     </section>
   );
 }
@@ -1378,6 +1382,7 @@ function App() {
                 onBack={detailOrigin === "guest" ? goGuest : goHome}
                 backLabel={detailOrigin === "guest" ? "guest preview" : canBrowseFullCatalogue ? "recommendations" : "quick sparks"}
                 authenticated={detailOrigin === "landing" && canBrowseFullCatalogue}
+                completedSessionId={playSession?.status === "completed" && playSession.playPath.id === selectedSample.id ? playSession.id : undefined}
                 onStart={startSession}
                 activeSession={playSession?.status === "active" && playSession.playPath.id === selectedSample.id}
                 onEndSession={playSession?.status === "active" && playSession.playPath.id === selectedSample.id ? endCurrentPlaySession : undefined}

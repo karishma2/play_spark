@@ -386,6 +386,8 @@ Feedback is optional and applies to the completed overall Play Path—not to ind
 
 Valid ratings are `loved_it` and `okay`. Optional fixed reason keys are `too_easy`, `too_difficult`, `too_messy`, `lost_interest`, and `not_suitable`. There is no free-text feedback in the beta.
 
+Phase 6.3 also accepts a null rating when at least one reason is selected. Duplicate reasons and unknown fields are rejected. `GET /play-sessions/:playSessionId/feedback` returns the current fixed-choice response or `data: null`. Both operations require the completed session to belong to the signed-in parent and active child. Repeated POSTs replace the existing choices without creating another record or modifying session progress. Responses contain only `overallRating` and `reasonKeys`.
+
 ## 8. Favourites API
 
 Parents can save both whole activity plans and individual missions.

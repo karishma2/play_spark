@@ -19,6 +19,7 @@
     "setup:auth": "tsx server/setupAuth.ts",
     "setup:play-sessions": "tsx server/setupPlaySessions.ts",
     "setup:favourites": "tsx server/setupFavourites.ts",
+    "setup:feedback": "tsx server/setupFeedback.ts",
     "test": "node scripts/run-tests.mjs",
     "verify": "npm run check && npm run check:catalog && npm run check:profiles && npm test && npm run build && npm run check:progress",
     "start": "node server-dist/index.js"
