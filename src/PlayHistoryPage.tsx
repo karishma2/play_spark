@@ -20,11 +20,19 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
   const [retry, setRetry] = useState(0);
   const version = useRef(0);
   const pending = useRef(false);
+  const failedAction = useRef<() => Promise<void>>();
+  const heading = useRef<HTMLHeadingElement>(null);
+  const previousSelection = useRef<string>();
+  useEffect(() => {
+    if (previousSelection.current !== selected?.id) heading.current?.focus();
+    previousSelection.current = selected?.id;
+  }, [selected?.id]);
 
   useEffect(() => {
     const request = ++version.current;
     pending.current = true;
-    setLoading(true); setError(undefined); setSessions([]); setSelected(undefined);
+    failedAction.current = undefined;
+    setLoading(true); setError(undefined); setSessions([]); setSelected(undefined); setCursor(null);
     getPlayHistory().then((page) => {
       if (request !== version.current) return;
       setSessions(page.sessions); setCursor(page.nextCursor);
@@ -36,13 +44,13 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
     return () => { version.current += 1; pending.current = false; };
   }, [retry]);
 
-  async function act(action: () => Promise<void>) {
+  async function act(action: (request: number) => Promise<void>) {
     if (pending.current) return;
     const request = ++version.current;
     pending.current = true; setLoading(true); setError(undefined);
-    try { await action(); }
+    try { await action(request); if (request === version.current) failedAction.current = undefined; }
     catch (failure) {
-      if (request === version.current) setError(failure instanceof ApiError ? failure.message : "We couldn't open this activity. Please try again.");
+      if (request === version.current) { failedAction.current = () => act(action); setError(failure instanceof ApiError ? failure.message : "We couldn't open this activity. Please try again."); }
     } finally {
       if (request === version.current) { pending.current = false; setLoading(false); }
     }
@@ -50,8 +58,7 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
 
   function loadMore() {
     if (!cursor) return;
-    const request = version.current + 1;
-    void act(async () => {
+    void act(async (request) => {
       const page = await getPlayHistory(cursor);
       if (version.current !== request) return;
       setSessions((current) => [...current, ...page.sessions.filter((item) => !current.some(({ id }) => id === item.id))]);
@@ -60,8 +67,7 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
   }
 
   function openSaved(id: string) {
-    const request = version.current + 1;
-    void act(async () => {
+    void act(async (request) => {
       const saved = await getSavedPlaySession(id);
       if (version.current === request) { setSelected(saved); window.scrollTo({ top: 0 }); }
     });
@@ -69,8 +75,7 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
 
   function replay() {
     if (!selected) return;
-    const request = version.current + 1;
-    void act(async () => {
+    void act(async (request) => {
       await startPlaySession(selected.playPath.id);
       if (version.current === request) onReplay();
     });
@@ -79,8 +84,8 @@ export function PlayHistoryPage({ onHome, onReplay, renderWall }: {
   return <>
     <main className="app-shell play-history">
       <p className="eyebrow">Your child’s play</p>
-      <h1>{selected ? selected.playPath.title : "Play history"}</h1>
-      {error && <div className="state-card" role="alert"><p>{error}</p>{!sessions.length && !selected && <button className="button button-primary" onClick={() => setRetry((value) => value + 1)}>Try again</button>}</div>}
+      <h1 ref={heading} tabIndex={-1}>{selected ? selected.playPath.title : "Play history"}</h1>
+      {error && <div className="state-card" role="alert"><p>{error}</p><button className="button button-primary" disabled={loading} onClick={() => failedAction.current ? void failedAction.current() : setRetry((value) => value + 1)}>Try again</button></div>}
       {loading && <p role="status">Opening your saved play…</p>}
       {selected ? <>
         <p>{selected.status === "completed" ? "Completed" : "Ended unfinished"} · {savedDate(selected)} · {selected.completedMissionIds.length} of {selected.playPath.missions.length} missions completed</p>

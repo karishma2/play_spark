@@ -25,6 +25,22 @@ This document describes delivery order and acceptance criteria. Approved archite
 | 6 — Progress and retention | Mission Wall, favourites, history, and fixed-choice feedback | Phase 5 |
 | 7 — Private-beta readiness | Account deletion, analytics, accessibility review, deployment, backup, and operational checks | Phases 2–6 |
 
+## Phase 7.2 — Privacy-safe analytics
+
+**Status:** Deferred by the user for the initial private beta. Do not add analytics dependencies, events or recordings in Phase 7.3.
+
+## Phase 7.3 — Beta accessibility and reliability
+
+**Status:** Complete on `feature/beta-usability` — 13 October 2026; full verification, user-reported manual testing and supplied code review passed. Commit approved; push and merge pending.
+
+- Preserve the current visual design and screen-free play flow; no new dependencies, tracking or data-model changes.
+- Add keyboard skip-to-content, focus management on route changes, clearly visible focus, practical touch targets and mobile-safe form controls. Respect reduced motion.
+- Explain offline/reconnected state without automatically resubmitting mutations. Provide a safe recovery screen for unexpected rendering failures without exposing diagnostics.
+- Keep existing favourites/history visible after action failures and retry the failed action rather than resetting the list or dropping the selected history detail.
+- Make discovery selection/results clear and provide a reset to the established default preferences; maintain ranking and ownership behavior.
+- Validate changed UI with synthetic data at desktop/mobile and keyboard checks. Record connected-flow/live-database gaps rather than claiming full beta readiness. Account-deletion live database and post-review retests remain explicit follow-up scope.
+- Finalization uses the feature gate; manual testing, review and user sign-off precede commit.
+
 ## Phase 7.1 — Parent account deletion
 
 **Status:** In progress on `feature/account-deletion` — 13 October 2026.

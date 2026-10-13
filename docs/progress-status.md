@@ -48,6 +48,19 @@
 
 ## Planned next feature
 
+### Phase 7.3 — Beta accessibility and reliability
+
+- **Status:** Complete on `feature/beta-usability`, based on `4102079` (merged PR #18), 13 October 2026. Finalized; user approved commit. Push and merge remain pending.
+- **Scope:** Keyboard/mobile usability, clear connection status and safe recovery, context-preserving favourites/history retries and clearer discovery controls. Existing design and screen-free play behavior retained; no new dependencies or schema changes.
+- **Phase 7.2:** Analytics deferred by the user for private beta.
+- **Delivered:** Global keyboard skip and route focus, stronger focus/touch/mobile form styling, offline/reconnected notices without automatic mutation retries, safe render-failure recovery, discoverability reset and selected-time status. Favourites/history failures preserve list/detail context and retry the failed operation; history detail/back restores heading focus and repeated card actions have descriptive accessible names.
+- **Developer browser checks:** Synthetic React preview checked filter reset (20 minutes/Ready/no constraints), connection notices, favourites pagination failure/retry, failed removal/retry/empty state, history detail failure/retry and heading focus on open/back. At 390px, inspected discovery and checked saved/detail/account layouts for horizontal overflow and 16px form inputs. Keyboard activation of skip-to-content focused the main heading; a simulated render failure showed the safe reload screen. Temporary preview removed afterward; no real account/database operations performed.
+- **Phase 7.1 retests:** Synthetic browser checks confirmed surrounding spaces keep deletion disabled, exact email enables it, and successful delayed deletion invokes its App-owned callback after form unmount. This does not prove live database deletion or full cross-account cleanup.
+- **Prior validation:** Production build (including TypeScript) and progress guard passed on the final Phase 7.3 application working tree. No Stitch comparison was performed; existing components/tokens were reused.
+- **Manual/review sign-off:** User reported manual testing passed and supplied reviewer PASS with no actionable defects. Reviewer reused existing verification and did not independently exercise live network interruption or backend-connected retries. No additional Reviewer/Tester was launched.
+- **Final verification:** `npm run verify` passed on the Phase 7.3 application working tree based on `4102079`: TypeScript, 12 catalogue paths, 13 profile options, 69 tests, production build and progress guard. Existing manual/review evidence was reused. Only finalization documentation changed afterward; no application changes or additional review/test cycle.
+- **Remaining evidence:** Live network interruption, backend-connected retries and live-database/full connected-flow confirmation are not independently evidenced. No commits, pushes or deployment made.
+
 ### Phase 7.1 — Parent account deletion
 
 - **Status:** In progress (implementation delivered; verification gaps remain) on `feature/account-deletion`, based on merged Phase 6.3 `c745989`, 13 October 2026; commit authorized by the user. Push is not part of this request.
