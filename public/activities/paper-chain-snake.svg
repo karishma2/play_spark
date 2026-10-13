@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 150" role="img" aria-labelledby="title desc">
+<title id="title">Make a Wiggly Paper Snake</title><desc id="desc">A green and yellow paper-chain snake with a drawn face and a long looping body.</desc>
+<rect width="360" height="150" rx="18" fill="#f3efea"/>
+<g id="stage-1" stroke-width="3" stroke-linejoin="round"><g fill="none" stroke-width="12"><ellipse cx="130" cy="93" rx="23" ry="30" stroke="#79a583"/><ellipse cx="167" cy="83" rx="24" ry="16" stroke="#dda74a"/><ellipse cx="204" cy="92" rx="23" ry="29" stroke="#79a583"/></g></g>
+<g id="stage-2" stroke-width="3" stroke-linejoin="round"><path d="M42 58q35-25 62 0l-2 40q-28 26-58 0z" fill="#79a583" stroke="#214e34"/><g fill="#fff"><circle cx="60" cy="69" r="8"/><circle cx="85" cy="69" r="8"/></g><g fill="#214e34"><circle cx="61" cy="70" r="3"/><circle cx="86" cy="70" r="3"/></g><path d="M72 104v19m0-2-6 5m6-5 6 5" fill="none" stroke="#d96b43" stroke-width="5"/></g>
+<g id="stage-3" stroke-width="3" stroke-linejoin="round"><g fill="none" stroke-width="12"><ellipse cx="241" cy="82" rx="24" ry="16" stroke="#dda74a"/><ellipse cx="278" cy="92" rx="23" ry="29" stroke="#79a583"/></g><path d="m298 92 36 20-37 7z" fill="#dda74a" stroke="#214e34"/></g>
+</svg>

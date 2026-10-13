@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 150" role="img" aria-labelledby="title desc">
+<title id="title">Fold-and-Flip Funny Creatures</title><desc id="desc">A folded paper creature opening to reveal a long colourful mouth.</desc>
+<rect width="360" height="150" rx="18" fill="#f3efea"/>
+<g id="stage-1" stroke-width="3" stroke-linejoin="round"><rect x="39" y="18" width="113" height="119" rx="8" fill="#fff" stroke="#d6cbbc"/><path d="M42 78h107M42 91h107" stroke="#7ba5b6" stroke-dasharray="6 5"/></g>
+<g id="stage-2" stroke-width="3" stroke-linejoin="round"><g fill="#dda74a" stroke="#214e34"><path d="M59 78V45l18 13 20-21 17 21 19-13v33z"/><path d="M59 92h74l-10 28H70z"/></g><g fill="#214e34"><circle cx="81" cy="69" r="4"/><circle cx="113" cy="69" r="4"/></g><path d="M67 84h59" stroke="#d96b43" stroke-width="5"/></g>
+<g id="stage-3" stroke-width="3" stroke-linejoin="round"><rect x="202" y="18" width="115" height="119" rx="8" fill="#fff" stroke="#d6cbbc"/><path d="m220 49 16 10 24-23 20 23 18-10v74h-78z" fill="#dda74a" stroke="#214e34"/><path d="M230 74h58v39h-58z" fill="#d96b43"/><path d="m235 74 5 10 5-10m21 0 5 10 5-10" fill="#fff"/><path d="M244 111q15-18 30 0" fill="#f2b4ae"/><g fill="#214e34"><circle cx="239" cy="64" r="4"/><circle cx="278" cy="64" r="4"/></g></g>
+</svg>

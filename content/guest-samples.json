@@ -947,6 +947,777 @@
           "tidyUp": "Return the treasures and save or recycle the map."
         }
       ]
+    },
+    {
+      "id": "64b100000000000000000013",
+      "title": "Sticker Shape Detective: Match, Count & Make a Pattern",
+      "description": "Cover matching shapes, fill counted spaces and make your own sticker pattern. Parent draws the sheet first, then checks in at the end.",
+      "goal": "Practise recognising shapes, counting one object at a time and continuing a simple pattern.",
+      "supports": [
+        "Shape matching",
+        "Counting to five",
+        "Pattern making"
+      ],
+      "durationMinutes": 10,
+      "themeKey": "art",
+      "replacementPathId": "64b100000000000000000011",
+      "eligibility": {
+        "ageBands": [
+          "3_4",
+          "4_5",
+          "5_6"
+        ],
+        "interestKeys": [
+          "art"
+        ],
+        "playStyleKeys": [
+          "discover",
+          "create"
+        ],
+        "energyLevels": [
+          "calm",
+          "ready_to_play"
+        ],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "independent_after_setup"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 13,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Match & Count",
+        "secondaryCategory": "Make, try & improve",
+        "imageUrl": "/activities/sticker-shape-detective.svg",
+        "imageAlt": "A paper sheet with matching shapes, counted coloured dots and a repeating sticker pattern.",
+        "materials": [
+          "paper",
+          "washable marker",
+          "large stickers or crayon dots"
+        ],
+        "safetyNote": "Use large stickers or crayon dots instead of loose beans. Keep backing paper away from mouths. Parent draws the sheet before handing it over."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000013",
+        "key": "sticker-shape-detective",
+        "title": "Sticker Shape Detective",
+        "background": {
+          "assetRef": "inline-svg:sticker-shape-detective",
+          "alt": "A paper sheet with matching shapes, counted coloured dots and a repeating sticker pattern."
+        },
+        "elements": [
+          {
+            "key": "sticker-shape-detective-1",
+            "label": "Shape board",
+            "revealMessage": "Shape board revealed!",
+            "assetRef": "/activities/sticker-shape-detective.svg#stage-1",
+            "layer": 1
+          },
+          {
+            "key": "sticker-shape-detective-2",
+            "label": "Counting stickers",
+            "revealMessage": "Counting stickers revealed!",
+            "assetRef": "/activities/sticker-shape-detective.svg#stage-2",
+            "layer": 2
+          },
+          {
+            "key": "sticker-shape-detective-3",
+            "label": "Finished pattern",
+            "revealMessage": "Finished pattern revealed!",
+            "assetRef": "/activities/sticker-shape-detective.svg#stage-3",
+            "layer": 3
+          }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000037",
+          "position": 1,
+          "wallElementKey": "sticker-shape-detective-1",
+          "title": "Find the matching shapes",
+          "durationMinutes": 3,
+          "setupSteps": [
+            "Parent draws three big circles and three big squares, mixed across a sheet.",
+            "Show one circle and one square. Leave large stickers within reach."
+          ],
+          "sayThis": "Can you find every circle?",
+          "childChallenge": "Put a sticker or crayon dot in each circle. Easier: use only two shapes. Harder: add triangles and match each shape to a different colour.",
+          "tidyUp": "Keep all backing paper in one pile."
+        },
+        {
+          "id": "64b300000000000000000038",
+          "position": 2,
+          "wallElementKey": "sticker-shape-detective-2",
+          "title": "Give each box its number",
+          "durationMinutes": 3,
+          "setupSteps": [
+            "Draw three boxes with 1, 2 and 3 dots at the top; use 4 and 5 for a harder round."
+          ],
+          "sayThis": "One sticker for each dot. Shall we count them as you place them?",
+          "childChallenge": "Fill each box with the matching number of stickers or crayon dots. Touch and count each mark once; check your own boxes.",
+          "tidyUp": "Keep unused stickers on their sheet."
+        },
+        {
+          "id": "64b300000000000000000039",
+          "position": 3,
+          "wallElementKey": "sticker-shape-detective-3",
+          "title": "Make a repeating sticker trail",
+          "durationMinutes": 4,
+          "setupSteps": [
+            "Start a red-blue-red-blue pattern with stickers or marker dots."
+          ],
+          "sayThis": "What comes next? Now make a pattern for me.",
+          "childChallenge": "Continue the pattern for six more marks. Easier: copy the two-colour pattern. Harder: invent a three-part pattern and leave a gap for a parent to solve.",
+          "tidyUp": "Save the finished sheet and put away the marker."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000014",
+      "title": "Make a Wiggly Paper Snake",
+      "description": "Join paper loops into a snake, give it a face and extend its body with a repeating colour pattern. Parent cuts the pieces first and helps with the first loop.",
+      "goal": "Practise joining pieces, following a colour sequence and checking how a handmade object moves.",
+      "supports": [
+        "Fine-motor coordination",
+        "Colour sequencing",
+        "Making and testing"
+      ],
+      "durationMinutes": 20,
+      "themeKey": "animals",
+      "replacementPathId": "64b100000000000000000013",
+      "eligibility": {
+        "ageBands": [
+          "3_4",
+          "4_5",
+          "5_6"
+        ],
+        "interestKeys": [
+          "animals",
+          "art"
+        ],
+        "playStyleKeys": [
+          "create",
+          "build",
+          "pretend"
+        ],
+        "energyLevels": [
+          "calm",
+          "ready_to_play"
+        ],
+        "noiseLevel": "quiet",
+        "messLevel": "low",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 14,
+        "setupMinutes": 4,
+        "parentEffort": "Low",
+        "messLevel": "Low",
+        "category": "Paper Craft",
+        "secondaryCategory": "Make, try & improve",
+        "imageUrl": "/activities/paper-chain-snake.svg",
+        "imageAlt": "A green and yellow paper-chain snake with a drawn face and a long looping body.",
+        "materials": [
+          "coloured paper strips and a paper head (adult-precut)",
+          "glue stick",
+          "washable marker"
+        ],
+        "safetyNote": "An adult cuts strips about 3 cm wide and 15 cm long, plus one large head shape. Use a glue stick, not staples. Do not wrap the chain around a neck."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000014",
+        "key": "paper-chain-snake",
+        "title": "Make a Wiggly Paper Snake",
+        "background": {
+          "assetRef": "inline-svg:paper-chain-snake",
+          "alt": "A green and yellow paper-chain snake with a drawn face and a long looping body."
+        },
+        "elements": [
+          {
+            "key": "paper-chain-snake-1",
+            "label": "First paper loops",
+            "revealMessage": "First paper loops revealed!",
+            "assetRef": "/activities/paper-chain-snake.svg#stage-1",
+            "layer": 1
+          },
+          {
+            "key": "paper-chain-snake-2",
+            "label": "Snake face",
+            "revealMessage": "Snake face revealed!",
+            "assetRef": "/activities/paper-chain-snake.svg#stage-2",
+            "layer": 2
+          },
+          {
+            "key": "paper-chain-snake-3",
+            "label": "Long patterned tail",
+            "revealMessage": "Long patterned tail revealed!",
+            "assetRef": "/activities/paper-chain-snake.svg#stage-3",
+            "layer": 3
+          }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000040",
+          "position": 1,
+          "wallElementKey": "paper-chain-snake-1",
+          "title": "Connect the first three loops",
+          "durationMinutes": 5,
+          "setupSteps": [
+            "Set out eight adult-cut strips in two colours and the precut head.",
+            "Help the child glue the first strip into a ring. Thread the next strip through it before closing."
+          ],
+          "sayThis": "Can you link a new loop through this one?",
+          "childChallenge": "Connect three loops. Hold each glued join briefly. Easier: parent holds the loop open. Harder: join the next two without help.",
+          "tidyUp": "Close the glue stick whenever you pause."
+        },
+        {
+          "id": "64b300000000000000000041",
+          "position": 2,
+          "wallElementKey": "paper-chain-snake-2",
+          "title": "Give your snake a face",
+          "durationMinutes": 8,
+          "setupSteps": [
+            "Place the large precut head beside the chain.",
+            "Parent helps glue its back to the end loop."
+          ],
+          "sayThis": "What kind of face will your snake have?",
+          "childChallenge": "Draw two eyes and a mouth on the head. Add stripes or spots, then lift the head gently to see the body follow.",
+          "tidyUp": "Put the marker cap back on."
+        },
+        {
+          "id": "64b300000000000000000042",
+          "position": 3,
+          "wallElementKey": "paper-chain-snake-3",
+          "title": "Grow and test its patterned tail",
+          "durationMinutes": 7,
+          "setupSteps": [
+            "Set the remaining strips in a reachable pile."
+          ],
+          "sayThis": "Green, yellow, green... which colour comes next?",
+          "childChallenge": "Add five loops in a repeating colour pattern. Check and fix any colour that breaks the pattern, then gently wiggle the finished snake along the table. Harder: create a three-colour tail.",
+          "tidyUp": "Let the joins dry flat, close the glue and collect paper scraps."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000015",
+      "title": "Build a Standing Paper Dinosaur",
+      "description": "Decorate a dinosaur, fit its body into cardboard legs and adjust it until it stands. Parent prepares all cuts and helps with fitting; the child chooses the colours and tests the balance.",
+      "goal": "Make a recognisable dinosaur and investigate how leg placement changes its balance.",
+      "supports": [
+        "Creative choices",
+        "Hand-eye coordination",
+        "Balance and problem-solving"
+      ],
+      "durationMinutes": 20,
+      "themeKey": "animals",
+      "replacementPathId": "64b100000000000000000014",
+      "eligibility": {
+        "ageBands": [
+          "3_4",
+          "4_5",
+          "5_6"
+        ],
+        "interestKeys": [
+          "animals",
+          "art",
+          "building"
+        ],
+        "playStyleKeys": [
+          "create",
+          "build",
+          "discover"
+        ],
+        "energyLevels": [
+          "calm",
+          "ready_to_play"
+        ],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 15,
+        "setupMinutes": 5,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Make & Balance",
+        "secondaryCategory": "Make, try & improve",
+        "imageUrl": "/activities/standing-paper-dinosaur.svg",
+        "imageAlt": "A decorated green paper-plate dinosaur standing on two short cardboard-roll legs.",
+        "materials": [
+          "paper plate body and cardboard-roll legs (adult-precut)",
+          "washable markers or crayons",
+          "paper head and tail (adult-precut)"
+        ],
+        "safetyNote": "An adult cuts a plate in half, prepares a head and tail with tabs and slots in the body, and cuts a clean cardboard roll into two short legs with top slots. Adult checks all edges before play; no child cutting is required."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000015",
+        "key": "standing-paper-dinosaur",
+        "title": "Build a Standing Paper Dinosaur",
+        "background": {
+          "assetRef": "inline-svg:standing-paper-dinosaur",
+          "alt": "A decorated green paper-plate dinosaur standing on two short cardboard-roll legs."
+        },
+        "elements": [
+          {
+            "key": "standing-paper-dinosaur-1",
+            "label": "Decorated dinosaur body",
+            "revealMessage": "Decorated dinosaur body revealed!",
+            "assetRef": "/activities/standing-paper-dinosaur.svg#stage-1",
+            "layer": 1
+          },
+          {
+            "key": "standing-paper-dinosaur-2",
+            "label": "Head and tail",
+            "revealMessage": "Head and tail revealed!",
+            "assetRef": "/activities/standing-paper-dinosaur.svg#stage-2",
+            "layer": 2
+          },
+          {
+            "key": "standing-paper-dinosaur-3",
+            "label": "Two steady legs",
+            "revealMessage": "Two steady legs revealed!",
+            "assetRef": "/activities/standing-paper-dinosaur.svg#stage-3",
+            "layer": 3
+          }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000043",
+          "position": 1,
+          "wallElementKey": "standing-paper-dinosaur-1",
+          "title": "Design the dinosaur body",
+          "durationMinutes": 5,
+          "setupSteps": [
+            "Set out the precut plate body, head and tail with crayons or markers.",
+            "Parent demonstrates how the pieces will look together."
+          ],
+          "sayThis": "Will your dinosaur have spots, stripes or both?",
+          "childChallenge": "Decorate the body and draw a large eye on the head. Easier: colour freely. Harder: make a repeating spot or stripe pattern.",
+          "tidyUp": "Cap markers before starting to build."
+        },
+        {
+          "id": "64b300000000000000000044",
+          "position": 2,
+          "wallElementKey": "standing-paper-dinosaur-2",
+          "title": "Fit the head and tail",
+          "durationMinutes": 8,
+          "setupSteps": [
+            "Parent holds the body and shows where the head and tail tabs fit."
+          ],
+          "sayThis": "Which piece is the head? Which side needs the tail?",
+          "childChallenge": "Slide the prepared tabs into their slots, with parent help if needed. Check that the face points away from the tail and the parts stay attached.",
+          "tidyUp": "Keep the two leg pieces together for the next step."
+        },
+        {
+          "id": "64b300000000000000000045",
+          "position": 3,
+          "wallElementKey": "standing-paper-dinosaur-3",
+          "title": "Make it stand and test its balance",
+          "durationMinutes": 7,
+          "setupSteps": [
+            "Parent helps slide the body into the two slotted cardboard legs on a low table."
+          ],
+          "sayThis": "What happens if its legs are too close together?",
+          "childChallenge": "Stand the dinosaur on a flat surface. Move the legs a little farther apart with a parent and compare. Once it stands, arrange a paper home around it. Harder: explain which leg position worked best.",
+          "tidyUp": "Store the dinosaur upright and collect spare paper pieces."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000016",
+      "title": "Build a Paper Bridge That Holds a Toy",
+      "description": "Bridge a gap with paper, fold a stronger road and test whether your toy car can cross. Parent sets up the books, then returns to compare the child's designs.",
+      "goal": "Discover how folding changes the strength of paper by comparing two bridge designs.",
+      "supports": [
+        "Prediction and testing",
+        "Spatial problem-solving",
+        "Persistence"
+      ],
+      "durationMinutes": 20,
+      "themeKey": "vehicles",
+      "replacementPathId": "64b100000000000000000001",
+      "eligibility": {
+        "ageBands": [
+          "3_4",
+          "4_5",
+          "5_6"
+        ],
+        "interestKeys": [
+          "building",
+          "vehicles"
+        ],
+        "playStyleKeys": [
+          "build",
+          "discover"
+        ],
+        "energyLevels": [
+          "calm",
+          "ready_to_play"
+        ],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 16,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Build & Test",
+        "secondaryCategory": "Make, try & improve",
+        "imageUrl": "/activities/paper-bridge-test.svg",
+        "imageAlt": "A pleated paper bridge between two books carrying a small toy car.",
+        "materials": [
+          "two sheets of paper",
+          "two equal-height books",
+          "one small lightweight toy car"
+        ],
+        "safetyNote": "Keep books and bridges on a low table or floor. Use a lightweight toy suited to the child's age; never use the bridge to support a person."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000016",
+        "key": "paper-bridge-test",
+        "title": "Build a Paper Bridge That Holds a Toy",
+        "background": {
+          "assetRef": "inline-svg:paper-bridge-test",
+          "alt": "A pleated paper bridge between two books carrying a small toy car."
+        },
+        "elements": [
+          {
+            "key": "paper-bridge-test-1",
+            "label": "Book supports",
+            "revealMessage": "Book supports revealed!",
+            "assetRef": "/activities/paper-bridge-test.svg#stage-1",
+            "layer": 1
+          },
+          {
+            "key": "paper-bridge-test-2",
+            "label": "Folded paper road",
+            "revealMessage": "Folded paper road revealed!",
+            "assetRef": "/activities/paper-bridge-test.svg#stage-2",
+            "layer": 2
+          },
+          {
+            "key": "paper-bridge-test-3",
+            "label": "Car crossing",
+            "revealMessage": "Car crossing revealed!",
+            "assetRef": "/activities/paper-bridge-test.svg#stage-3",
+            "layer": 3
+          }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000046",
+          "position": 1,
+          "wallElementKey": "paper-bridge-test-1",
+          "title": "Try a flat paper road",
+          "durationMinutes": 5,
+          "setupSteps": [
+            "Place two books the same height about 10 cm apart on the floor.",
+            "Lay one sheet across the gap."
+          ],
+          "sayThis": "Do you think this flat road can hold the car?",
+          "childChallenge": "Predict, then place the car in the middle gently and notice what happens. Parent helps if the sheet slips; there is no need to make it work yet.",
+          "tidyUp": "Put the car beside the books between tests."
+        },
+        {
+          "id": "64b300000000000000000047",
+          "position": 2,
+          "wallElementKey": "paper-bridge-test-2",
+          "title": "Fold a stronger bridge",
+          "durationMinutes": 8,
+          "setupSteps": [
+            "Set out the second sheet.",
+            "Show how to fold a strip forward and back like a paper fan; a parent can start the first two folds."
+          ],
+          "sayThis": "What could these folds change?",
+          "childChallenge": "Make several folds across the sheet, then lay it across the same gap. Easier: parent makes folds and child opens the fan. Harder: try a different fold width.",
+          "tidyUp": "Keep both paper designs so you can compare them."
+        },
+        {
+          "id": "64b300000000000000000048",
+          "position": 3,
+          "wallElementKey": "paper-bridge-test-3",
+          "title": "Test, compare and improve",
+          "durationMinutes": 7,
+          "setupSteps": [
+            "Use the same books, gap and car for both designs."
+          ],
+          "sayThis": "Which road bends less? How can you tell?",
+          "childChallenge": "Try the car on each bridge. Choose the better design and change just one thing, such as narrowing the gap, before testing again. Describe what changed.",
+          "tidyUp": "Return the car and books and recycle or save the bridges."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000017",
+      "title": "Fold-and-Flip Funny Creatures",
+      "description": "Fold a paper flap, draw a small creature and open it to reveal a surprisingly long mouth or body. Parent demonstrates one fold, then the child draws and invents more versions.",
+      "goal": "Explore how a fold changes a picture while planning and drawing an original creature.",
+      "supports": [
+        "Drawing and fine-motor practice",
+        "Spatial planning",
+        "Creative expression"
+      ],
+      "durationMinutes": 30,
+      "themeKey": "art",
+      "replacementPathId": "64b100000000000000000013",
+      "eligibility": {
+        "ageBands": [
+          "4_5",
+          "5_6"
+        ],
+        "interestKeys": [
+          "art",
+          "animals",
+          "stories"
+        ],
+        "playStyleKeys": [
+          "create",
+          "pretend"
+        ],
+        "energyLevels": [
+          "calm",
+          "ready_to_play"
+        ],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "small",
+        "independenceLevel": "independent_after_setup"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 17,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Draw & Reveal",
+        "secondaryCategory": "Make, try & improve",
+        "imageUrl": "/activities/fold-flip-creatures.svg",
+        "imageAlt": "A folded paper creature opening to reveal a long colourful mouth.",
+        "materials": [
+          "two sheets of paper",
+          "washable markers or crayons"
+        ],
+        "safetyNote": "Use paper and washable drawing tools only; no scissors are needed. Keep marker caps together and away from mouths."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000017",
+        "key": "fold-flip-creatures",
+        "title": "Fold-and-Flip Funny Creatures",
+        "background": {
+          "assetRef": "inline-svg:fold-flip-creatures",
+          "alt": "A folded paper creature opening to reveal a long colourful mouth."
+        },
+        "elements": [
+          {
+            "key": "fold-flip-creatures-1",
+            "label": "Folded paper flap",
+            "revealMessage": "Folded paper flap revealed!",
+            "assetRef": "/activities/fold-flip-creatures.svg#stage-1",
+            "layer": 1
+          },
+          {
+            "key": "fold-flip-creatures-2",
+            "label": "Friendly creature face",
+            "revealMessage": "Friendly creature face revealed!",
+            "assetRef": "/activities/fold-flip-creatures.svg#stage-2",
+            "layer": 2
+          },
+          {
+            "key": "fold-flip-creatures-3",
+            "label": "Surprise long creature",
+            "revealMessage": "Surprise long creature revealed!",
+            "assetRef": "/activities/fold-flip-creatures.svg#stage-3",
+            "layer": 3
+          }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000049",
+          "position": 1,
+          "wallElementKey": "fold-flip-creatures-1",
+          "title": "Make a paper picture flap",
+          "durationMinutes": 8,
+          "setupSteps": [
+            "Fold a sheet in half, then fold the upper flap back to make a zigzag opening.",
+            "Parent demonstrates once and leaves the second sheet for another design."
+          ],
+          "sayThis": "Close it, open it. Where will your creature hide?",
+          "childChallenge": "Practise opening and closing the flap. Draw two small guide marks that meet when it is shut. Easier: parent prepares both folds. Harder: make your second fold yourself.",
+          "tidyUp": "Keep the paper flat on the table."
+        },
+        {
+          "id": "64b300000000000000000050",
+          "position": 2,
+          "wallElementKey": "fold-flip-creatures-2",
+          "title": "Draw the closed creature",
+          "durationMinutes": 10,
+          "setupSteps": [
+            "Keep the folded flap shut with its edges lined up."
+          ],
+          "sayThis": "A tiny mouth now... what might be hiding inside?",
+          "childChallenge": "Draw a face across the closed fold, with its mouth touching both edges. Add eyes, ears or horns. Try a second creature with a different expression if you have time.",
+          "tidyUp": "Keep the markers on the table beside the paper."
+        },
+        {
+          "id": "64b300000000000000000051",
+          "position": 3,
+          "wallElementKey": "fold-flip-creatures-3",
+          "title": "Open, reveal and invent another",
+          "durationMinutes": 12,
+          "setupSteps": [
+            "Open the flap slowly to see the blank space inside."
+          ],
+          "sayThis": "How long can its mouth or body become?",
+          "childChallenge": "Join the mouth lines through the hidden space, add big teeth or a colourful tongue and close it to test the surprise. Make another version on the second sheet, or add a pattern inside. Show a parent how the picture changes.",
+          "tidyUp": "Cap markers, keep favourite creatures and recycle spare paper."
+        }
+      ]
+    },
+    {
+      "id": "64b100000000000000000018",
+      "title": "Carry the Sock: Balance, Walk & Try Again",
+      "description": "Carry a soft sock on a spoon between two cushion stations, then change your route and try again. Parent clears the floor and stays nearby while the child walks.",
+      "goal": "Practise controlled walking and hand balance, adjusting speed when a soft object slips.",
+      "supports": [
+        "Hand-eye coordination",
+        "Controlled movement",
+        "Persistence"
+      ],
+      "durationMinutes": 10,
+      "themeKey": "stories",
+      "replacementPathId": "64b100000000000000000009",
+      "eligibility": {
+        "ageBands": [
+          "3_4",
+          "4_5",
+          "5_6"
+        ],
+        "interestKeys": [
+          "animals",
+          "stories"
+        ],
+        "playStyleKeys": [
+          "move",
+          "pretend"
+        ],
+        "energyLevels": [
+          "ready_to_play",
+          "full_energy"
+        ],
+        "noiseLevel": "quiet",
+        "messLevel": "none",
+        "spaceLevel": "medium",
+        "independenceLevel": "check_in_occasionally"
+      },
+      "guestPreview": {
+        "enabled": false,
+        "position": 18,
+        "setupMinutes": 2,
+        "parentEffort": "Low",
+        "messLevel": "None",
+        "category": "Movement",
+        "secondaryCategory": "Make, try & improve",
+        "imageUrl": "/activities/soft-sock-balance.svg",
+        "imageAlt": "A soft rolled sock resting on a large spoon beside two floor cushion stations.",
+        "materials": [
+          "one loosely rolled pair of socks",
+          "one large serving spoon",
+          "two cushions"
+        ],
+        "safetyNote": "Use a large blunt serving spoon and soft socks. Walk only on a clear, flat, non-slip floor; cushions mark stations and are not for climbing. An adult stays nearby."
+      },
+      "wallScene": {
+        "id": "64b200000000000000000018",
+        "key": "soft-sock-balance",
+        "title": "Carry the Sock",
+        "background": {
+          "assetRef": "inline-svg:soft-sock-balance",
+          "alt": "A soft rolled sock resting on a large spoon beside two floor cushion stations."
+        },
+        "elements": [
+          {
+            "key": "soft-sock-balance-1",
+            "label": "Soft sock parcel",
+            "revealMessage": "Soft sock parcel revealed!",
+            "assetRef": "/activities/soft-sock-balance.svg#stage-1",
+            "layer": 1
+          },
+          {
+            "key": "soft-sock-balance-2",
+            "label": "Two cushion stations",
+            "revealMessage": "Two cushion stations revealed!",
+            "assetRef": "/activities/soft-sock-balance.svg#stage-2",
+            "layer": 2
+          },
+          {
+            "key": "soft-sock-balance-3",
+            "label": "Curving walking route",
+            "revealMessage": "Curving walking route revealed!",
+            "assetRef": "/activities/soft-sock-balance.svg#stage-3",
+            "layer": 3
+          }
+        ]
+      },
+      "missions": [
+        {
+          "id": "64b300000000000000000052",
+          "position": 1,
+          "wallElementKey": "soft-sock-balance-1",
+          "title": "Find your balancing grip",
+          "durationMinutes": 2,
+          "setupSteps": [
+            "Place two cushions about three walking steps apart on a clear floor.",
+            "Put the soft sock on the bowl of the spoon."
+          ],
+          "sayThis": "Can your sock stay on while you stand still?",
+          "childChallenge": "Try holding the spoon with two hands, then one. Find a grip that keeps the sock steady. Easier: use both hands for the whole activity.",
+          "tidyUp": "Keep the cushions flat and clear of doorways."
+        },
+        {
+          "id": "64b300000000000000000053",
+          "position": 2,
+          "wallElementKey": "soft-sock-balance-2",
+          "title": "Carry it between two stations",
+          "durationMinutes": 4,
+          "setupSteps": [
+            "Start beside one cushion and walk toward the other."
+          ],
+          "sayThis": "Slow steps or fast steps: which helps your sock stay on?",
+          "childChallenge": "Carry the sock there and back three times, walking slowly. If it drops, stop, pick it up and continue; no score or timer is needed.",
+          "tidyUp": "Place the spoon on a cushion whenever you pause."
+        },
+        {
+          "id": "64b300000000000000000054",
+          "position": 3,
+          "wallElementKey": "soft-sock-balance-3",
+          "title": "Change one thing and try again",
+          "durationMinutes": 4,
+          "setupSteps": [
+            "Parent moves one cushion a step sideways to make a gentle turn."
+          ],
+          "sayThis": "What changes when your route bends?",
+          "childChallenge": "Follow the new route there and back. Try slower turns or a different grip and notice which helps. Harder: pause halfway for three counts without dropping the sock.",
+          "tidyUp": "Return the spoon to the kitchen and put away the socks and cushions."
+        }
+      ]
     }
   ]
 }
