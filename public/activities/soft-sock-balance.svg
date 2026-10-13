@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 150" role="img" aria-labelledby="title desc">
+<title id="title">Carry the Sock: Balance, Walk &amp; Try Again</title><desc id="desc">A soft rolled sock resting on a large spoon beside two floor cushion stations.</desc>
+<rect width="360" height="150" rx="18" fill="#f3efea"/>
+<g id="stage-1" stroke-width="3" stroke-linejoin="round"><path d="M45 37h26l-1 38q32-6 38 14 0 19-39 20H45z" fill="#d96b43" stroke="#214e34"/><path d="M47 50h20M47 60h20" stroke="#fff"/><ellipse cx="78" cy="117" rx="42" ry="12" fill="#dda74a" stroke="#214e34"/><path d="M115 117h35" stroke="#214e34" stroke-width="8" stroke-linecap="round"/></g>
+<g id="stage-2" stroke-width="3" stroke-linejoin="round"><rect x="171" y="77" width="60" height="43" rx="15" fill="#7ba5b6" stroke="#214e34"/><path d="M180 85q20 20 42 0M180 113q20-20 42 0" fill="none" stroke="#fff"/><rect x="276" y="34" width="60" height="43" rx="15" fill="#79a583" stroke="#214e34"/><path d="M284 42q20 20 44 0M284 69q20-20 44 0" fill="none" stroke="#fff"/></g>
+<g id="stage-3" stroke-width="3" stroke-linejoin="round"><path d="M201 69q-5-40 39-36t27 49q-13 25 9 26" fill="none" stroke="#7f63b5" stroke-width="6" stroke-linecap="round" stroke-dasharray="4 10"/><path d="m270 94 6 15 12-10" fill="none" stroke="#7f63b5" stroke-width="4"/></g>
+</svg>

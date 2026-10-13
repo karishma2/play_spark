@@ -48,9 +48,20 @@
 
 ## Planned next feature
 
+### Beta activity refresh — first six additions
+
+- **Status:** In progress (implemented; manual/content sign-off pending) on `feature/beta-activity-refresh`, based on merged Phase 7.3 `505de2e`, 13 October 2026. User authorized commit; push and merge are not part of this request.
+- **Scope:** Expand the reviewed catalogue from 12 to 18 activities while retaining all existing IDs and exactly two public guest samples. Add shape/counting, paper snake, standing dinosaur, paper bridge, fold-and-flip drawing and soft-sock balance activities with three concrete missions each, adult preparation, difficulty variations and staged Mission Walls.
+- **References:** User-supplied public Instagram counting/shape reel and Facebook paper-chain snake, cup rocket and dinosaur reels. Adapt general activity ideas using original instructions/art; rocket deferred as parent-guided. No video assets copied.
+- **Delivered:** Six new paths with 18 missions and six original SVG illustrations shared by cards and three staged reveal groups per scene. New local artwork uses the existing calm reveal styling; detail setup facts now show the actual preparation minutes. Existing 12 entries/IDs and all old artwork remain unchanged.
+- **Validation:** Seed schema validates 18 paths; two focused content tests pass (stable/unique IDs, two public samples, mission duration totals, local artwork and matching reveal fragments). Production build passed before the final setup-label wording change; TypeScript passed afterward. Synthetic actual-screen checks loaded all six previews and completed the paper-snake three-mission/manual-reveal/final-wall journey. No real account/session mutation during browser checks.
+- **Development seed:** Repeatable seed completed in `play_spark_dev`; independent content-only counts confirmed 18 published paths, exactly 2 guest paths and 54 published missions. Production database was not seeded. Recommendations continue returning their bounded personalized shortlist rather than all 18 cards.
+- **Commit verification (13 October):** `npm run verify` passed on the activity-refresh working tree based on `505de2e`: TypeScript, 18 catalogue paths, 13 profile options, 71 tests, production build and progress guard. Only this delivery record changed afterward. User authorized the single feature commit; manual/content sign-off remains pending.
+- **Remaining:** User manual/content review and production rollout after sign-off. A mobile viewport override did not apply to the preview, so no new mobile validation is claimed; desktop visual checks passed. Temporary synthetic preview removed. No push or merge performed.
+
 ### Phase 7.3 — Beta accessibility and reliability
 
-- **Status:** Complete on `feature/beta-usability`, based on `4102079` (merged PR #18), 13 October 2026. Finalized; user approved commit. Push and merge remain pending.
+- **Status:** Complete; PR #19 merged into `main` as `505de2e`, 13 October 2026. Existing live network/backend retry evidence gaps remain recorded below.
 - **Scope:** Keyboard/mobile usability, clear connection status and safe recovery, context-preserving favourites/history retries and clearer discovery controls. Existing design and screen-free play behavior retained; no new dependencies or schema changes.
 - **Phase 7.2:** Analytics deferred by the user for private beta.
 - **Delivered:** Global keyboard skip and route focus, stronger focus/touch/mobile form styling, offline/reconnected notices without automatic mutation retries, safe render-failure recovery, discoverability reset and selected-time status. Favourites/history failures preserve list/detail context and retry the failed operation; history detail/back restores heading focus and repeated card actions have descriptive accessible names.

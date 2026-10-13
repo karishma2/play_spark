@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 150" role="img" aria-labelledby="title desc">
+<title id="title">Build a Paper Bridge That Holds a Toy</title><desc id="desc">A pleated paper bridge between two books carrying a small toy car.</desc>
+<rect width="360" height="150" rx="18" fill="#f3efea"/>
+<g id="stage-1" stroke-width="3" stroke-linejoin="round"><g stroke="#214e34"><rect x="23" y="100" width="84" height="23" rx="5" fill="#dda74a"/><rect x="23" y="78" width="84" height="22" rx="5" fill="#7ba5b6"/><rect x="252" y="100" width="84" height="23" rx="5" fill="#dda74a"/><rect x="252" y="78" width="84" height="22" rx="5" fill="#7ba5b6"/></g></g>
+<g id="stage-2" stroke-width="3" stroke-linejoin="round"><path d="M67 77 83 59 99 77 115 59 131 77 147 59 163 77 179 59 195 77 211 59 227 77 243 59 259 77 275 59 291 77" fill="none" stroke="#214e34" stroke-width="4"/><path d="M67 80h224" stroke="#d96b43" stroke-width="7"/></g>
+<g id="stage-3" stroke-width="3" stroke-linejoin="round"><path d="M148 47h68l-9-19h-31l-13 19h-15v13h68V47z" fill="#d96b43" stroke="#214e34"/><path d="m179 31-9 14h29l-7-14z" fill="#fff"/><circle cx="165" cy="60" r="8" fill="#214e34"/><circle cx="202" cy="60" r="8" fill="#214e34"/></g>
+</svg>

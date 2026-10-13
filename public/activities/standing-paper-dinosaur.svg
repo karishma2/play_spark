@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 150" role="img" aria-labelledby="title desc">
+<title id="title">Build a Standing Paper Dinosaur</title><desc id="desc">A decorated green paper-plate dinosaur standing on two short cardboard-roll legs.</desc>
+<rect width="360" height="150" rx="18" fill="#f3efea"/>
+<g id="stage-1" stroke-width="3" stroke-linejoin="round"><path d="M73 85a82 59 0 0 1 164 0z" fill="#79a583" stroke="#214e34"/><g fill="#dda74a"><circle cx="119" cy="61" r="9"/><circle cx="149" cy="44" r="8"/><circle cx="177" cy="65" r="11"/><circle cx="202" cy="51" r="7"/></g></g>
+<g id="stage-2" stroke-width="3" stroke-linejoin="round"><path d="M220 87V38q0-20 24-20h32q17 0 17 17v10h-44v42zM77 85 30 55 49 85z" fill="#79a583" stroke="#214e34"/><circle cx="273" cy="31" r="4" fill="#214e34"/><path d="M276 43h12" stroke="#214e34"/></g>
+<g id="stage-3" stroke-width="3" stroke-linejoin="round"><g fill="#d5b98c" stroke="#705735"><path d="M106 84h30v45h-30zM184 84h30v45h-30z"/><ellipse cx="121" cy="84" rx="15" ry="5"/><ellipse cx="199" cy="84" rx="15" ry="5"/></g><path d="M69 135h181" stroke="#214e34" stroke-width="4" stroke-linecap="round"/></g>
+</svg>

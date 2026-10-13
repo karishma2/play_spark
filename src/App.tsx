@@ -224,6 +224,11 @@ function AdditionalMissionWallScene({
 }) {
   const piece = (index: number) => `mission-wall-piece${revealed[index] ? " revealed" : ""}${highlightedMissionIndex === index ? " newly-revealed" : ""}`;
 
+  const illustratedScenes = ["sticker-shape-detective", "paper-chain-snake", "standing-paper-dinosaur", "paper-bridge-test", "fold-flip-creatures", "soft-sock-balance"];
+  if (illustratedScenes.includes(sceneKey)) return <>{[0, 1, 2].map((index) =>
+    <g key={index} className={piece(index)}><use href={`/activities/${sceneKey}.svg#stage-${index + 1}`} /></g>
+  )}</>;
+
   if (sceneKey === "secret-code-path") return <>
     <g className={piece(0)} fill="none" stroke="#d96b43" strokeWidth="8"><circle cx="75" cy="108" r="25" /><circle cx="145" cy="83" r="23" /><circle cx="215" cy="108" r="25" /><path d="M55 108h40M145 60v46M197 90l36 36" /></g>
     <g className={piece(1)} fill="#dda74a"><ellipse cx="270" cy="101" rx="13" ry="24" transform="rotate(-25 270 101)" /><ellipse cx="301" cy="78" rx="13" ry="24" transform="rotate(-25 301 78)" /></g>
@@ -731,7 +736,7 @@ function SampleDetail({
         <div className="path-facts">
           <div><span>◷</span><small>Duration</small><strong>{sample.durationMinutes} min</strong></div>
           <div><span>♧</span><small>Parent effort</small><strong>{sample.parentEffort} effort</strong></div>
-          <div><span>◴</span><small>Setup</small><strong>{sample.setupMinutes <= 1 ? "Almost none" : "Little prep"}</strong></div>
+          <div><span>◴</span><small>Setup</small><strong>{sample.setupMinutes === 0 ? "No prep" : `${sample.setupMinutes} min`}</strong></div>
           <div><span>⌂</span><small>Setting</small><strong>Indoors</strong></div>
         </div>
         <div className="path-material-checklist">

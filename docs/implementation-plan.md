@@ -25,6 +25,15 @@ This document describes delivery order and acceptance criteria. Approved archite
 | 6 — Progress and retention | Mission Wall, favourites, history, and fixed-choice feedback | Phase 5 |
 | 7 — Private-beta readiness | Account deletion, analytics, accessibility review, deployment, backup, and operational checks | Phases 2–6 |
 
+## Beta activity refresh — first batch
+
+**Status:** In progress on `feature/beta-activity-refresh` — 13 October 2026.
+
+- Preserve the 12 existing paths and add six distinct activities (18 total), keeping exactly two guest-enabled samples. Retain existing stable IDs and frozen session/history behavior.
+- Each new path has a clear tangible result, realistic preparation/materials/parent involvement, three actionable missions, easier/harder variations and age/practical eligibility.
+- Use original local SVG previews and three mission-specific reveal elements per path. Reuse the calm Mission Wall interaction and reduced-motion behavior.
+- Validate seed schema, linked assets/replacements, mission duration totals and UI. Seed the configured development database after validation so recommendations can include the additions; never seed production or merge without explicit authorization.
+
 ## Phase 7.2 — Privacy-safe analytics
 
 **Status:** Deferred by the user for the initial private beta. Do not add analytics dependencies, events or recordings in Phase 7.3.
