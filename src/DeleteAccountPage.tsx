@@ -32,7 +32,7 @@ export function DeleteAccountPage({ email, onDeleted, onCancel }: { email: strin
         <label htmlFor="confirmation-email">Type your account email exactly: <strong>{email}</strong></label>
         <input id="confirmation-email" type="text" inputMode="email" autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={254} required value={confirmation} disabled={pending} aria-describedby="deletion-warning" onChange={(event) => setConfirmation(event.target.value)} />
         <button className="button button-danger" disabled={pending || confirmation !== email}>{pending ? "Deleting account…" : "Permanently delete my account"}</button>
-        <button className="button-link" type="button" disabled={pending} onClick={onCancel}>Cancel — keep my account</button>
+        <button className="button button-soft" type="button" disabled={pending} onClick={onCancel}>Cancel — keep my account</button>
         {pending && <p role="status">Please wait while your account is deleted.</p>}
       </form>
     </section>
