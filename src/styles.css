@@ -149,6 +149,11 @@ nav .nav-active { color: white; background: var(--primary); }
 .onboarding-progress strong { color: var(--primary); }
 .onboarding-progress > div { height: 7px; overflow: hidden; grid-column: 1 / -1; background: var(--sand-deep); border-radius: 999px; }
 .onboarding-progress i { height: 100%; display: block; background: var(--secondary); border-radius: inherit; transition: width 220ms ease; }
+.child-profile-context { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; padding: 16px; border: 1px solid #bcd7c2; border-left: 4px solid var(--primary); border-radius: 14px; background: var(--primary-soft); }
+.child-profile-context > span { flex-shrink: 0; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; background: var(--primary); font-weight: 700; }
+.child-profile-context p { margin: 0; color: var(--primary-deep); font-size: 14px; line-height: 1.6; }
+.onboarding-account-actions { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px 24px; margin-top: 20px; }
+.onboarding-account-actions .text-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin: 0; padding: 10px 14px; }
 .onboarding-step h1 { max-width: 660px; margin: 10px 0 14px; font-size: clamp(2.25rem, 5vw, 3.7rem); }
 .onboarding-step > p:not(.eyebrow, .privacy-note) { max-width: 580px; }
 .onboarding-step > label, .birth-fields label { display: grid; gap: 7px; margin-top: 28px; color: var(--text); font-size: 13px; font-weight: 700; }

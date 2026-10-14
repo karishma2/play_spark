@@ -2,7 +2,7 @@
 
 **Purpose:** This file is the durable record of what has been built, verified, and left for later. Read it with the approved architecture, database, ERD, API, and development-workflow documents before starting feature work.
 
-**Last updated:** 13 October 2026
+**Last updated:** 14 October 2026
 
 ## Status meanings
 
@@ -47,6 +47,15 @@
 - **Production follow-up (8 October):** Screenshot shows history `400`, not `404`. The Vercel adapter now removes the runtime's own query property so internal rewrite fields cannot shadow Express's public-URL query parser. A synthetic Vercel-shaped regression checks public and forwarded URLs, valid pages, invalid limits, and unknown-field rejection. Twelve focused Play Session tests and TypeScript passed. Fix remains uncommitted on the Phase 6.2 branch; production redeployment and confirmation remain pending.
 
 ## Planned next feature
+
+### Child onboarding — parent/child clarity
+
+- **Status:** Complete on `feature/child-onboarding-clarity`, based on `20db96b`, 14 October 2026. User approved commit after final verification; push and merge remain pending.
+- **Finding:** Mobile testing confused the parent’s information with the child’s because the only clear cue was small coloured text above a generic heading.
+- **Fix:** Explicit child-focused headings on all four steps, persistent high-contrast parent-account/child-profile note, child-specific field/review labels, and birth-information explanation beside the relevant fields. Existing flow, validation and data model remain unchanged.
+- **Additional finding:** Completion-screen Sign out/Delete account controls touched on mobile and desktop. A wrapping action row now gives 24px horizontal separation and individual 44px tap areas, spaced below the main Explore action.
+- **Validation:** TypeScript passed. Synthetic browser checks covered all four onboarding steps without saving, optional nickname, child-specific form/review labels, privacy help and persistent parent/child note. First-step layout inspected at 390px and 1280px without horizontal overflow. Completion actions measured a 24px gap and 44px heights at both widths. Temporary preview removed; no account/profile changes.
+- **Final verification (14 October):** `npm run verify` passed on the clarity-fix application working tree based on `20db96b`: TypeScript, 18 catalogue paths, 13 profile options, 71 tests, production build and progress guard. Scoped diff check confirms presentation-only changes; existing mobile/desktop evidence reused. Only delivery documentation changed afterward. User gave commit sign-off; no push/merge. Real-parent comprehension was not independently retested.
 
 ### Beta activity refresh — first six additions
 

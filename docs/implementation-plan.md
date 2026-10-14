@@ -25,6 +25,13 @@ This document describes delivery order and acceptance criteria. Approved archite
 | 6 — Progress and retention | Mission Wall, favourites, history, and fixed-choice feedback | Phase 5 |
 | 7 — Private-beta readiness | Account deletion, analytics, accessibility review, deployment, backup, and operational checks | Phases 2–6 |
 
+## Child onboarding clarity follow-up
+
+**Status:** Complete on `feature/child-onboarding-clarity` — 14 October 2026; final verification passed and user approved commit.
+
+- Clearly distinguish the completed parent account from the child profile on mobile and desktop using explicit headings, a persistent readable note and child-specific labels on all four steps.
+- Keep fields, optional nickname, privacy/age policy, validation and save flow unchanged. Move the existing birth-date privacy explanation next to birth fields; check narrow mobile layout and keyboard/form labels. No Stitch redesign or dependency/schema changes.
+
 ## Beta activity refresh — first batch
 
 **Status:** In progress on `feature/beta-activity-refresh` — 13 October 2026.
