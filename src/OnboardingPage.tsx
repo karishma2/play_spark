@@ -159,8 +159,10 @@ export function OnboardingPage({
           <p>Your child’s profile is saved securely and will shape recommendations in the next phase.</p>
           <Link className="button button-primary" to="/">Explore activities</Link>
           {signOutError && <div className="auth-error" role="alert">{signOutError}</div>}
-          <button className="text-button" onClick={onSignOut}>Sign out</button>
-          <Link className="text-button" to="/delete-account">Delete account</Link>
+          <div className="onboarding-account-actions">
+            <button className="text-button" onClick={onSignOut}>Sign out</button>
+            <Link className="text-button" to="/delete-account">Delete account</Link>
+          </div>
         </section>
       </main>
     );
@@ -193,18 +195,22 @@ export function OnboardingPage({
           <span><strong>Play Spark</strong><small>Mindful Screen-Free Play</small></span>
         </Link>
         <div className="onboarding-progress" aria-label={`Step ${step} of 4`}>
-          <span>Child profile</span><strong>Step {step} of 4</strong>
+          <span>Your child’s profile</span><strong>Step {step} of 4</strong>
           <div><i style={{ width: `${step * 25}%` }} /></div>
         </div>
+        <aside className="child-profile-context" aria-label="About your child’s profile">
+          <span aria-hidden="true">✓</span>
+          <p><strong>Your parent account is ready.</strong> These details are about <strong>your child.</strong></p>
+        </aside>
         <form onSubmit={submit} noValidate>
           {message && <div className="auth-error" role="alert">{message}</div>}
           {step === 1 && (
             <div className="onboarding-step">
               <p className="eyebrow">A little about your child</p>
-              <h1 id="onboarding-title">Help us choose ideas that fit.</h1>
-              <p>We only collect what we need. A full birth date is never requested.</p>
+              <h1 id="onboarding-title">Let’s set up your child’s profile</h1>
+              <p>Tell us about your child so we can suggest age-appropriate play.</p>
               <label>
-                <span>Nickname <small>Optional</small></span>
+                <span>Child’s nickname <small>Optional</small></span>
                 <input
                   maxLength={40}
                   value={nickname}
@@ -216,47 +222,48 @@ export function OnboardingPage({
               </label>
               <div className="birth-fields">
                 <label>
-                  <span>Birth month</span>
-                  <select value={birthMonth} onChange={(event) => setBirthMonth(event.target.value)} aria-invalid={Boolean(fieldErrors.birthMonth)}>
+                  <span>Child’s birth month</span>
+                  <select value={birthMonth} onChange={(event) => setBirthMonth(event.target.value)} aria-describedby="child-age-help" aria-invalid={Boolean(fieldErrors.birthMonth)}>
                     <option value="">Choose month</option>
                     {birthMonths.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
                   </select>
                   {fieldErrors.birthMonth && <small className="onboarding-field-error">{fieldErrors.birthMonth}</small>}
                 </label>
                 <label>
-                  <span>Birth year</span>
-                  <select value={birthYear} onChange={(event) => setBirthYear(event.target.value)} aria-invalid={Boolean(fieldErrors.birthYear)}>
+                  <span>Child’s birth year</span>
+                  <select value={birthYear} onChange={(event) => setBirthYear(event.target.value)} aria-describedby="child-age-help" aria-invalid={Boolean(fieldErrors.birthYear)}>
                     <option value="">Choose year</option>
                     {birthYears.map((year) => <option key={year} value={year}>{year}</option>)}
                   </select>
                   {fieldErrors.birthYear && <small className="onboarding-field-error">{fieldErrors.birthYear}</small>}
                 </label>
               </div>
+              <p className="privacy-note" id="child-age-help">We use your child’s birth month and year to find suitable activities. We never ask for the full birth date.</p>
             </div>
           )}
           {step === 2 && (
             <div className="onboarding-step">
               <p className="eyebrow">Their favourite things</p>
-              <h1 id="onboarding-title">What lights them up?</h1>
-              <ProfileOptionChoices legend="Interests" hint="Choose one or more. You can change these later." options={options.interests} selected={interestKeys} onToggle={(key) => toggle(key, interestKeys, setInterestKeys)} error={fieldErrors.interestKeys} />
+              <h1 id="onboarding-title">What does your child enjoy?</h1>
+              <ProfileOptionChoices legend="Your child’s interests" hint="Choose one or more things your child enjoys. You can change these later." options={options.interests} selected={interestKeys} onToggle={(key) => toggle(key, interestKeys, setInterestKeys)} error={fieldErrors.interestKeys} />
             </div>
           )}
           {step === 3 && (
             <div className="onboarding-step">
               <p className="eyebrow">How they like to play</p>
-              <h1 id="onboarding-title">Which kinds of play feel natural?</h1>
-              <ProfileOptionChoices legend="Play styles" hint="Choose one or more styles that fit most days." options={options.playStyles} selected={playStyleKeys} onToggle={(key) => toggle(key, playStyleKeys, setPlayStyleKeys)} error={fieldErrors.playStyleKeys} />
+              <h1 id="onboarding-title">How does your child like to play?</h1>
+              <ProfileOptionChoices legend="Your child’s play styles" hint="Choose one or more ways your child likes to play most days." options={options.playStyles} selected={playStyleKeys} onToggle={(key) => toggle(key, playStyleKeys, setPlayStyleKeys)} error={fieldErrors.playStyleKeys} />
             </div>
           )}
           {step === 4 && (
             <div className="onboarding-step">
               <p className="eyebrow">Ready to save</p>
-              <h1 id="onboarding-title">Does this look right?</h1>
+              <h1 id="onboarding-title">Check your child’s profile</h1>
               <dl className="profile-review">
-                <div><dt>Nickname</dt><dd>{nickname.trim() || "Not added"}</dd></div>
-                <div><dt>Birth month and year</dt><dd>{birthMonths[Number(birthMonth) - 1]} {birthYear}</dd></div>
-                <div><dt>Interests</dt><dd>{interestLabels.join(", ")}</dd></div>
-                <div><dt>Play styles</dt><dd>{playStyleLabels.join(", ")}</dd></div>
+                <div><dt>Child’s nickname</dt><dd>{nickname.trim() || "Not added"}</dd></div>
+                <div><dt>Child’s birth month and year</dt><dd>{birthMonths[Number(birthMonth) - 1]} {birthYear}</dd></div>
+                <div><dt>Child’s interests</dt><dd>{interestLabels.join(", ")}</dd></div>
+                <div><dt>Child’s play styles</dt><dd>{playStyleLabels.join(", ")}</dd></div>
               </dl>
               <p className="privacy-note">Only your signed-in parent account can access this profile.</p>
             </div>
